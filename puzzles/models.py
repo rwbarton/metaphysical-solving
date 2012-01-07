@@ -63,6 +63,7 @@ class TagTagListRelation(models.Model):
     order = models.PositiveIntegerField()
 
     class Meta:
+        ordering = ['taglist', 'order']
         unique_together = ("taglist", "order")
 
 class Motd(models.Model):
