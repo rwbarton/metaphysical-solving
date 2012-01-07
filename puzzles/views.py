@@ -42,3 +42,7 @@ def overview(request):
 
 def puzzle(request, puzzle_id):
     return NotImplementedError
+
+def welcome(request):
+    context = puzzle_context(request,{});
+    return render_to_response("puzzles/welcome.html",context);
