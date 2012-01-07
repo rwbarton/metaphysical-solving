@@ -67,3 +67,11 @@ td.puzzle-list-title {
 td.puzzle-list-status {
     width: 170px;
 }
+
+div.puzzle-blurb {
+    padding: 3px;
+}
+
+span.puzzle-title {
+    font-weight: bold;
+}

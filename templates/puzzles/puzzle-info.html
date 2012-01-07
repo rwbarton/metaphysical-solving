@@ -1,0 +1,11 @@
+{% extends "puzzles/base_generic.html" %}
+
+{% block title %}{{ puzzle.title }}{% endblock %}
+
+{% block content %}
+<div class="puzzle-blurb">
+<span class="puzzle-title">{{ puzzle.title }}</span>!
+Status: {{ puzzle.status }}
+Priority: {{ puzzle.priority }}
+</div>
+{% endblock %}

@@ -11,6 +11,8 @@ urlpatterns = patterns('',
     url(r'^overview/(\d+)/$', 'puzzles.views.overview_by'),
 
     url(r'^puzzle/(\d+)/$', 'puzzles.views.puzzle'),
+    url(r'^puzzle/info/(\d+)/$', 'puzzles.views.puzzle_info'),
+    url(r'^puzzle/spreadsheet/(\d+)/$', 'puzzles.views.puzzle_spreadsheet'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

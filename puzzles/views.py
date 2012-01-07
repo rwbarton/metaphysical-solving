@@ -1,4 +1,4 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 
 from models import Tag, Puzzle, TagList, Motd
@@ -41,7 +41,16 @@ def overview(request):
     return overview_by(request, default_taglist_id)
 
 def puzzle(request, puzzle_id):
-    return NotImplementedError
+    return render_to_response("puzzles/puzzle-frames.html", RequestContext(request, {'id': puzzle_id}))
+
+def puzzle_info(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
+                'puzzle': puzzle
+                }))
+
+def puzzle_spreadsheet(request, puzzle_id):
+    return redirect(Puzzle.objects.get(id=puzzle_id).spreadsheet)
 
 def welcome(request):
     context = puzzle_context(request,{});
