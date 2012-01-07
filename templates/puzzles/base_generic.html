@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/base.css" />
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+
+  <body>
+    <div id="header">
+      User: <span class="username">{{ user }}</span>
+      <ul id="navlist">
+	<li><a href="/overview">Overview</a></li>
+	<li><a href="/database">Database</a></li>
+	<li><a href="/progress">Progress</a></li>
+	<li><a href="/tools">Solving tools</a></li>
+	<li><a href="/help">Help</a></li>
+      </ul>
+      HQ: 555-555-2012
+    </div>
+
+    <div id="motd">
+      {{ motd|safe }}
+    </div>
+
+    <div id="content">{% block content %}{% endblock %}</div>
+  </body>
+</html>

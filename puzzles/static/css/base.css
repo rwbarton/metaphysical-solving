@@ -1,0 +1,33 @@
+body {
+    margin: 0px;
+}
+
+a {
+    color: #006b9a;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+div#header {
+    background: #cccccc;
+}
+
+ul#navlist {
+    display: inline;
+    padding: 0px 20px;
+}
+
+ul#navlist li {
+    display: inline;
+    padding: 0px 6px;
+}
+
+.username { color: #cc0000; }
+
+div#motd {
+    background: #eeff88;
+    padding: 0px 6px;
+}
