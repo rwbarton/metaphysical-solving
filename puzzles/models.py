@@ -66,4 +66,4 @@ class TagTagListRelation(models.Model):
         unique_together = ("taglist", "order")
 
 class Motd(models.Model):
-    motd = models.TextField()
+    motd = models.TextField(blank=True)
