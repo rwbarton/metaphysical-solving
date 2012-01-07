@@ -8,6 +8,9 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'solving.views.home', name='home'),
     url(r'^overview/$', 'puzzles.views.overview'),
+    url(r'^overview/(\d+)/$', 'puzzles.views.overview_by'),
+
+    url(r'^puzzle/(\d+)/$', 'puzzles.views.puzzle'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

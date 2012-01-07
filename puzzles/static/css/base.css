@@ -31,3 +31,39 @@ div#motd {
     background: #eeff88;
     padding: 0px 6px;
 }
+
+span.active-taglist {
+    font-weight: bold;
+}
+
+span.taglist {
+    font-style: italic;
+}
+
+span.tag {
+    font-style: italic;
+}
+
+tr.puzzle-list-header {
+    background: #d2dadd;
+}
+
+tr.puzzle-list-odd {
+    background: #f2f8fa;
+}
+
+tr.puzzle-list-even {
+    background: #e5edf0;
+}
+
+td.puzzle-list-puzzle {
+    background: white;
+}
+
+td.puzzle-list-title {
+    width: 400px;
+}
+
+td.puzzle-list-status {
+    width: 170px;
+}

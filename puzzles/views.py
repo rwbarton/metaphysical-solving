@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from models import Motd
+from models import Tag, Puzzle, TagList, Motd
 
 def get_motd():
     try:
@@ -14,8 +14,31 @@ def puzzle_context(request, d):
     d1['motd'] = get_motd()
     return RequestContext(request, d1)
 
-def overview(request):
+def overview_by(request, taglist_id):
+    taglist_id = int(taglist_id)
+    taglists = TagList.objects.all()
+
+    tags = TagList.objects.get(id=taglist_id).tags.all()
+
     context = puzzle_context(request, {
-            'message': "List of puzzles goes here!",
+            'taglists': taglists,
+            'active_taglist_id': taglist_id,
+            'tags': ({
+                    'name': tag.name,
+                    'puzzles': Tag.objects.get(id=tag.id).puzzle_set.all()
+                    }
+                     for tag in tags),
             })
     return render_to_response("puzzles/overview.html", context)
+
+def overview(request):
+    try:
+        default_taglist_id = TagList.objects.get(name="default").id
+    except TagList.DoesNotExist:
+        default_taglist_id = TagList.objects.order_by('id')[0].id
+    except TagList.DoesNotExist:
+        default_taglist_id = 0
+    return overview_by(request, default_taglist_id)
+
+def puzzle(request, puzzle_id):
+    return NotImplementedError

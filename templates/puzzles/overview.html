@@ -1,10 +1,45 @@
 {% extends "puzzles/base_generic.html" %}
 
-{% block title %}Puzzle overview{% endblock %}
-
-{% block user %}some guy{% endblock %}
+{% block title %}Overview{% endblock %}
 
 {% block content %}
-<center>View puzzles by:
-</center>
+  <center>
+    View puzzles by:
+    {% for taglist in taglists %}
+      {% if taglist.id == active_taglist_id %}
+	<span class="active-taglist">
+	  <span class="taglist">{{ taglist.name }}</span>
+	</span>
+      {% else %}
+	<a href="{% url puzzles.views.overview_by taglist.id %}">
+	  <span class="taglist">{{ taglist.name }}</span>
+	</a>
+      {% endif %}
+    {% endfor %}
+  </center>
+
+  {% for tag in tags %}
+    <table class="puzzle-list">
+      <tbody>
+	<tr class="puzzle-list-header">
+	  <th colspan=3>
+	    Puzzles with tag <span class="tag">{{ tag.name }}</span>
+	  </th>
+	</tr>
+	{% for puzzle in tag.puzzles %}
+	  <tr class="{% cycle "puzzle-list-odd" "puzzle-list-even" %}">
+	    <td class="puzzle-list-puzzle">
+	      <a href="{{ puzzle.url }}">[P]</a>
+	    </td>
+	    <td class="puzzle-list-title">
+	      <a href="{% url puzzles.views.puzzle puzzle.id %}">{{ puzzle.title }}</a>
+	    </td>
+	    <td class="puzzle-list-status">
+	      {{ puzzle.status.text }}
+	    </td>
+	  </tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}
 {% endblock %}
