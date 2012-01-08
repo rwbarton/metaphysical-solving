@@ -1,5 +1,9 @@
 # Django settings for solving project.
 
+import sys
+
+sys.path.append('/srv/dist/django-openid-auth_0.4')
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -110,6 +114,19 @@ TEMPLATE_DIRS = (
     'templates'
 )
 
+LOGIN_URL = '/openid/login/'
+LOGIN_REDIRECT_URL = '/'
+
+OPENID_SSO_SERVER_URL = 'https://www.google.com/accounts/o8/id'
+OPENID_CREATE_USERS = True
+OPENID_UPDATE_DETAILS_FROM_SREG = True
+OPENID_USE_AS_ADMIN_LOGIN = True
+
+AUTHENTICATION_BACKENDS = (
+    'django_openid_auth.auth.OpenIDBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -121,6 +138,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django_openid_auth',
     'puzzles'
 )
 

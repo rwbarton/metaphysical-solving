@@ -1,5 +1,6 @@
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
 
 from models import Tag, Puzzle, TagList, Motd
 
@@ -14,6 +15,7 @@ def puzzle_context(request, d):
     d1['motd'] = get_motd()
     return RequestContext(request, d1)
 
+@login_required
 def overview_by(request, taglist_id):
     taglist_id = int(taglist_id)
     taglists = TagList.objects.all()
@@ -31,6 +33,7 @@ def overview_by(request, taglist_id):
             })
     return render_to_response("puzzles/overview.html", context)
 
+@login_required
 def overview(request):
     try:
         default_taglist_id = TagList.objects.get(name="default").id
@@ -40,18 +43,22 @@ def overview(request):
         default_taglist_id = 0
     return overview_by(request, default_taglist_id)
 
+@login_required
 def puzzle(request, puzzle_id):
     return render_to_response("puzzles/puzzle-frames.html", RequestContext(request, {'id': puzzle_id}))
 
+@login_required
 def puzzle_info(request, puzzle_id):
     puzzle = Puzzle.objects.get(id=puzzle_id)
     return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
                 'puzzle': puzzle
                 }))
 
+@login_required
 def puzzle_spreadsheet(request, puzzle_id):
     return redirect(Puzzle.objects.get(id=puzzle_id).spreadsheet)
 
+@login_required
 def welcome(request):
     context = puzzle_context(request,{});
     return render_to_response("puzzles/welcome.html",context);
