@@ -59,6 +59,10 @@ def puzzle_spreadsheet(request, puzzle_id):
     return redirect(Puzzle.objects.get(id=puzzle_id).spreadsheet)
 
 @login_required
+def puzzle_chat(request, puzzle_id):
+    return redirect('http://metaphysical.no-ip.org/chat/#%d' % int(puzzle_id))
+
+@login_required
 def welcome(request):
     context = puzzle_context(request,{});
     return render_to_response("puzzles/welcome.html",context);
