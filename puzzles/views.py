@@ -1,8 +1,11 @@
+import random
+
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
+from django.utils.http import urlencode
 from django.contrib.auth.decorators import login_required
 
-from models import Tag, Puzzle, TagList, Motd
+from models import Tag, Puzzle, TagList, Motd, jabber_username, jabber_password
 
 def get_motd():
     try:
@@ -60,7 +63,11 @@ def puzzle_spreadsheet(request, puzzle_id):
 
 @login_required
 def puzzle_chat(request, puzzle_id):
-    return redirect('http://metaphysical.no-ip.org/chat/#%d' % int(puzzle_id))
+    return redirect("http://metaphysical.no-ip.org/chat/?" +
+                    urlencode({'id': puzzle_id,
+                               'username': jabber_username(request.user),
+                               'password': jabber_password(),
+                               'resource': hex(random.getrandbits(64))}))
 
 @login_required
 def welcome(request):
