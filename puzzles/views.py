@@ -4,8 +4,9 @@ from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from django.utils.http import urlencode
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 
-from models import Tag, Puzzle, TagList, Motd, jabber_username, jabber_password
+from models import Status, Priority, Tag, Puzzle, TagList, Motd, jabber_username, jabber_password
 
 def get_motd():
     try:
@@ -53,8 +54,12 @@ def puzzle(request, puzzle_id):
 @login_required
 def puzzle_info(request, puzzle_id):
     puzzle = Puzzle.objects.get(id=puzzle_id)
+    statuses = Status.objects.all()
+    priorities = Priority.objects.all()
     return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
-                'puzzle': puzzle
+                'puzzle': puzzle,
+                'statuses': statuses,
+                'priorities': priorities
                 }))
 
 @login_required
@@ -68,6 +73,22 @@ def puzzle_chat(request, puzzle_id):
                                'username': jabber_username(request.user),
                                'password': jabber_password(),
                                'resource': hex(random.getrandbits(64))}))
+
+@login_required
+def puzzle_set_status(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    status = Status.objects.get(text=request.POST['status'])
+    puzzle.status = status
+    puzzle.save()
+    return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+
+@login_required
+def puzzle_set_priority(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    priority = Priority.objects.get(text=request.POST['priority'])
+    puzzle.priority = priority
+    puzzle.save()
+    return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
 
 @login_required
 def welcome(request):

@@ -4,8 +4,20 @@
 
 {% block content %}
 <div class="puzzle-blurb">
-<span class="puzzle-title">{{ puzzle.title }}</span>!
-Status: {{ puzzle.status }}
-Priority: {{ puzzle.priority }}
+<a class="puzzle-title" target="_blank" href="{{ puzzle.url }}">{{ puzzle.title }}</a>
+<form id="status_form" action="{% url puzzles.views.puzzle_set_status puzzle.id %}" method="post">{% csrf_token %}
+<select onchange="document.forms.status_form.submit()" name="status">
+{% for status in statuses %}
+<option{% if puzzle.status == status %} selected="true"{% endif %}>{{ status.text }}</option>
+{% endfor %}
+</select>
+</form>
+<form id="priority_form" action="{% url puzzles.views.puzzle_set_priority puzzle.id %}" method="post">{% csrf_token %}
+<select onchange="document.forms.priority_form.submit()" name="priority">
+{% for priority in priorities %}
+<option{% if puzzle.priority == priority %} selected="true"{% endif %}>{{ priority.text }}</option>
+{% endfor %}
+</select>
+</form>
 </div>
 {% endblock %}
