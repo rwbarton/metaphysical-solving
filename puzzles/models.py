@@ -51,7 +51,7 @@ class Puzzle(models.Model):
 
     status = models.ForeignKey('Status', default=lambda: Config.objects.get().default_status)
     priority = models.ForeignKey('Priority', default=lambda: Config.objects.get().default_priority)
-    tags = models.ManyToManyField('Tag')
+    tags = models.ManyToManyField('Tag', default=lambda: [Config.objects.get().default_tag])
 
     solvers = models.ManyToManyField(User, blank=True)
 
