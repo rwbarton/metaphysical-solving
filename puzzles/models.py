@@ -1,4 +1,5 @@
 from django.db import models
+from ordered_model.models import OrderedModel
 
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -6,33 +7,27 @@ import re
 
 from puzzles.ejabberd import ejabberdctl
 
-class Status(models.Model):
+class Status(OrderedModel):
     text = models.CharField(max_length=200)
     css_name = models.SlugField(max_length=200, unique=True)
-    sort_order = models.PositiveIntegerField(unique=True)
 
-    class Meta:
-        ordering = ['sort_order']
-
+    class Meta(OrderedModel.Meta):
         verbose_name_plural = 'statuses'
 
     def __unicode__(self):
         return self.text
 
-class Priority(models.Model):
+class Priority(OrderedModel):
     text = models.CharField(max_length=200)
     css_name = models.SlugField(max_length=200, unique=True)
-    sort_order = models.PositiveIntegerField(unique=True)
 
-    class Meta:
-        ordering = ['sort_order']
-
+    class Meta(OrderedModel.Meta):
         verbose_name_plural = 'priorities'
 
     def __unicode__(self):
         return self.text
 
-class Tag(models.Model):
+class Tag(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
 
     def __unicode__(self):
@@ -59,7 +54,7 @@ class Puzzle(models.Model):
     def __unicode__(self):
         return self.title
 
-class TagList(models.Model):
+class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
     tags = models.ManyToManyField('Tag')
 
