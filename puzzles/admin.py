@@ -2,7 +2,7 @@ from django.contrib import admin
 from puzzles.models import Status, Priority, Tag, TagList, TagTagListRelation, Puzzle, Motd
 
 class SlugAdmin(admin.ModelAdmin):
-    prepopulated_fields = {'slug': ('text',)}
+    prepopulated_fields = {'css_name': ('text',)}
 admin.site.register(Status, SlugAdmin)
 admin.site.register(Priority, SlugAdmin)
 admin.site.register(Tag)

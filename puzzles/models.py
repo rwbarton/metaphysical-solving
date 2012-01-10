@@ -8,7 +8,7 @@ from puzzles.ejabberd import ejabberdctl
 
 class Status(models.Model):
     text = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
+    css_name = models.SlugField(max_length=200, unique=True)
     sort_order = models.PositiveIntegerField(unique=True)
 
     class Meta:
@@ -21,7 +21,7 @@ class Status(models.Model):
 
 class Priority(models.Model):
     text = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
+    css_name = models.SlugField(max_length=200, unique=True)
     sort_order = models.PositiveIntegerField(unique=True)
 
     class Meta:
