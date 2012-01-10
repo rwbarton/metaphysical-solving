@@ -6,6 +6,7 @@
 <div class="puzzle-blurb">
   <span class="status-{{ puzzle.status.slug }}" class="priority-{{ puzzle.priority.slug }}">
     <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}">{{ puzzle.title }}</a>
+    Status:
     <form id="status_form" action="{% url puzzles.views.puzzle_set_status puzzle.id %}" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
       <select onchange="document.forms.status_form.submit()" name="status">
@@ -14,6 +15,7 @@
 	{% endfor %}
       </select>
     </form>
+    Priority:
     <form id="priority_form" action="{% url puzzles.views.puzzle_set_priority puzzle.id %}" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
       <select onchange="document.forms.priority_form.submit()" name="priority">

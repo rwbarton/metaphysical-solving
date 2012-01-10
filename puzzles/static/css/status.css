@@ -1,0 +1,19 @@
+.status-not-puzzle {
+    background: #d0d0d0;
+}
+
+.status-not-started {
+    background: #ffd0d0;
+}
+
+.status-being-worked-on {
+    background: #ffd0d0;
+}
+
+.status-needs-more-help {
+    background: #ffd0d0;
+}
+
+.status-solved {
+    background: #d0ffd0;
+}
