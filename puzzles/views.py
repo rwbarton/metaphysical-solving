@@ -6,13 +6,13 @@ from django.utils.http import urlencode
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
-from models import Status, Priority, Tag, Puzzle, TagList, Motd, jabber_username, jabber_password
+from models import Status, Priority, Tag, Puzzle, TagList, Config, jabber_username, jabber_password
 from django.contrib.auth.models import User
 
 def get_motd():
     try:
-        return Motd.objects.get().motd
-    except (Motd.DoesNotExist, Motd.MultipleObjectsReturned):
+        return Config.objects.get().motd
+    except (Config.DoesNotExist, Config.MultipleObjectsReturned):
         return "Oops, someone broke this message. Please ask an admin to fix it."
 
 def puzzle_context(request, d):
@@ -42,13 +42,7 @@ def overview_by(request, taglist_id):
 
 @login_required
 def overview(request):
-    try:
-        default_taglist_id = TagList.objects.get(name="default").id
-    except TagList.DoesNotExist:
-        default_taglist_id = TagList.objects.order_by('id')[0].id
-    except TagList.DoesNotExist:
-        default_taglist_id = 0
-    return overview_by(request, default_taglist_id)
+    return overview_by(request, Config.objects.get().default_taglist.id)
 
 @login_required
 def puzzle(request, puzzle_id):

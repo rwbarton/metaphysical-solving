@@ -7,6 +7,14 @@ import re
 
 from puzzles.ejabberd import ejabberdctl
 
+class Config(models.Model):
+    default_status = models.ForeignKey('Status')
+    default_priority = models.ForeignKey('Priority')
+    default_tag = models.ForeignKey('Tag')
+    default_taglist = models.ForeignKey('TagList')
+
+    motd = models.TextField(blank=True)
+
 class Status(OrderedModel):
     text = models.CharField(max_length=200)
     css_name = models.SlugField(max_length=200, unique=True)
@@ -41,8 +49,8 @@ class Puzzle(models.Model):
     title = models.CharField(max_length=200)
     url = models.URLField(unique=True)
 
-    status = models.ForeignKey('Status')
-    priority = models.ForeignKey('Priority')
+    status = models.ForeignKey('Status', default=lambda: Config.objects.get().default_status)
+    priority = models.ForeignKey('Priority', default=lambda: Config.objects.get().default_priority)
     tags = models.ManyToManyField('Tag')
 
     solvers = models.ManyToManyField(User, blank=True)
@@ -60,9 +68,6 @@ class TagList(OrderedModel):
 
     def __unicode__(self):
         return self.name
-
-class Motd(models.Model):
-    motd = models.TextField(blank=True)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
