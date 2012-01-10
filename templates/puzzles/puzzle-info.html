@@ -62,10 +62,9 @@
     Add:
     {% if not you_solving %}
     <form action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
-      <b>Me</b>
       <input type="hidden" name="continue" value="{{ path }}" />
       <input type="hidden" name="solver" value="{{ user.id }}" />
-      <input type="image" src="{{ STATIC_URL }}img/add.png" alt="Add" />
+      <input type="submit" value="Me" />
     </form>
     {% endif %}
     <form id="add_other_user" action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
