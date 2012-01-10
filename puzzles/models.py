@@ -61,19 +61,10 @@ class Puzzle(models.Model):
 
 class TagList(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    tags = models.ManyToManyField('Tag', through='TagTagListRelation')
+    tags = models.ManyToManyField('Tag')
 
     def __unicode__(self):
         return self.name
-
-class TagTagListRelation(models.Model):
-    tag = models.ForeignKey('Tag')
-    taglist = models.ForeignKey('TagList')
-    order = models.PositiveIntegerField()
-
-    class Meta:
-        ordering = ['taglist', 'order']
-        unique_together = ("taglist", "order")
 
 class Motd(models.Model):
     motd = models.TextField(blank=True)
