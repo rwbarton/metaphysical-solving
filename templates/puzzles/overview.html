@@ -11,9 +11,7 @@
 	  <span class="taglist">{{ taglist.name }}</span>
 	</span>
       {% else %}
-	<a href="{% url puzzles.views.overview_by taglist.id %}">
-	  <span class="taglist">{{ taglist.name }}</span>
-	</a>
+	<a href="{% url puzzles.views.overview_by taglist.id %}"><span class="taglist">{{ taglist.name }}</span></a>
       {% endif %}
     {% endfor %}
   </center>
