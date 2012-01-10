@@ -25,6 +25,21 @@ ul#navlist li {
     padding: 0px 6px;
 }
 
+ul#puzzlelist {
+    display: inline;
+    padding: 0px;
+}
+
+ul#puzzlelist li {
+    display: inline;
+    padding: 0px;
+}
+
+ul#puzzlelist form {
+    display: inline;
+    padding: 0px 3px;
+}
+
 .username { color: #cc0000; }
 
 div#motd {

@@ -21,16 +21,18 @@
       User: <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
       Working on:
       {% if my_puzzles %}
-      {% for puzzle in my_puzzles %}
-      <a target="_top" href="{% url puzzles.views.puzzle puzzle.id %}">
-	{{ puzzle.title }}
-      </a>
-      <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
-	<input type="hidden" name="continue" value="{{ path }}" />
-	<input type="hidden" name="solver" value="{{ user.id }}" />
-	<input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
-      </form>
-      {% endfor %}
+      <ul id="puzzlelist">
+	{% for puzzle in my_puzzles %}
+	<li>
+	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+	    <a target="_top" href="{% url puzzles.views.puzzle puzzle.id %}">{{ puzzle.title }}</a>
+	    <input type="hidden" name="continue" value="{{ path }}" />
+	    <input type="hidden" name="solver" value="{{ user.id }}" />
+	    <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
+	  </form>
+	</li>
+	{% endfor %}
+      </ul>
       {% else %}
       nothing
       {% endif %}
