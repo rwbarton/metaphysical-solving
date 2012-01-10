@@ -31,18 +31,6 @@
       <tr><th>Working now:</th></tr>
     </thead>
     <tbody>
-      {% for solver in other_solvers %}
-      <tr>
-	<td>{{ solver.first_name }}</td>
-	<td>
-	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
-	    <input type="hidden" name="continue" value="{{ path }}" />
-	    <input type="hidden" name="solver" value="{{ solver.id }}" />
-	    <input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove" />
-	  </form>
-	</td>
-      </tr>
-      {% endfor %}
       {% if you_solving %}
       <tr>
 	<td><b>You</b></td>
@@ -55,6 +43,18 @@
 	</td>
       </tr>
       {% endif %}
+      {% for solver in other_solvers %}
+      <tr>
+	<td>{{ solver.first_name }}</td>
+	<td>
+	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+	    <input type="hidden" name="continue" value="{{ path }}" />
+	    <input type="hidden" name="solver" value="{{ solver.id }}" />
+	    <input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove" />
+	  </form>
+	</td>
+      </tr>
+      {% endfor %}
     </tbody>
   </table>
 
