@@ -28,9 +28,14 @@
 
   <table id="whos-working">
     <thead>
-      <tr><th>Working now:</th></tr>
+      <tr><th colspan=2>Working now:</th></tr>
     </thead>
     <tbody>
+      {% if not you_solving and not other_solvers %}
+      <tr>
+	<td>nobody</td>
+      </tr>
+      {% endif %}
       {% if you_solving %}
       <tr>
 	<td><b>You</b></td>
