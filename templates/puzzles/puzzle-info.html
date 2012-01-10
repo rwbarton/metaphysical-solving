@@ -4,66 +4,87 @@
 
 {% block content %}
 <div class="puzzle-blurb">
-  <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}">{{ puzzle.title }}</a>
-  <form id="status_form" action="{% url puzzles.views.puzzle_set_status puzzle.id %}" method="post">{% csrf_token %}
-    <input type="hidden" name="continue" value="{{ path }}" />
-    <select onchange="document.forms.status_form.submit()" name="status">
-      {% for status in statuses %}
-      <option{% if puzzle.status == status %} selected="true"{% endif %}>{{ status.text }}</option>
-      {% endfor %}
-    </select>
-  </form>
-  <form id="priority_form" action="{% url puzzles.views.puzzle_set_priority puzzle.id %}" method="post">{% csrf_token %}
-    <input type="hidden" name="continue" value="{{ path }}" />
-    <select onchange="document.forms.priority_form.submit()" name="priority">
-      {% for priority in priorities %}
-      <option{% if puzzle.priority == priority %} selected="true"{% endif %}>{{ priority.text }}</option>
-      {% endfor %}
-    </select>
-  </form>
+  <table><tbody><tr>
+	<td>
+	  <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}">{{ puzzle.title }}</a>
+	</td>
+	<td>
+	  <form id="status_form" action="{% url puzzles.views.puzzle_set_status puzzle.id %}" method="post">{% csrf_token %}
+	    <input type="hidden" name="continue" value="{{ path }}" />
+	    <select onchange="document.forms.status_form.submit()" name="status">
+	      {% for status in statuses %}
+	      <option{% if puzzle.status == status %} selected="true"{% endif %}>{{ status.text }}</option>
+	      {% endfor %}
+	    </select>
+	  </form>
+	</td>
+	<td>
+	  <form id="priority_form" action="{% url puzzles.views.puzzle_set_priority puzzle.id %}" method="post">{% csrf_token %}
+	    <input type="hidden" name="continue" value="{{ path }}" />
+	    <select onchange="document.forms.priority_form.submit()" name="priority">
+	      {% for priority in priorities %}
+	      <option{% if puzzle.priority == priority %} selected="true"{% endif %}>{{ priority.text }}</option>
+	      {% endfor %}
+	    </select>
+	  </form>
+	</td>
+  </tr></tbody></table>
 
-  Working now:
-  <ul>
-    {% for solver in other_solvers %}
-    <li>
-      {{ solver.first_name }}
-      <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
-	<input type="hidden" name="continue" value="{{ path }}" />
-	<input type="hidden" name="solver" value="{{ solver.id }}" />
-	<input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove"></input>
-      </form>
-    </li>
-    {% endfor %}
-    {% if you_solving %}
-    <li>
-      <b>You</b>
-      <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
-	<input type="hidden" name="continue" value="{{ path }}" />
-	<input type="hidden" name="solver" value="{{ user.id }}" />
-	<input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
-      </form>
-    </li>
-  </ul>
-  Add:
-  {% else %}
-</ul>
-Add:
-<b>Me</b>
-<form action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
-  <input type="hidden" name="continue" value="{{ path }}" />
-  <input type="hidden" name="solver" value="{{ user.id }}" />
-  <input type="image" src="{{ STATIC_URL }}img/add.png" alt="Add" />
-</form>
-{% endif %}
-<form id="add_other_user" action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
-  <input type="hidden" name="continue" value="{{ path }}" />
-  <select onchange="document.forms.add_other_user.submit()" name="solver">
-    <option />
-    {% for other_user in other_users %}
-    <option value="{{ other_user.id }}">{{ other_user.first_name }} {{ other_user.last_name }}</option>
-    {% endfor %}
-  </select>
-</form>
-</ul>
+  <table id="whos-working">
+    <thead>
+      <tr><th>Working now:</th></tr>
+    </thead>
+    <tbody>
+      {% for solver in other_solvers %}
+      <tr>
+	<td>{{ solver.first_name }}</td>
+	<td>
+	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+	    <input type="hidden" name="continue" value="{{ path }}" />
+	    <input type="hidden" name="solver" value="{{ solver.id }}" />
+	    <input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove" />
+	  </form>
+	</td>
+      </tr>
+      {% endfor %}
+      {% if you_solving %}
+      <tr>
+	<td><b>You</b></td>
+	<td>
+	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+	    <input type="hidden" name="continue" value="{{ path }}" />
+	    <input type="hidden" name="solver" value="{{ user.id }}" />
+	    <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
+	  </form>
+	</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  <table><tbody><tr>
+	<td>Add:</td>
+	{% if not you_solving %}
+	<td>
+	  <form action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
+	    <b>Me</b>
+	    <input type="hidden" name="continue" value="{{ path }}" />
+	    <input type="hidden" name="solver" value="{{ user.id }}" />
+	    <input type="image" src="{{ STATIC_URL }}img/add.png" alt="Add" />
+	  </form>
+	</td>
+	{% endif %}
+	<td>
+	  <form id="add_other_user" action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
+	    <input type="hidden" name="continue" value="{{ path }}" />
+	    <select onchange="document.forms.add_other_user.submit()" name="solver">
+	      <option>Other user...</option>
+	      {% for other_user in other_users %}
+	      <option value="{{ other_user.id }}">{{ other_user.first_name }} {{ other_user.last_name }}</option>
+	      {% endfor %}
+	    </select>
+	  </form>
+	</td>
+  </tr></tbody></table>
 </div>
 {% endblock %}

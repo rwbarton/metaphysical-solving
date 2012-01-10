@@ -87,6 +87,29 @@ div.puzzle-blurb {
     padding: 3px;
 }
 
+.puzzle-blurb > table {
+    display: inline-table;
+    vertical-align: top;
+}
+
 span.puzzle-title {
     font-weight: bold;
+}
+
+#whos-working {
+    font-size: 80%;
+}
+
+#whos-working th {
+    color: #808080;
+    font-weight: normal;
+}
+
+#whos-working * {
+    padding: 0px;
+    border-spacing: 0px;
+}
+
+td input {
+    vertical-align: bottom;
 }
