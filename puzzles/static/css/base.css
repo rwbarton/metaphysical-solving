@@ -15,6 +15,10 @@ div#header {
     background: #cccccc;
 }
 
+form {
+    display: inline;
+}
+
 ul#navlist {
     display: inline;
     padding: 0px 20px;
@@ -36,7 +40,6 @@ ul#puzzlelist li {
 }
 
 ul#puzzlelist form {
-    display: inline;
     padding: 0px 3px;
 }
 
