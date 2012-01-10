@@ -44,16 +44,17 @@ class PuzzleWrongAnswer(models.Model):
 
 class Puzzle(models.Model):
     title = models.CharField(max_length=200)
-    url = models.URLField()
+    url = models.URLField(unique=True)
 
     status = models.ForeignKey('Status')
     priority = models.ForeignKey('Priority')
-    tags = models.ManyToManyField('Tag', blank=True)
+    tags = models.ManyToManyField('Tag')
 
     solvers = models.ManyToManyField(User, blank=True)
 
     spreadsheet = models.URLField(blank=True)
     answer = models.CharField(max_length=200, blank=True)
+    checkAnswerLink = models.URLField(blank=True)
 
     def __unicode__(self):
         return self.title
