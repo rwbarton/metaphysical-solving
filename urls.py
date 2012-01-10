@@ -16,6 +16,8 @@ urlpatterns = patterns('',
     url(r'^puzzle/chat/(\d+)/$', 'puzzles.views.puzzle_chat'),
     url(r'^puzzle/set_status/(\d+)/$', 'puzzles.views.puzzle_set_status'),
     url(r'^puzzle/set_priority/(\d+)/$', 'puzzles.views.puzzle_set_priority'),
+    url(r'^puzzle/remove_solver/(\d+)/$', 'puzzles.views.puzzle_remove_solver'),
+    url(r'^puzzle/add_solver/(\d+)/$', 'puzzles.views.puzzle_add_solver'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

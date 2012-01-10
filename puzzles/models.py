@@ -50,6 +50,8 @@ class Puzzle(models.Model):
     priority = models.ForeignKey('Priority')
     tags = models.ManyToManyField('Tag', blank=True)
 
+    solvers = models.ManyToManyField(User, blank=True)
+
     spreadsheet = models.URLField(blank=True)
     answer = models.CharField(max_length=200, blank=True)
 

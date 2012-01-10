@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
 from models import Status, Priority, Tag, Puzzle, TagList, Motd, jabber_username, jabber_password
+from django.contrib.auth.models import User
 
 def get_motd():
     try:
@@ -56,10 +57,17 @@ def puzzle_info(request, puzzle_id):
     puzzle = Puzzle.objects.get(id=puzzle_id)
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
+    solvers = puzzle.solvers.all()
+    you_solving = request.user in solvers
+    other_solvers = [solver for solver in solvers if solver != request.user]
+    other_users = [other_user for other_user in User.objects.all() if other_user not in solvers]
     return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
                 'puzzle': puzzle,
                 'statuses': statuses,
-                'priorities': priorities
+                'priorities': priorities,
+                'you_solving': you_solving,
+                'other_solvers': other_solvers,
+                'other_users': other_users
                 }))
 
 @login_required
@@ -87,6 +95,22 @@ def puzzle_set_priority(request, puzzle_id):
     puzzle = Puzzle.objects.get(id=puzzle_id)
     priority = Priority.objects.get(text=request.POST['priority'])
     puzzle.priority = priority
+    puzzle.save()
+    return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+
+@login_required
+def puzzle_remove_solver(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    solver = User.objects.get(id=request.POST['solver'])
+    puzzle.solvers.remove(solver)
+    puzzle.save()
+    return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+
+@login_required
+def puzzle_add_solver(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    solver = User.objects.get(id=request.POST['solver'])
+    puzzle.solvers.add(solver)
     puzzle.save()
     return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
 

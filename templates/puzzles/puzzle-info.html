@@ -19,5 +19,45 @@
 {% endfor %}
 </select>
 </form>
+
+Working now:
+<ul>
+{% for solver in other_solvers %}
+<li>
+{{ solver.first_name }}
+<form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="solver" value="{{ solver.id }}" />
+<input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove"></input>
+</form>
+</li>
+{% endfor %}
+{% if you_solving %}
+<li>
+<b>You</b>
+<form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="solver" value="{{ user.id }}" />
+<input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
+</form>
+</li>
+</ul>
+Add:
+{% else %}
+</ul>
+Add:
+<b>Me</b>
+<form action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="solver" value="{{ user.id }}" />
+<input type="image" src="{{ STATIC_URL }}img/add.png" alt="Add" />
+</form>
+{% endif %}
+<form id="add_other_user" action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
+<select onchange="document.forms.add_other_user.submit()" name="solver">
+<option />
+{% for other_user in other_users %}
+<option value="{{ other_user.id }}">{{ other_user.first_name }} {{ other_user.last_name }}</option>
+{% endfor %}
+</select>
+</form>
+</ul>
 </div>
 {% endblock %}
