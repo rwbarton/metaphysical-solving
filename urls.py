@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^puzzle/remove_solver/(\d+)/$', 'puzzles.views.puzzle_remove_solver'),
     url(r'^puzzle/add_solver/(\d+)/$', 'puzzles.views.puzzle_add_solver'),
 
+    url(r'^puzzle/go_to_sleep/$', 'puzzles.views.go_to_sleep'),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

@@ -35,6 +35,10 @@
 	</li>
 	{% endfor %}
       </ul>
+      <form action="{% url puzzles.views.go_to_sleep %}" method="post">{% csrf_token %}
+	<input type="hidden" name="continue" value="{{ path }}" />
+	<input type="submit" value="Clear" />
+      </form>
       {% else %}
       nothing
       {% endif %}

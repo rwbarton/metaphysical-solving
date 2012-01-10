@@ -111,6 +111,13 @@ def puzzle_add_solver(request, puzzle_id):
     return redirect(request.POST['continue'])
 
 @login_required
+def go_to_sleep(request):
+    for puzzle in request.user.puzzle_set.all():
+        puzzle.solvers.remove(request.user)
+        puzzle.save()
+    return redirect(request.POST['continue'])
+
+@login_required
 def welcome(request):
     context = puzzle_context(request,{});
     return render_to_response("puzzles/welcome.html",context);
