@@ -29,7 +29,7 @@
 	{% for puzzle in tag.puzzles %}
 	  <tr class="{% cycle "puzzle-list-odd" "puzzle-list-even" %}">
 	    <td class="puzzle-list-puzzle">
-	      <a href="{{ puzzle.url }}">[P]</a>
+	      <a target="_blank" href="{{ puzzle.url }}">[P]</a>
 	    </td>
 	    <td class="puzzle-list-title">
 	      <a href="{% url puzzles.views.puzzle puzzle.id %}">{{ puzzle.title }}</a>
