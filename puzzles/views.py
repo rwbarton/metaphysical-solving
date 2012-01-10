@@ -18,6 +18,8 @@ def get_motd():
 def puzzle_context(request, d):
     d1 = dict(d)
     d1['motd'] = get_motd()
+    d1['my_puzzles'] = request.user.puzzle_set.all()
+    d1['path'] = request.path
     return RequestContext(request, d1)
 
 @login_required
@@ -88,7 +90,7 @@ def puzzle_set_status(request, puzzle_id):
     status = Status.objects.get(text=request.POST['status'])
     puzzle.status = status
     puzzle.save()
-    return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+    return redirect(request.POST['continue'])
 
 @login_required
 def puzzle_set_priority(request, puzzle_id):
@@ -96,7 +98,7 @@ def puzzle_set_priority(request, puzzle_id):
     priority = Priority.objects.get(text=request.POST['priority'])
     puzzle.priority = priority
     puzzle.save()
-    return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+    return redirect(request.POST['continue'])
 
 @login_required
 def puzzle_remove_solver(request, puzzle_id):
@@ -104,7 +106,7 @@ def puzzle_remove_solver(request, puzzle_id):
     solver = User.objects.get(id=request.POST['solver'])
     puzzle.solvers.remove(solver)
     puzzle.save()
-    return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+    return redirect(request.POST['continue'])
 
 @login_required
 def puzzle_add_solver(request, puzzle_id):
@@ -112,7 +114,7 @@ def puzzle_add_solver(request, puzzle_id):
     solver = User.objects.get(id=request.POST['solver'])
     puzzle.solvers.add(solver)
     puzzle.save()
-    return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+    return redirect(request.POST['continue'])
 
 @login_required
 def welcome(request):

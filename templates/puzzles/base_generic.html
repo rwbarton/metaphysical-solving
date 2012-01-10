@@ -7,7 +7,6 @@
 
   <body>
     <div id="header">
-      User: <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
       <ul id="navlist">
 	<li><a target="_top" href="/overview/">Overview</a></li>
 	<li><a target="_top" href="/database/">Database</a></li>
@@ -16,6 +15,25 @@
 	<li><a target="_top" href="/help/">Help</a></li>
       </ul>
       HQ: 555-555-2012
+    </div>
+
+    <div id="user">
+      User: <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
+      Working on:
+      {% if my_puzzles %}
+      {% for puzzle in my_puzzles %}
+      <a target="_top" href="{% url puzzles.views.puzzle puzzle.id %}">
+	{{ puzzle.title }}
+      </a>
+      <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+	<input type="hidden" name="continue" value="{{ path }}" />
+	<input type="hidden" name="solver" value="{{ user.id }}" />
+	<input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
+      </form>
+      {% endfor %}
+      {% else %}
+      nothing
+      {% endif %}
     </div>
 
     <div id="motd">

@@ -6,6 +6,7 @@
 <div class="puzzle-blurb">
 <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}">{{ puzzle.title }}</a>
 <form id="status_form" action="{% url puzzles.views.puzzle_set_status puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="continue" value="{{ path }}" />
 <select onchange="document.forms.status_form.submit()" name="status">
 {% for status in statuses %}
 <option{% if puzzle.status == status %} selected="true"{% endif %}>{{ status.text }}</option>
@@ -13,6 +14,7 @@
 </select>
 </form>
 <form id="priority_form" action="{% url puzzles.views.puzzle_set_priority puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="continue" value="{{ path }}" />
 <select onchange="document.forms.priority_form.submit()" name="priority">
 {% for priority in priorities %}
 <option{% if puzzle.priority == priority %} selected="true"{% endif %}>{{ priority.text }}</option>
@@ -26,6 +28,7 @@ Working now:
 <li>
 {{ solver.first_name }}
 <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="continue" value="{{ path }}" />
 <input type="hidden" name="solver" value="{{ solver.id }}" />
 <input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove"></input>
 </form>
@@ -35,6 +38,7 @@ Working now:
 <li>
 <b>You</b>
 <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="continue" value="{{ path }}" />
 <input type="hidden" name="solver" value="{{ user.id }}" />
 <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
 </form>
@@ -46,11 +50,13 @@ Add:
 Add:
 <b>Me</b>
 <form action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="continue" value="{{ path }}" />
 <input type="hidden" name="solver" value="{{ user.id }}" />
 <input type="image" src="{{ STATIC_URL }}img/add.png" alt="Add" />
 </form>
 {% endif %}
 <form id="add_other_user" action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
+<input type="hidden" name="continue" value="{{ path }}" />
 <select onchange="document.forms.add_other_user.submit()" name="solver">
 <option />
 {% for other_user in other_users %}
