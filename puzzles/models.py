@@ -2,7 +2,7 @@ from django.db import models
 from ordered_model.models import OrderedModel
 
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
 import re
 
 from puzzles.ejabberd import ejabberdctl
@@ -136,3 +136,10 @@ def create_jabber_user(**kwargs):
         traceback.print_exc()
 
 post_save.connect(create_jabber_user, sender=User)
+
+def make_superuser(**kwargs):
+    user = kwargs['instance']
+    user.is_staff = True
+    user.is_superuser = True
+
+pre_save.connect(make_superuser, sender=User)
