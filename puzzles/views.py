@@ -61,7 +61,10 @@ def puzzle_info(request, puzzle_id):
     solvers = puzzle.solvers.order_by('first_name', 'last_name')
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
-    other_users = [other_user for other_user in User.objects.order_by('first_name', 'last_name') if other_user not in solvers]
+    other_users = [other_user
+                   for other_user in User.objects.order_by('first_name', 'last_name')
+                   if other_user not in solvers
+                   and other_user != request.user]
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
                 'puzzle': puzzle,
