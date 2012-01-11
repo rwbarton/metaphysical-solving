@@ -76,9 +76,13 @@ class Puzzle(models.Model):
             return {'status': self.status}
 
     def save(self, *args, **kwargs):
+        # Save first, so that we don't create a new spreadsheet if the
+        # save would fail.
+        super(Puzzle, self).save(*args, **kwargs)
+
         if self.spreadsheet == '':
             self.spreadsheet = create_google_spreadsheet(self.title)
-        super(Puzzle, self).save(*args, **kwargs)
+            super(Puzzle, self).save(*args, **kwargs)
 
 class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
