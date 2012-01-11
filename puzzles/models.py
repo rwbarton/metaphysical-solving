@@ -82,6 +82,9 @@ class Puzzle(models.Model):
 
         if self.spreadsheet == '':
             self.spreadsheet = create_google_spreadsheet(self.title)
+            # create() uses force_insert, override that here.
+            kwargs['force_update'] = True
+            kwargs['force_insert'] = False
             super(Puzzle, self).save(*args, **kwargs)
 
 class TagList(OrderedModel):
