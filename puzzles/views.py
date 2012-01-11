@@ -19,7 +19,7 @@ def get_motd():
 def puzzle_context(request, d):
     d1 = dict(d)
     d1['motd'] = get_motd()
-    d1['my_puzzles'] = request.user.puzzle_set.all()
+    d1['my_puzzles'] = request.user.puzzle_set.order_by('id')
     d1['path'] = request.path
     return RequestContext(request, d1)
 
