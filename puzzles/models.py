@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 import re
 
 from puzzles.ejabberd import ejabberdctl
+from puzzles.googlespreadsheet import create_google_spreadsheet
 
 class Config(models.Model):
     default_status = models.ForeignKey('Status')
@@ -73,6 +74,11 @@ class Puzzle(models.Model):
             return {'answer': self.answer}
         else:
             return {'status': self.status}
+
+    def save(self, *args, **kwargs):
+        if self.spreadsheet == '':
+            self.spreadsheet = create_google_spreadsheet(self.title)
+        super(Puzzle, self).save(*args, **kwargs)
 
 class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
