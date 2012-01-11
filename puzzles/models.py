@@ -45,6 +45,9 @@ class PuzzleWrongAnswer(models.Model):
     puzzle = models.ForeignKey('Puzzle')
     answer = models.CharField(max_length=200)
 
+    def __unicode__(self):
+        return 'answer "%s" for puzzle "%s"' % (self.answer, self.puzzle.title)
+
 class Puzzle(models.Model):
     title = models.CharField(max_length=200)
     url = models.URLField(unique=True)
