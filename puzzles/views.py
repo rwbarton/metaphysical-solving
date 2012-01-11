@@ -48,7 +48,10 @@ def overview(request):
 
 @login_required
 def puzzle(request, puzzle_id):
-    return render_to_response("puzzles/puzzle-frames.html", RequestContext(request, {'id': puzzle_id}))
+    return render_to_response("puzzles/puzzle-frames.html", RequestContext(request, {
+                'id': puzzle_id,
+                'title': Puzzle.objects.get(id=puzzle_id).title
+                }))
 
 @login_required
 def puzzle_info(request, puzzle_id):
