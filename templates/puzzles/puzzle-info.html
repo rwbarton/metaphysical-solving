@@ -94,5 +94,7 @@
     {% endfor %}
   </ul>
   {% endif %}
+
+  <a target="_blank" href="{% url puzzles.views.puzzle_logged_chat puzzle.id %}">Logged chat</a>
 </div>
 {% endblock %}

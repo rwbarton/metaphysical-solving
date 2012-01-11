@@ -1,4 +1,5 @@
 import random
+import os
 
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
@@ -112,6 +113,16 @@ def puzzle_add_solver(request, puzzle_id):
     puzzle.solvers.add(solver)
     puzzle.save()
     return redirect(request.POST['continue'])
+
+@login_required
+def puzzle_logged_chat(request, puzzle_id):
+    chat_dir = '/var/www/muc/puzzle-%d' % int(puzzle_id)
+    files = os.listdir(chat_dir)
+    if files:
+        f = max(files)
+    else:
+        f = '.'
+    return redirect('http://metaphysical.no-ip.org/muc/puzzle-%d/%s' % (int(puzzle_id), f))
 
 @login_required
 def go_to_sleep(request):
