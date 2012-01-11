@@ -31,9 +31,16 @@
 	    </td>
 	    <td class="puzzle-list-title">
 	      <a href="{% url puzzles.views.puzzle puzzle.id %}">{{ puzzle.title }}</a>
+	      {% if puzzle.priority != default_priority %}
+	      <span class="puzzle-priority priority-{{ puzzle.priority.css_name }}">{{ puzzle.priority.text }}</span>
+	      {% endif %}
 	    </td>
 	    <td class="puzzle-list-status">
-	      {{ puzzle.status.text }}
+	      {% if puzzle.answer_or_status.answer %}
+	      <span class="puzzle-answer">{{ puzzle.answer_or_status.answer }}</span>
+	      {% else %}
+	      {{ puzzle.answer_or_status.status.text }}
+	      {% endif %}
 	    </td>
 	  </tr>
 	{% endfor %}

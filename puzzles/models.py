@@ -62,6 +62,12 @@ class Puzzle(models.Model):
     def __unicode__(self):
         return self.title
 
+    def answer_or_status(self):
+        if self.answer:
+            return {'answer': self.answer}
+        else:
+            return {'status': self.status}
+
 class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
     tags = models.ManyToManyField('Tag')

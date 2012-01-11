@@ -1,0 +1,14 @@
+.priority-low {
+    color: #808080;
+}
+
+.priority-normal {
+}
+
+.priority-high {
+    color: #ff8080;
+}
+
+.priority-asap {
+    color: #ff2020;
+}

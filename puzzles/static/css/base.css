@@ -86,6 +86,16 @@ td.puzzle-list-status {
     width: 170px;
 }
 
+span.puzzle-priority {
+    font-size: 80%;
+}
+
+span.puzzle-answer {
+    font-family: monospace;
+    font-weight: bold;
+    color: #800000;
+}
+
 div.puzzle-blurb {
     padding: 3px;
 }

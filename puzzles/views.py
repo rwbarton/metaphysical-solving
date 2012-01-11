@@ -37,6 +37,7 @@ def overview_by(request, taglist_id):
                     'puzzles': Tag.objects.get(id=tag.id).puzzle_set.all()
                     }
                      for tag in tags),
+            'default_priority': Config.objects.get().default_priority
             })
     return render_to_response("puzzles/overview.html", context)
 
