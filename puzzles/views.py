@@ -58,13 +58,15 @@ def puzzle_info(request, puzzle_id):
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
     other_users = [other_user for other_user in User.objects.all() if other_user not in solvers]
+    wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
                 'puzzle': puzzle,
                 'statuses': statuses,
                 'priorities': priorities,
                 'you_solving': you_solving,
                 'other_solvers': other_solvers,
-                'other_users': other_users
+                'other_users': other_users,
+                'wrong_answers': wrong_answers
                 }))
 
 @login_required

@@ -82,5 +82,17 @@
       </select>
     </form>
   </span>
+
+  {% if puzzle.answer %}
+  Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span>
+  {% endif %}
+  {% if wrong_answers %}
+  Wrong answers:
+  <ul id="puzzle-wrong-answers">
+    {% for wrong_answer in wrong_answers %}
+    <li>{{ wrong_answer.answer }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
 </div>
 {% endblock %}

@@ -123,6 +123,19 @@ span.puzzle-title {
     border-spacing: 0px;
 }
 
+ul#puzzle-wrong-answers {
+    display: inline;
+    padding: 0px;
+}
+
+ul#puzzle-wrong-answers > li {
+    display: inline;
+    padding: 0px 3px;
+    background: #ffe0e0;
+    font-family: monospace;
+    font-weight: bold;
+}
+
 td input {
     vertical-align: bottom;
 }
