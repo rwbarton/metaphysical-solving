@@ -85,6 +85,8 @@
 
   {% if puzzle.answer %}
   Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span>
+  {% else %}
+  <a target="_blank" href="{{ puzzle.checkAnswerLink }}">Call in answer</a>
   {% endif %}
   {% if wrong_answers %}
   Wrong answers:
