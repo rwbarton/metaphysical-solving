@@ -5,7 +5,7 @@
 </head>
 <frameset rows="150px,*" title="{{ title }}">
   <frame src="{% url puzzles.views.puzzle_info id %}" />
-  <frameset cols="*,500px">
+  <frameset cols="*,300px">
     <frame src="{% url puzzles.views.puzzle_spreadsheet id %}" />
     <frame src="{% url puzzles.views.puzzle_chat id %}" />
   </frameset>
