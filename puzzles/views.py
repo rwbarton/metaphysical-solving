@@ -13,6 +13,8 @@ from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Locatio
 from forms import UploadForm
 from django.contrib.auth.models import User
 
+from prebind import prebind
+
 def get_motd():
     try:
         return Config.objects.get().motd
@@ -95,11 +97,9 @@ def puzzle_spreadsheet(request, puzzle_id):
 
 @login_required
 def puzzle_chat(request, puzzle_id):
-    return redirect("http://metaphysical.no-ip.org/chat/?" +
-                    urlencode({'id': puzzle_id,
-                               'username': jabber_username(request.user),
-                               'password': jabber_password(),
-                               'resource': hex(random.getrandbits(64))}))
+    prebind_params = prebind(jabber_username(request.user), jabber_password())
+    prebind_params['id'] = puzzle_id
+    return redirect("http://metaphysical.no-ip.org/chat/prebind.html?" + urlencode(prebind_params))
 
 @login_required
 def puzzle_set_status(request, puzzle_id):
