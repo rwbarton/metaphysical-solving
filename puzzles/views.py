@@ -2,6 +2,7 @@ import random
 import os
 import os.path
 
+from django.http import HttpResponse
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from django.utils.http import urlencode
@@ -82,7 +83,10 @@ def puzzle_info(request, puzzle_id):
 
 @login_required
 def puzzle_spreadsheet(request, puzzle_id):
-    return redirect(Puzzle.objects.get(id=puzzle_id).spreadsheet)
+    spreadsheet = Puzzle.objects.get(id=puzzle_id).spreadsheet
+    if spreadsheet:
+        return redirect(spreadsheet)
+    return HttpResponse("Oops, the spreadsheet isn't ready quite yet. Please wait a moment and then <a href=\"\">refresh</a> this pane.")
 
 @login_required
 def puzzle_chat(request, puzzle_id):
