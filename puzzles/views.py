@@ -171,5 +171,4 @@ def go_to_sleep(request):
 
 @login_required
 def welcome(request):
-    context = puzzle_context(request,{});
-    return render_to_response("puzzles/welcome.html",context);
+    return redirect(reverse('puzzles.views.overview'))

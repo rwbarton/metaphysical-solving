@@ -5,8 +5,8 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'solving.views.home', name='home'),
+    url(r'^$','puzzles.views.welcome'),
+
     url(r'^overview/$', 'puzzles.views.overview'),
     url(r'^overview/(\d+)/$', 'puzzles.views.overview_by'),
 
@@ -30,5 +30,4 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^','puzzles.views.welcome'),
 )
