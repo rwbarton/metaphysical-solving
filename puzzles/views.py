@@ -1,5 +1,6 @@
 import random
 import os
+import os.path
 
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
@@ -7,7 +8,8 @@ from django.utils.http import urlencode
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
-from models import Status, Priority, Tag, Puzzle, TagList, Config, jabber_username, jabber_password
+from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Config, jabber_username, jabber_password
+from forms import UploadForm
 from django.contrib.auth.models import User
 
 def get_motd():
@@ -66,6 +68,7 @@ def puzzle_info(request, puzzle_id):
                    if other_user not in solvers
                    and other_user != request.user]
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
+    uploaded_files = puzzle.uploadedfile_set.order_by('id')
     return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
                 'puzzle': puzzle,
                 'statuses': statuses,
@@ -73,7 +76,8 @@ def puzzle_info(request, puzzle_id):
                 'you_solving': you_solving,
                 'other_solvers': other_solvers,
                 'other_users': other_users,
-                'wrong_answers': wrong_answers
+                'wrong_answers': wrong_answers,
+                'uploaded_files': uploaded_files
                 }))
 
 @login_required
@@ -129,6 +133,34 @@ def puzzle_logged_chat(request, puzzle_id):
     else:
         f = '.'
     return redirect('http://metaphysical.no-ip.org/muc/puzzle-%d/%s' % (int(puzzle_id), f))
+
+def handle_puzzle_upload(puzzle, name, file):
+    if file.name == '' or file.name[0] == '.' or '/' in file.name:
+        raise ValueError
+    upload = UploadedFile.objects.create(puzzle=puzzle, name=name)
+    directory = os.path.join('/var/www/uploads', str(puzzle.id), str(upload.id))
+    os.makedirs(directory)
+    outfile = open(os.path.join(directory, file.name), 'wb')
+    for chunk in file.chunks():
+        outfile.write(chunk)
+    outfile.close()
+    upload.url = 'http://metaphysical.no-ip.org/uploads/%d/%d/%s' % (puzzle.id, upload.id, file.name)
+    upload.save()
+
+@login_required
+def puzzle_upload(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    if request.method == 'POST':
+        form = UploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_puzzle_upload(puzzle, form.cleaned_data['name'], request.FILES['file'])
+            return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+    else:
+        form = UploadForm()
+    return render_to_response('puzzles/puzzle-upload.html', puzzle_context(request, {
+                'form': form,
+                'puzzle': puzzle
+                }))
 
 @login_required
 def go_to_sleep(request):

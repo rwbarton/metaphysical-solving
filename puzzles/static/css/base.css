@@ -136,6 +136,21 @@ ul#puzzle-wrong-answers > li {
     font-weight: bold;
 }
 
+ul#puzzle-uploads {
+    display: inline;
+    padding: 0px;
+}
+
+ul#puzzle-uploads > li {
+    display: inline;
+    padding: 0px 3px;
+}
+
 td input {
     vertical-align: bottom;
+}
+
+.upload * {
+    display: inline;
+    padding: 0px 3px;
 }

@@ -19,6 +19,7 @@ urlpatterns = patterns('',
     url(r'^puzzle/remove_solver/(\d+)/$', 'puzzles.views.puzzle_remove_solver'),
     url(r'^puzzle/add_solver/(\d+)/$', 'puzzles.views.puzzle_add_solver'),
     url(r'^puzzle/logged_chat/(\d+)/$', 'puzzles.views.puzzle_logged_chat'),
+    url(r'^puzzle/upload/(\d+)/$', 'puzzles.views.puzzle_upload'),
 
     url(r'^puzzle/go_to_sleep/$', 'puzzles.views.go_to_sleep'),
 

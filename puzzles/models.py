@@ -94,6 +94,11 @@ class TagList(OrderedModel):
     def __unicode__(self):
         return self.name
 
+class UploadedFile(models.Model):
+    puzzle = models.ForeignKey('Puzzle')
+    name = models.CharField(max_length=200)
+    url = models.URLField()
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 

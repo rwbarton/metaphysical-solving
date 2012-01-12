@@ -96,5 +96,16 @@
   {% endif %}
 
   <a target="_blank" href="{% url puzzles.views.puzzle_logged_chat puzzle.id %}">Logged chat</a>
+
+  <a href="{% url puzzles.views.puzzle_upload puzzle.id %}">Upload file</a>
+
+  {% if uploaded_files %}
+  Uploaded files:
+  <ul id="puzzle-uploads">
+  {% for upload in uploaded_files %}
+  <li><a target="_blank" href="{{ upload.url }}">{{ upload.name }}</a></li>
+  {% endfor %}
+  </ul>
+  {% endif %}
 </div>
 {% endblock %}

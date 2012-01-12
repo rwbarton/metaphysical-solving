@@ -1,0 +1,8 @@
+{% extends "puzzles/base_generic.html" %}
+
+{% block content %}
+<form class="upload" action="{% url puzzles.views.puzzle_upload puzzle.id %}" method="post" enctype="multipart/form-data">{% csrf_token %}
+  {{ form.as_ul }}
+  <input type="submit" value="Submit" />
+</form>
+{% endblock %}
