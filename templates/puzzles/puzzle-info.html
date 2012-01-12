@@ -48,7 +48,7 @@
       {% endif %}
       {% for solver in other_solvers %}
       <tr>
-	<td>{{ solver.first_name }}</td>
+	<td title="{{ solver.first_name }} {{ solver.last_name }} ({{ solver.userprofile.location }})">{{ solver.first_name }}</td>
 	<td>
 	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
 	    <input type="hidden" name="continue" value="{{ path }}" />
