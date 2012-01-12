@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="puzzle-blurb">
-  <span class="status-{{ puzzle.status.css_name }} priority-{{ puzzle.priority.css_name }}">
+  <span class="status-{{ puzzle.status.css_name }}">
     <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}">{{ puzzle.title }}</a>
     Status:
     <form id="status_form" action="{% url puzzles.views.puzzle_set_status puzzle.id %}" method="post">{% csrf_token %}
