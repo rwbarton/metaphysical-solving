@@ -24,6 +24,8 @@ def puzzle_context(request, d):
     d1['motd'] = get_motd()
     d1['my_puzzles'] = request.user.puzzle_set.order_by('id')
     d1['path'] = request.path
+    if 'body' in request.GET:
+        d1['body_only'] = True
     return RequestContext(request, d1)
 
 @login_required
@@ -41,7 +43,8 @@ def overview_by(request, taglist_id):
                     'puzzles': Tag.objects.get(id=tag.id).puzzle_set.all()
                     }
                      for tag in tags),
-            'default_priority': Config.objects.get().default_priority
+            'default_priority': Config.objects.get().default_priority,
+            'refresh': 60
             })
     return render_to_response("puzzles/overview.html", context)
 
@@ -78,7 +81,8 @@ def puzzle_info(request, puzzle_id):
                 'other_solvers': other_solvers,
                 'other_users': other_users,
                 'wrong_answers': wrong_answers,
-                'uploaded_files': uploaded_files
+                'uploaded_files': uploaded_files,
+                'refresh': 5
                 }))
 
 @login_required

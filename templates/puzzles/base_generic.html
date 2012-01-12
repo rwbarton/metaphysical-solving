@@ -1,3 +1,4 @@
+{% if not body_only %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,8 +6,20 @@
     <link rel="stylesheet" href="{{ STATIC_URL }}css/status.css" />
     <link rel="stylesheet" href="{{ STATIC_URL }}css/priority.css" />
     <title>{% block title %}{% endblock %}</title>
+    {% if refresh %}
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+    <script type="text/javascript">
+      function reload() {
+        $.ajax({
+          url: "?body",
+          success: function (data, textStatus, jqXHR) { document.body.innerHTML = data; },
+        });
+      };
+      $(document).ready(function () { setInterval(reload, {{ refresh }} * 1000); });
+    </script>
+    {% endif %}
   </head>
-
+{% endif %}
   <body>
     <div id="header">
       <ul id="navlist">
@@ -50,4 +63,6 @@
 
     <div id="content">{% block content %}{% endblock %}</div>
   </body>
+{% if not body_only %}
 </html>
+{% endif %}
