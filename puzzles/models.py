@@ -99,10 +99,17 @@ class UploadedFile(models.Model):
     name = models.CharField(max_length=200)
     url = models.URLField()
 
+class Location(OrderedModel):
+    name = models.CharField(max_length=200, unique=True)
+
+    def __unicode__(self):
+        return self.name
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
     has_jabber_account = models.BooleanField()
+    location = models.ForeignKey('Location')
 
 def jabber_username(user):
     first = ''.join(re.findall("\w", user.first_name))
@@ -125,7 +132,11 @@ def create_jabber_user(**kwargs):
         try:
             user_profile = UserProfile.objects.get(user=user)
         except UserProfile.DoesNotExist:
-            user_profile = UserProfile.objects.create(user=user, has_jabber_account=False)
+            user_profile = UserProfile.objects.create(
+                user=user,
+                has_jabber_account=False,
+                location=Location.objects.get(name="unknown")
+                )
         if not user_profile.has_jabber_account and user.first_name != '':
             username = jabber_username(user)
             with ejabberdctl() as e:

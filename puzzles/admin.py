@@ -1,6 +1,6 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
-from puzzles.models import Status, Priority, Tag, TagList, Puzzle, PuzzleWrongAnswer, Config
+from puzzles.models import Status, Priority, Tag, TagList, Location, Puzzle, PuzzleWrongAnswer, Config
 
 class SlugAdmin(OrderedModelAdmin):
     list_display = ('text', 'move_up_down_links')
@@ -12,6 +12,7 @@ class ItemAdmin(OrderedModelAdmin):
     list_display = ('name', 'move_up_down_links')
 admin.site.register(Tag, ItemAdmin)
 admin.site.register(TagList, ItemAdmin)
+admin.site.register(Location, ItemAdmin)
 
 admin.site.register(Puzzle)
 admin.site.register(PuzzleWrongAnswer)
