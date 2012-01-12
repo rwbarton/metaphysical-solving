@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^puzzle/logged_chat/(\d+)/$', 'puzzles.views.puzzle_logged_chat'),
     url(r'^puzzle/upload/(\d+)/$', 'puzzles.views.puzzle_upload'),
 
+    url(r'^puzzle/user_location/$', 'puzzles.views.user_location'),
     url(r'^puzzle/go_to_sleep/$', 'puzzles.views.go_to_sleep'),
 
     # Uncomment the admin/doc line below to enable admin documentation:

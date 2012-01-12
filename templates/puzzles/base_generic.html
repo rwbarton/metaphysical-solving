@@ -34,6 +34,15 @@
 
     <div id="user">
       User: <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
+      Location:
+      <form id="user_location" action="{% url puzzles.views.user_location %}" method="post">{% csrf_token %}
+	<input type="hidden" name="continue" value="{{ path }}" />
+	<select onchange="document.forms.user_location.submit()" name="location">
+	  {% for location in locations %}
+	  <option{% if location == user.userprofile.location %} selected="true"{% endif %}>{{ location.name }}</option>
+	  {% endfor %}
+	</select>
+      </form>
       Working on:
       {% if my_puzzles %}
       <ul id="puzzlelist">

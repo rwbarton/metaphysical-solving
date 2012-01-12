@@ -9,7 +9,7 @@ from django.utils.http import urlencode
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
-from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Config, jabber_username, jabber_password
+from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Location, Config, jabber_username, jabber_password
 from forms import UploadForm
 from django.contrib.auth.models import User
 
@@ -22,6 +22,7 @@ def get_motd():
 def puzzle_context(request, d):
     d1 = dict(d)
     d1['motd'] = get_motd()
+    d1['locations'] = Location.objects.all()
     d1['my_puzzles'] = request.user.puzzle_set.order_by('id')
     d1['path'] = request.path
     if 'body' in request.GET:
@@ -169,6 +170,13 @@ def puzzle_upload(request, puzzle_id):
                 'form': form,
                 'puzzle': puzzle
                 }))
+
+@login_required
+def user_location(request):
+    location = Location.objects.get(name=request.POST['location'])
+    request.user.userprofile.location = location
+    request.user.userprofile.save()
+    return redirect(request.POST['continue'])
 
 @login_required
 def go_to_sleep(request):
