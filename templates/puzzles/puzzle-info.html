@@ -45,9 +45,9 @@
    <select id="fileselector">
   {% for upload in uploaded_files %}
 	<option style="background:url(/static/img/file.png) no-repeat; padding-left:15px;" value="{{ upload.url }}">{{ upload.name }}</option>
-        <input type="button" value="Open" onclick="window.open(document.getElementById('fileselector').options[document.getElementById('fileselector').selectedIndex].value, '_blank');">
   {% endfor %}
    </select>
+        <input type="button" value="Open" onclick="window.open(document.getElementById('fileselector').options[document.getElementById('fileselector').selectedIndex].value, '_blank');">
   {% endif %}
   </div>
 
