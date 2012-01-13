@@ -13,7 +13,7 @@ class ItemAdmin(OrderedModelAdmin):
 admin.site.register(Tag, ItemAdmin)
 admin.site.register(TagList, ItemAdmin)
 admin.site.register(Location, ItemAdmin)
+admin.site.register(Puzzle, ItemAdmin)
 
-admin.site.register(Puzzle)
 admin.site.register(PuzzleWrongAnswer)
 admin.site.register(Config)

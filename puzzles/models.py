@@ -52,7 +52,7 @@ class PuzzleWrongAnswer(models.Model):
     def __unicode__(self):
         return 'answer "%s" for puzzle "%s"' % (self.answer, self.puzzle.title)
 
-class Puzzle(models.Model):
+class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)
     url = models.URLField(unique=True)
 
