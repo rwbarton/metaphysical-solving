@@ -118,6 +118,12 @@ border-top: #000000 5px solid;
 background: #EDED8C;
 margin: 0px 0px 15px 0px;
 padding: 15px 15px 15px 15px;
+ column-break-inside: avoid;
+ break-inside: avoid;
+ -moz-column-break-inside: avoid;
+ -webkit-column-break-inside: avoid;
+ -moz-break-inside: avoid;
+ -webkit-break-inside: avoid;
 }
 
 form {
