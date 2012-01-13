@@ -1,8 +1,10 @@
 {% extends "puzzles/base_generic.html" %}
 
 {% block content %}
+<div id="fileupload" style="padding-top:2em; padding-bottom:2em; background:#dddddd;width:100%;margin:auto; text-align: center;">
 <form class="upload" action="{% url puzzles.views.puzzle_upload puzzle.id %}" method="post" enctype="multipart/form-data">{% csrf_token %}
   {{ form.as_ul }}
   <input type="submit" value="Submit" />
 </form>
+</div>
 {% endblock %}
