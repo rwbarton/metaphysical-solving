@@ -4,6 +4,19 @@
 
 {% block content %}
 <div id="overview">
+
+    <div id="tagcontrol">
+    View puzzles by:
+    {% for taglist in taglists %}
+      {% if taglist.id == active_taglist_id %}
+	<span class="active-taglist">{{taglist.name}}</span>
+      {% else %}
+	<a class="taglink" href="{% url puzzles.views.overview_by taglist.id %}"><span class="taglist">{{ taglist.name }}</span></a>
+      {% endif %}
+    {% endfor %}
+   </div>
+
+  <div id="puzzlesbytag">
    <div id="userwork">
       Hello, <strong>{{ user.first_name }} {{ user.last_name }}</strong> (<a href="{% url puzzles.views.logout_user %}">switch</a> if that's not you). You are currently in <strong>{{ user.userprofile.location.name }}</strong>, working on:
       {% if my_puzzles %}
@@ -28,18 +41,7 @@
       {% endif %}
     </div>
 
-    <div id="tagcontrol">
-    View puzzles by:
-    {% for taglist in taglists %}
-      {% if taglist.id == active_taglist_id %}
-	<span class="active-taglist">{{taglist.name}}</span>
-      {% else %}
-	<a class="taglink" href="{% url puzzles.views.overview_by taglist.id %}"><span class="taglist">{{ taglist.name }}</span></a>
-      {% endif %}
-    {% endfor %}
-   </div>
 
-  <div id="puzzlesbytag">
   {% for tag in tags %}
    <div class="onetag"> 
    <table class="puzzle-list">

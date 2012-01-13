@@ -1,9 +1,11 @@
 {% extends "puzzles/base_generic.html" %}
 
 {% block content %}
-<div class="puzzle-blurb">
-  <span class="status-{{ puzzle.status.css_name }}">
-    <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}">{{ puzzle.title }}</a>
+<div class="puzzle-blurb status-{{ puzzle.status.css_name }}">
+    <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}" title="Go to {{puzzle.title}} on hunt site"><img src="/static/img/external.png" style="vertical-align:middle;"> {{ puzzle.title }}</a>
+
+
+    <div id="puzzlestatus">
     Status:
     <form id="status_form" action="{% url puzzles.views.puzzle_set_status puzzle.id %}" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
@@ -13,6 +15,10 @@
 	{% endfor %}
       </select>
     </form>
+    </div>
+
+
+    <div id="puzzlepriority">
     Priority:
     <form id="priority_form" action="{% url puzzles.views.puzzle_set_priority puzzle.id %}" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
@@ -22,44 +28,80 @@
 	{% endfor %}
       </select>
     </form>
-  </span>
+    </div> 
 
-  <table id="whos-working">
-    <thead>
-      <tr><th colspan=2>Working now:</th></tr>
-    </thead>
-    <tbody>
+    <div id="tags">
+    Tags (view only):
+    <select id="puzzle-tags">
+    {% for tag in puzzle.tags.all %}
+    <option>{{ tag.name }}</option>
+    {% endfor %}
+    </select>
+    </div>
+
+    <div id="puzzlefiles">
+  <a id="attachfile" href="{% url puzzles.views.puzzle_upload puzzle.id %}">Attach file</a>
+  {% if uploaded_files %}Attached files:
+   <select id="fileselector">
+  {% for upload in uploaded_files %}
+	<option style="background:url(/static/img/file.png) no-repeat; padding-left:15px;" value="{{ upload.url }}">{{ upload.name }}</option>
+        <input type="button" value="Open" onclick="window.open(document.getElementById('fileselector').options[document.getElementById('fileselector').selectedIndex].value, '_blank');">
+  {% endfor %}
+   </select>
+  {% endif %}
+  </div>
+
+<div id="chatlink">
+  <a target="_blank" href="{% url puzzles.views.puzzle_logged_chat puzzle.id %}">Logged chat</a>
+</div>
+
+
+</div>
+
+<div id="answers">
+  {% if puzzle.answer %}
+  <div id="puzzleanswer">
+  <strong><img src="/static/img/correct.png" style="vertical-align:middle;"> Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span></strong>
+  </div>
+  {% else %}
+  {% if puzzle.checkAnswerLink %}
+  <a target="_blank" id="callinanswer" href="{{ puzzle.checkAnswerLink }}">Call in answer</a>
+  {% endif %}
+  {% endif %}
+  {% if wrong_answers %}
+  Wrong answers:
+  <ul id="puzzle-wrong-answers">
+    {% for wrong_answer in wrong_answers %}
+    <li>{{ wrong_answer.answer }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+<div id="workers">
+      Working on this now:
       {% if not you_solving and not other_solvers %}
-      <tr>
-	<td>nobody</td>
-      </tr>
+      nobody
       {% endif %}
       {% if you_solving %}
-      <tr>
-	<td><b>You</b></td>
-	<td>
+	<span class="onesolver"><img src="/static/img/user.png" style="vertical-align:middle;padding-right:2px;">You
 	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
 	    <input type="hidden" name="continue" value="{{ path }}" />
 	    <input type="hidden" name="solver" value="{{ user.id }}" />
-	    <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
+	    <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" style="vertical-align:middle;"/>
 	  </form>
-	</td>
-      </tr>
+        </span>
       {% endif %}
       {% for solver in other_solvers %}
-      <tr>
-	<td title="{{ solver.first_name }} {{ solver.last_name }} ({{ solver.userprofile.location }})">{{ solver.first_name }}</td>
-	<td>
+	<span class="onesolver" title="{{ solver.first_name }} {{ solver.last_name }} ({{ solver.userprofile.location }})">
+          <img src="/static/img/user.png" style="vertical-align:middle;padding-right:2px;">{{ solver.first_name }}
 	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
 	    <input type="hidden" name="continue" value="{{ path }}" />
 	    <input type="hidden" name="solver" value="{{ solver.id }}" />
-	    <input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove" />
+	    <input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove" style="vertical-align:middle;"/>
 	  </form>
-	</td>
-      </tr>
+        </span>
       {% endfor %}
-    </tbody>
-  </table>
 
   <span>
     Add:
@@ -80,34 +122,6 @@
       </select>
     </form>
   </span>
-
-  {% if puzzle.answer %}
-  Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span>
-  {% else %}
-  {% if puzzle.checkAnswerLink %}
-  <a target="_blank" href="{{ puzzle.checkAnswerLink }}">Call in answer</a>
-  {% endif %}
-  {% endif %}
-  {% if wrong_answers %}
-  Wrong answers:
-  <ul id="puzzle-wrong-answers">
-    {% for wrong_answer in wrong_answers %}
-    <li>{{ wrong_answer.answer }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-
-  <a target="_blank" href="{% url puzzles.views.puzzle_logged_chat puzzle.id %}">Logged chat</a>
-
-  <a href="{% url puzzles.views.puzzle_upload puzzle.id %}">Upload file</a>
-
-  {% if uploaded_files %}
-  Uploaded files:
-  <ul id="puzzle-uploads">
-  {% for upload in uploaded_files %}
-  <li><a target="_blank" href="{{ upload.url }}">{{ upload.name }}</a></li>
-  {% endfor %}
-  </ul>
-  {% endif %}
+</div>
 </div>
 {% endblock %}

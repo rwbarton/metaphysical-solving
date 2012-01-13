@@ -113,14 +113,10 @@ div#tagcontrol {
 }
 
 #userwork {
-clear: both;
-font-size:0.8em;
-width: 200px;
 border: #000000 1px solid;
 border-top: #000000 5px solid;
 background: #EDED8C;
-float: right;
-margin: 0px 15px 15px 15px;
+margin: 0px 0px 15px 0px;
 padding: 15px 15px 15px 15px;
 }
 
@@ -195,16 +191,25 @@ a.taglink {
 div#overview {
   margin-left:15px;
   margin-top:15px;
+  margin-right:15px;
+  margin-bottom: 15px;
 }
 
 div#puzzlesbytag {
   -moz-column-count: 3;
   -moz-column-gap: 1em;
   -moz-column-rule: none;
+  -moz-column-width: 400px;
 
   -webkit-column-count: 3;
   -webkit-column-gap: 1em;
   -webkit-column-rule: none;
+  -webkit-column-width: 400px;
+
+  column-count: 3;
+  column-gap: 1em;
+  column-rule: none;
+  column-width: 400px;  
 }
 
 .onetag {
@@ -219,10 +224,13 @@ div#puzzlesbytag {
 
 .onetag table {
  border-spacing: 0px 2px;
+ width: 100%;
 }
 
 .onetag td, .onetag th {
  padding: 5px 3px 5px 5px;
+ word-wrap: break-word;
+ padding-right: 8px;
 }
 
 tr.puzzle-list-header {
@@ -304,7 +312,7 @@ span.puzzle-priority {
 
 span.puzzle-answer {
     display: inline-block;
-    font-family: monospace;
+    font-family: "Courier New" monospace;
     text-transform: uppercase;
     line-height: 0.9em;
     font-weight: bold;
@@ -313,6 +321,93 @@ span.puzzle-answer {
 
 div.puzzle-blurb {
     padding: 3px;
+    padding-left: 10px;
+    background: #dddddd;
+    line-height:1.5em;
+}
+
+div#answers {
+    padding: 0px;
+    padding-left: 10px;
+    background: #BECAD1;
+    line-height: 2em;
+}
+
+
+div#chatlink {
+    float:right;
+    margin-right: 10px;
+}
+
+div#chatlink a {
+    text-decoration: underline;
+}
+
+div#workers {
+    height: 2em;
+    line-height: 2em;
+    padding-left: 10px;
+    background: #F2E3CB;
+}
+
+div#workers .onesolver {
+    display: inline-block;
+    height: 2em;
+    background: #F2CD91;
+    margin-right: 5px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+div#answers div#puzzleanswer {
+    height: 2em;
+    padding-left: 4px;
+    padding-right: 4px;
+    display:inline-block;
+    margin-right:15px;
+    background: #11F023; 
+}
+
+div#tags {
+    display: inline-block;
+    margin-right: 15px;
+    margin-left: 15px;
+}
+
+div#puzzlefiles a#attachfile {
+    position:relative;
+    text-transform: uppercase;
+    font-size: 0.6em;
+    font-weight: bold;
+    color: #ffffff;
+    background: #120C38;
+    border: #120C38 1px solid;
+    padding: 2px 4px 2px 4px;
+    top: -2px;
+    margin-right: 5px;
+}
+
+div#puzzlefiles a#attachfile:hover {
+    text-decoration: none;
+    background: #111100;
+}
+
+
+
+
+div#answers a#callinanswer {
+    text-transform: uppercase;
+    font-size: 0.6em;
+    font-weight: bold;
+    color: #ffffff;
+    background: #25781A url(/static/img/greenback.gif) repeat-x;
+    border: #194713 1px solid;
+    padding: 2px;
+}
+
+div#answers a#callinanswer:hover {
+    text-decoration: none;
+    background: #194713;
 }
 
 .puzzle-blurb > table {
@@ -320,7 +415,31 @@ div.puzzle-blurb {
     vertical-align: top;
 }
 
+.puzzle-blurb.status-solved {
+    background: #2E961B;
+}
+
+.puzzle-blurb div#puzzlestatus {
+    display: inline-block;
+    padding-left: 10px;
+}
+
+.puzzle-blurb div#puzzlepriority {
+    display: inline-block;
+    padding-left: 10px;
+}
+
+.puzzle-blurb div#puzzlefiles {
+    display: inline-block;
+    padding-left: 10px;
+}
+
 span.puzzle-title {
+    font-weight: bold;
+}
+
+a.puzzle-title {
+    font-size: 1.2em;
     font-weight: bold;
 }
 
@@ -346,19 +465,26 @@ ul#puzzle-wrong-answers {
 ul#puzzle-wrong-answers > li {
     display: inline;
     padding: 0px 3px;
-    background: #ffe0e0;
-    font-family: monospace;
+    background: #f7ADAD;
+    font-family: "Courier New" monospace;
     font-weight: bold;
 }
 
+div#fileuploads {
+    display: inline-block;
+}
+
 ul#puzzle-uploads {
+    width: 100%;
     display: inline;
     padding: 0px;
+    font-size: 0.8em;
 }
 
 ul#puzzle-uploads > li {
     display: inline;
     padding: 0px 3px;
+    float: left;
 }
 
 td input {
