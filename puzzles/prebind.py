@@ -16,10 +16,10 @@ def prebind(username, password):
     authid = dom1.firstChild.getAttribute('authid')
     auth = base64.b64encode("%s\0%s\0%s" % (authid, username, password))
 
-    print urllib.urlopen(http_bind_url, "<body rid='%d' xmlns='http://jabber.org/protocol/httpbind' sid='%s'><auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>%s</auth></body>" % (rid, sid, auth)).read()
+    urllib.urlopen(http_bind_url, "<body rid='%d' xmlns='http://jabber.org/protocol/httpbind' sid='%s'><auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>%s</auth></body>" % (rid, sid, auth)).read()
     rid += 1
 
-    print urllib.urlopen(http_bind_url, "<body rid='%d' xmlns='http://jabber.org/protocol/httpbind' sid='%s' to='metaphysical.no-ip.org' xml:lang='en' xmpp:restart='true' xmlns:xmpp='urn:xmpp:xbosh'/>" % (rid, sid)).read()
+    urllib.urlopen(http_bind_url, "<body rid='%d' xmlns='http://jabber.org/protocol/httpbind' sid='%s' to='metaphysical.no-ip.org' xml:lang='en' xmpp:restart='true' xmlns:xmpp='urn:xmpp:xbosh'/>" % (rid, sid)).read()
     rid += 1
 
     dom2 = parse(urllib.urlopen(http_bind_url, "<body rid='%d' xmlns='http://jabber.org/protocol/httpbind' sid='%s'><iq type='set' xmlns='jabber:client'><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><resource>%s</resource></bind></iq></body>" % (rid, sid, resource)))
@@ -27,7 +27,7 @@ def prebind(username, password):
 
     jid = dom2.getElementsByTagName('jid')[0].childNodes[0].data
 
-    print urllib.urlopen(http_bind_url, "<body rid='%d' xmlns='http://jabber.org/protocol/httpbind' sid='%s'><iq type='set' xmlns='jabber:client'><session xmlns='urn:ietf:params:xml:ns:xmpp-session' /></iq></body>" % (rid, sid)).read()
+    urllib.urlopen(http_bind_url, "<body rid='%d' xmlns='http://jabber.org/protocol/httpbind' sid='%s'><iq type='set' xmlns='jabber:client'><session xmlns='urn:ietf:params:xml:ns:xmpp-session' /></iq></body>" % (rid, sid)).read()
     rid += 1
 
     return {'rid': rid, 'sid': sid, 'jid': jid}
