@@ -22,20 +22,20 @@
   </head>
 {% endif %}
   <body>
+    <div id="infoheader">
+       <div id="teamname">METAPHYSICAL PLANT</div>
+       <div id="motdbanner">
+            {{ motd|safe }}
+       </div>
+       <div id="hqcontact">HQ: 555-555-2012</div>
+    </div>
     <div id="header">
       <ul id="navlist">
-	<li><a target="_top" href="/overview/">Overview</a></li>
-	<li><a target="_top" href="/database/">Database</a></li>
-	<li><a target="_top" href="/progress/">Progress</a></li>
-	<li><a target="_top" href="/tools/">Solving tools</a></li>
-	<li><a target="_top" href="/help/">Help</a></li>
+	<li><a target="_top" href="/overview/">Overview</a></li><li><a target="_top" href="/database/">Database</a></li><li><a target="_top" href="/progress/">Progress</a></li><li><a target="_top" href="/tools/">Solving tools</a></li><li><a target="_top" href="/help/">Help</a></li>
       </ul>
-      HQ: 555-555-2012
-    </div>
-
-    <div id="user">
-      User: <span class="username">{{ user.first_name }} {{ user.last_name }}</span>
-      Location:
+    <div id="rightheader">
+      <div id="userinfo">{{ user.first_name }} {{ user.last_name }} (<a href="../switchuser.html">switch user</a>)</div>
+      <div id="locationinfo">      
       <form id="user_location" action="{% url puzzles.views.user_location %}" method="post">{% csrf_token %}
 	<input type="hidden" name="continue" value="{{ path }}" />
 	<select onchange="document.forms.user_location.submit()" name="location">
@@ -44,33 +44,9 @@
 	  {% endfor %}
 	</select>
       </form>
-      Working on:
-      {% if my_puzzles %}
-      <ul id="puzzlelist">
-	{% for puzzle in my_puzzles %}
-	<li>
-	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
-	    <a target="_top" href="{% url puzzles.views.puzzle puzzle.id %}">{{ puzzle.title }}</a>
-	    <input type="hidden" name="continue" value="{{ path }}" />
-	    <input type="hidden" name="solver" value="{{ user.id }}" />
-	    <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" />
-	  </form>
-	</li>
-	{% endfor %}
-      </ul>
-      <form action="{% url puzzles.views.go_to_sleep %}" method="post">{% csrf_token %}
-	<input type="hidden" name="continue" value="{{ path }}" />
-	<input type="submit" value="Clear" />
-      </form>
-      {% else %}
-      nothing
-      {% endif %}
+      </div>
     </div>
-
-    <div id="motd">
-      {{ motd|safe }}
     </div>
-
     <div id="content">{% block content %}{% endblock %}</div>
   </body>
 {% if not body_only %}

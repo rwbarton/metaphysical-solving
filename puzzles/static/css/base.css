@@ -1,5 +1,8 @@
 body {
     margin: 0px;
+    min-width: 900px;
+    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+    font-size: 0.9em;
 }
 
 a {
@@ -11,8 +14,114 @@ a:hover {
     text-decoration: underline;
 }
 
+div#infoheader {
+  height: 25px;
+  line-height: 25px;
+  padding-left: 30px;
+  background: #000000 url(/static/img/plant.png) no-repeat 10px center; 
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+div#infoheader #teamname {
+  display: inline;
+}
+
+div#infoheader #motdbanner {
+  display: inline;
+  margin-left: 20px;
+  padding: 5px 0px 5px 30px;
+  height: 30px;
+  width: 300px;
+  background: url(/static/img/info.png) no-repeat 5px center;
+  color: #ffee00; 
+}
+
+div#infoheader div#hqcontact {
+    float: right;
+    background: url(/static/img/whitephone.png) no-repeat 10px center; 
+    padding-right: 15px;
+    padding-left: 30px;
+    font-weight: bold;
+}
+
+
 div#header {
-    background: #cccccc;
+    background: #1f2861;
+    height: 2.1em;
+    line-height: 2.1em;
+    font-size: 0.8em;
+    color: #ffffff;
+    padding-left:10px;
+}
+
+div#header a {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+div#header li a, div#header li a:visited {
+    display: inline-block;
+    padding: 0px 8px 0px 8px;
+    border-left: #3E4B9E 1px solid;
+    border-right:#3E4B9E 1px solid;
+    margin-left: -1px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+div#header li a:hover {
+    background: #3746A6;
+}
+
+div#header div#rightheader {
+    background: #D67031;
+    color: #1f2861;
+    float: right;
+}
+
+div#header div#rightheader a {
+    color: #3B49A3;
+}
+
+
+div#header div#userinfo {
+    display:inline-block;
+    background: url(/static/img/user.png) no-repeat 5px center; 
+    padding-right: 10px;
+    padding-left: 25px;
+    font-weight: bold;
+}
+
+div#header div#locationinfo select {
+    font-size:0.9em;
+    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+}
+
+div#header div#locationinfo {
+    display:inline-block;
+    background: url(/static/img/location.png) no-repeat 5px center; 
+    padding-right: 10px;
+    padding-left: 20px;
+    font-weight: bold;
+}
+
+div#tagcontrol {
+   margin-bottom: 15px;
+   padding: 5px;
+}
+
+#userwork {
+clear: both;
+font-size:0.8em;
+width: 200px;
+border: #000000 1px solid;
+border-top: #000000 5px solid;
+background: #EDED8C;
+float: right;
+margin: 0px 15px 15px 15px;
+padding: 15px 15px 15px 15px;
 }
 
 form {
@@ -21,49 +130,104 @@ form {
 
 ul#navlist {
     display: inline;
-    padding: 0px 20px;
+    height: 2em;
+    padding: 0px;
+    margin: 0px;
 }
 
 ul#navlist li {
     display: inline;
-    padding: 0px 6px;
+    height: 2em;
+    padding: 0px;
+    margin: 0px;    
 }
 
 ul#puzzlelist {
-    display: inline;
     padding: 0px;
 }
 
 ul#puzzlelist li {
-    display: inline;
-    padding: 0px;
+    display: block;
+    padding: 2px;
+    padding-left:4px;
+    line-height: 1.5em;
+    min-height: 2em;
+    margin: 0px 0px 5px 0px;
+    background: #CFD2E8;
+    border: #5C6180 1px solid;
+    list-style-type: none;
+}
+
+ul#puzzlelist li a {
+    display: inline-block;
+    max-width: 80%;
 }
 
 ul#puzzlelist form {
-    padding: 0px 3px;
+    display: block;
+    padding: 0px;
+    height: 100%;
 }
 
 .username { color: #cc0000; }
 
-div#motd {
-    background: #eeff88;
-    padding: 0px 6px;
-}
-
 span.active-taglist {
+    display: inline;
     font-weight: bold;
+    background: #dddddd;
+    margin-right: 5px;
+    padding: 2px;
 }
 
 span.taglist {
-    font-style: italic;
+    display: inline;
 }
 
 span.tag {
-    font-style: italic;
+}
+
+a.taglink {
+  margin-right: 5px;
+  text-decoration: none;
+  border-bottom: #333333 1px dashed;
+}
+
+div#overview {
+  margin-left:15px;
+  margin-top:15px;
+}
+
+div#puzzlesbytag {
+  -moz-column-count: 3;
+  -moz-column-gap: 1em;
+  -moz-column-rule: none;
+
+  -webkit-column-count: 3;
+  -webkit-column-gap: 1em;
+  -webkit-column-rule: none;
+}
+
+.onetag {
+ margin-bottom: 1.5em;
+ column-break-inside: avoid;
+ break-inside: avoid;
+ -moz-column-break-inside: avoid;
+ -webkit-column-break-inside: avoid;
+ -moz-break-inside: avoid;
+ -webkit-break-inside: avoid;
+}
+
+.onetag table {
+ border-spacing: 0px 2px;
+}
+
+.onetag td, .onetag th {
+ padding: 5px 3px 5px 5px;
 }
 
 tr.puzzle-list-header {
-    background: #d2dadd;
+    background: #161F7D;
+    color: #FFFFFF;
 }
 
 tr.puzzle-list-odd {
@@ -74,16 +238,64 @@ tr.puzzle-list-even {
     background: #e5edf0;
 }
 
+tr.puzzle-list-regular {
+    background: #e5edf0;
+}
+
+tr.status-not-puzzle {
+    background: #C4C4C4;
+    color: #8A8A8A;
+}
+
+tr.status-not-started {
+    background: #FFFFFF;
+    color: #151C6E;
+}
+
+tr.status-being-worked {
+
+}
+
+tr.priority-low {
+    background: #C4C4C4;
+    color: #8A8A8A; 
+}
+
+tr.priority-normal {
+
+}
+
+tr.priority-high {
+    background: #F7F42A;
+}
+
+span.priority-high, span.priority-asap {
+    text-transform: uppercase;   
+}
+
+tr.priority-asap {
+    background: #E82E2E;
+}
+
+tr.status-solved {
+ background: #BAD9B6;
+}
+
+td.answercolumn-solved {
+    background: url(/static/img/correct.png) no-repeat 3px 50%;
+    padding-left: 27px;
+}
+
 td.puzzle-list-puzzle {
-    background: white;
+    border-right: none;
 }
 
 td.puzzle-list-title {
-    width: 400px;
+    width: 60%;
 }
 
 td.puzzle-list-status {
-    width: 170px;
+    width: 40%;
 }
 
 span.puzzle-priority {
@@ -91,9 +303,12 @@ span.puzzle-priority {
 }
 
 span.puzzle-answer {
+    display: inline-block;
     font-family: monospace;
+    text-transform: uppercase;
+    line-height: 0.9em;
     font-weight: bold;
-    color: #800000;
+    color: #2F5214;
 }
 
 div.puzzle-blurb {
