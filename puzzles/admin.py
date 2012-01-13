@@ -13,7 +13,9 @@ class ItemAdmin(OrderedModelAdmin):
 admin.site.register(Tag, ItemAdmin)
 admin.site.register(TagList, ItemAdmin)
 admin.site.register(Location, ItemAdmin)
-admin.site.register(Puzzle, ItemAdmin)
+class PuzzleAdmin(OrderedModelAdmin):
+    list_display = ('title', 'move_up_down_links')
+admin.site.register(Puzzle, PuzzleAdmin)
 
 admin.site.register(PuzzleWrongAnswer)
 admin.site.register(Config)
