@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from django.utils.http import urlencode
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
@@ -184,6 +185,13 @@ def go_to_sleep(request):
         puzzle.solvers.remove(request.user)
         puzzle.save()
     return redirect(request.POST['continue'])
+
+def logout_user(request):
+    logout(request)
+    return render_to_response('puzzles/logout.html', RequestContext(request))
+
+def logout_return(request):
+    return render_to_response('puzzles/logout_return.html', RequestContext(request))
 
 @login_required
 def welcome(request):
