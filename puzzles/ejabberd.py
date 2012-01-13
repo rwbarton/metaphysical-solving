@@ -17,4 +17,4 @@ class ejabberdctl:
         shutil.rmtree(self.dir)
 
     def execute(self, *args):
-        subprocess.call(['env', 'HOME=' + self.dir, 'ejabberdctl', '--concurrent'] + list(args))
+        subprocess.call(['env', 'HOME=' + self.dir, '/usr/sbin/ejabberdctl', '--concurrent'] + list(args))
