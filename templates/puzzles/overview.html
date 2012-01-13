@@ -5,7 +5,7 @@
 {% block content %}
 <div id="overview">
    <div id="userwork">
-      Hello, <strong>{{ user.first_name }} {{ user.last_name }}</strong> (<a href="../switchuser.html">switch</a> if that's not you). You are currently in <strong>{{ user.userprofile.location.name }}</strong>, working on:
+      Hello, <strong>{{ user.first_name }} {{ user.last_name }}</strong> (<a href="{% url puzzles.views.logout_user %}">switch</a> if that's not you). You are currently in <strong>{{ user.userprofile.location.name }}</strong>, working on:
       {% if my_puzzles %}
       <ul id="puzzlelist">
         {% for puzzle in my_puzzles %}
