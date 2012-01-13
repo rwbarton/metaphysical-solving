@@ -86,7 +86,7 @@ def puzzle_info(request, puzzle_id):
                 'other_users': other_users,
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
-                'refresh': 5
+                'refresh': 30
                 }))
 
 @login_required
