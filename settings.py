@@ -16,7 +16,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'puzzle',
+        'NAME': 'puzzlecisra',
         'OPTIONS': {
             'read_default_file': '/etc/my.cnf'
             },
