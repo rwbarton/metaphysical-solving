@@ -20,6 +20,7 @@ urlpatterns = patterns('',
     url(r'^puzzle/add_solver/(\d+)/$', 'puzzles.views.puzzle_add_solver'),
     url(r'^puzzle/logged_chat/(\d+)/$', 'puzzles.views.puzzle_logged_chat'),
     url(r'^puzzle/upload/(\d+)/$', 'puzzles.views.puzzle_upload'),
+    url(r'^puzzle/call_in_answer/(\d+)/$', 'puzzles.views.puzzle_call_in_answer'),
 
     url(r'^puzzle/user_location/$', 'puzzles.views.user_location'),
     url(r'^puzzle/go_to_sleep/$', 'puzzles.views.go_to_sleep'),
