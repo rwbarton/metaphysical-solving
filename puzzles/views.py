@@ -9,9 +9,10 @@ from django.utils.http import urlencode
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 
-from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_to_email
-from forms import UploadForm
+from models import Status, Priority, Tag, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_to_email
+from forms import UploadForm, AnswerForm
 from django.contrib.auth.models import User
 
 def get_motd():
@@ -171,6 +172,33 @@ def puzzle_upload(request, puzzle_id):
     else:
         form = UploadForm()
     return render_to_response('puzzles/puzzle-upload.html', puzzle_context(request, {
+                'form': form,
+                'puzzle': puzzle
+                }))
+
+def handle_puzzle_answer(puzzle, answer, result):
+    if result == 'correct' or result == 'presumed_correct':
+        puzzle.answer = answer
+    if result == 'correct':
+        puzzle.status = Status.objects.get(css_name='solved')
+    puzzle.save()
+    if result == 'incorrect':
+        try:
+            PuzzleWrongAnswer.objects.create(puzzle=puzzle, answer=answer)
+        except IntegrityError:
+            pass
+
+@login_required
+def puzzle_call_in_answer(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    if request.method == 'POST':
+        form = AnswerForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_puzzle_answer(puzzle, form.cleaned_data['answer'], form.cleaned_data['result'])
+            return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+    else:
+        form = AnswerForm()
+    return render_to_response('puzzles/puzzle-call-in-answer.html', puzzle_context(request, {
                 'form': form,
                 'puzzle': puzzle
                 }))

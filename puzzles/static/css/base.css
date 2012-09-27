@@ -507,3 +507,8 @@ td input {
     display: inline;
     padding: 0px 3px;
 }
+
+.callinanswer * {
+    display: inline;
+    padding: 0px 3px;
+}
