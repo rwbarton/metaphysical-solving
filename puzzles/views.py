@@ -10,11 +10,9 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
-from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Location, Config, jabber_username, jabber_password
+from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Location, Config
 from forms import UploadForm
 from django.contrib.auth.models import User
-
-from prebind import prebind
 
 def get_motd():
     try:
@@ -98,9 +96,7 @@ def puzzle_spreadsheet(request, puzzle_id):
 
 @login_required
 def puzzle_chat(request, puzzle_id):
-    prebind_params = prebind(jabber_username(request.user), jabber_password())
-    prebind_params['id'] = puzzle_id
-    return redirect("http://metaphysical.no-ip.org/chat/prebind.html?" + urlencode(prebind_params))
+    return redirect("https://plant.humbughq.com/#narrow/stream/p" + str(puzzle_id))
 
 @login_required
 def puzzle_set_status(request, puzzle_id):
