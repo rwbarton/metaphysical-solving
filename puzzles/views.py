@@ -10,7 +10,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
-from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Location, Config
+from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_id_to_email
 from forms import UploadForm
 from django.contrib.auth.models import User
 
@@ -96,7 +96,13 @@ def puzzle_spreadsheet(request, puzzle_id):
 
 @login_required
 def puzzle_chat(request, puzzle_id):
-    return redirect("https://plant.humbughq.com/#narrow/stream/p" + str(puzzle_id))
+    if request.user.userprofile.finished_humbug_registration():
+        return redirect("https://plant.humbughq.com/#narrow/stream/p" + str(puzzle_id))
+    else:
+        confirmation_url = HumbugConfirmation.objects.get(email=user_id_to_email(request.user.id)).confirmation_url
+        return render_to_response("puzzles/go-register-for-humbug.html", RequestContext(request, {
+                    'confirmation_url': confirmation_url
+                    }))
 
 @login_required
 def puzzle_set_status(request, puzzle_id):

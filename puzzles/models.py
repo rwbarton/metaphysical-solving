@@ -6,7 +6,7 @@ from django.db.models.signals import pre_save, post_save
 import re
 
 from puzzles.googlespreadsheet import create_google_spreadsheet
-from puzzles.humbug import humbug_register_email
+from puzzles.humbug import humbug_register_email, humbug_registration_finished
 
 class Config(models.Model):
     default_status = models.ForeignKey('Status')
@@ -105,12 +105,24 @@ class Location(OrderedModel):
     def __unicode__(self):
         return self.name
 
+def user_id_to_email(user_id):
+    return 'solver+%d@metaphysicalplant.com' % (user_id,)
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
     location = models.ForeignKey('Location')
     has_humbug_account = models.BooleanField()
     # Humbug account email addresses are based off the *user* id (not user_profile)
+
+    def finished_humbug_registration(self):
+        if self.has_humbug_account:
+            return True
+        if humbug_registration_finished(user_id_to_email(self.user.id)):
+            self.has_humbug_account = True
+            self.save()
+            return True
+        return False
 
 class HumbugConfirmation(models.Model):
     email = models.CharField(max_length=63, unique=True)
@@ -119,7 +131,7 @@ class HumbugConfirmation(models.Model):
 def humbug_register(**kwargs):
     if kwargs['created']:
         user = kwargs['instance']
-        humbug_register_email('solver+%d@metaphysicalplant.com' % (user.id,))
+        humbug_register_email(user_id_to_email(user.id))
 
 post_save.connect(humbug_register, sender=User)
 

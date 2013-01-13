@@ -112,6 +112,12 @@ div#tagcontrol {
    padding: 5px;
 }
 
+body#humbug-info {
+    padding: 10px;
+    background: #FFFFBF;
+    min-width: 0;
+}
+
 #userwork {
 border: #000000 1px solid;
 border-top: #000000 5px solid;
