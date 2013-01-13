@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError
 from ordered_model.models import OrderedModel
 
 from django.contrib.auth.models import User
@@ -108,6 +108,17 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
     location = models.ForeignKey('Location')
+
+def make_user_profile(**kwargs):
+    user = kwargs['instance']
+    default_location = Location.objects.get(name='Cambridge')
+    try:
+        UserProfile(user=user, location=default_location).save()
+    except IntegrityError:
+        # user profile already exists, do nothing
+        pass
+
+post_save.connect(make_user_profile, sender=User)
 
 def make_superuser(**kwargs):
     user = kwargs['instance']
