@@ -106,7 +106,7 @@ class Location(OrderedModel):
         return self.name
 
 def user_id_to_email(user_id):
-    return 'solver+%d@metaphysicalplant.com' % (user_id,)
+    return 's+%d@metaphysicalplant.com' % (user_id,)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
