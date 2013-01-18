@@ -34,7 +34,7 @@
 	<li><a target="_top" href="/overview/">Overview</a></li><li><a target="_blank" href="http://mhunt.ws">Allen's wordsearch</a></li><li><a target="_blank" href="http://50.56.208.215/wordsearch/">Reid's wordsearch</a></li><li><a target="_blank" href="https://metaphysical.no-ip.org:4432/huntlinks/index.php">Solving tools</a></li><li><a target="_blank" href="/help/">Help</a></li>
       </ul>
     <div id="rightheader">
-      <div id="userinfo">{{ user.first_name }} {{ user.last_name }} {% if has_humbug %}(<a target="_blank" href="https://plant.humbughq.com/accounts/login/?email={{ humbug_email|urlencode }}">sign into Humbug</a>){% endif %} (<a target="_top" href="{% url puzzles.views.logout_user %}">switch user</a>)</div>
+      <div id="userinfo">{{ user.first_name }} {{ user.last_name }} ({{ humbug_email }}) (<a target="_top" href="{% url puzzles.views.logout_user %}">switch user</a>)</div>
       <div id="locationinfo">      
       <form id="user_location" action="{% url puzzles.views.user_location %}" method="post">{% csrf_token %}
 	<input type="hidden" name="continue" value="{{ path }}" />
