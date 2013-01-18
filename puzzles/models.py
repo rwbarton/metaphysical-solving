@@ -6,7 +6,7 @@ from django.db.models.signals import pre_save, post_save
 import re
 
 from puzzles.googlespreadsheet import create_google_spreadsheet
-from puzzles.humbug import humbug_register_email, humbug_registration_finished
+from puzzles.humbug import humbug_register_email, humbug_registration_finished, humbug_send
 
 class Config(models.Model):
     default_status = models.ForeignKey('Status')
@@ -86,6 +86,16 @@ class Puzzle(OrderedModel):
             kwargs['force_update'] = True
             kwargs['force_insert'] = False
             super(Puzzle, self).save(*args, **kwargs)
+
+def send_puzzle_humbug(**kwargs):
+    if kwargs['created']:
+        puzzle = kwargs['instance']
+        humbug_send(user='b+status',
+                    stream='p%d' % (puzzle.id,),
+                    subject='solve',
+                    message='New puzzle %s' % (puzzle.title,))
+
+post_save.connect(send_puzzle_humbug, sender=Puzzle)
 
 class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
