@@ -179,7 +179,7 @@ post_save.connect(humbug_register, sender=User)
 
 def make_user_profile(**kwargs):
     user = kwargs['instance']
-    default_location = Location.objects.get(name='Cambridge')
+    default_location = Location.objects.get(name='unknown')
     try:
         UserProfile(user=user, location=default_location, has_humbug_account=False).save()
     except IntegrityError:
