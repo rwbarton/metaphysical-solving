@@ -109,7 +109,7 @@ class Puzzle(OrderedModel):
 
             humbug_send(user='b+status',
                         stream='status',
-                        stream='solved',
+                        subject='solved',
                         message='Puzzle %s solved' % (puzzle.title,))
 
 def send_puzzle_humbug(**kwargs):
