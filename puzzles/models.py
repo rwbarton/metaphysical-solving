@@ -52,6 +52,16 @@ class PuzzleWrongAnswer(models.Model):
     def __unicode__(self):
         return 'answer "%s" for puzzle "%s"' % (self.answer, self.puzzle.title)
 
+def wrong_answer_message(**kwargs):
+    if kwargs['created']:
+        wa = kwargs['instance']
+        humbug_send(user='b+status',
+                    stream='p%d' % (wa.puzzle.id,),
+                    subject='wrong answer',
+                    message='Wrong answer: %s' % wa.answer)
+
+post_save.connect(wrong_answer_message, sender=PuzzleWrongAnswer)
+
 class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)
     url = models.URLField(unique=True)
@@ -76,6 +86,10 @@ class Puzzle(OrderedModel):
             return {'status': self.status}
 
     def save(self, *args, **kwargs):
+        # Grab old instance to see if our answer is new.
+        old_puzzle = Puzzle.objects.get(id=self.id)
+        old_answer = old_puzzle.answer
+
         # Save first, so that we don't create a new spreadsheet if the
         # save would fail.
         super(Puzzle, self).save(*args, **kwargs)
@@ -86,6 +100,12 @@ class Puzzle(OrderedModel):
             kwargs['force_update'] = True
             kwargs['force_insert'] = False
             super(Puzzle, self).save(*args, **kwargs)
+
+        if self.answer != old_answer:
+            humbug_send(user='b+status',
+                        stream='p%d' % (self.id,),
+                        subject='solved!',
+                        message='!gravatar(b+status+correct@metaphysicalplant.com) **%s**' % self.answer)
 
 def send_puzzle_humbug(**kwargs):
     if kwargs['created']:
