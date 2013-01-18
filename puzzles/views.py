@@ -10,7 +10,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
-from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_id_to_email
+from models import Status, Priority, Tag, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_to_email
 from forms import UploadForm
 from django.contrib.auth.models import User
 
@@ -99,7 +99,7 @@ def puzzle_chat(request, puzzle_id):
     if request.user.userprofile.finished_humbug_registration():
         return redirect("https://p%d.e.plant.humbughq.com/?lurk=p%d" % (int(puzzle_id), int(puzzle_id)))
     else:
-        confirmation_url = HumbugConfirmation.objects.get(email=user_id_to_email(request.user.id)).confirmation_url
+        confirmation_url = HumbugConfirmation.objects.get(email=user_to_email(request.user)).confirmation_url
         return render_to_response("puzzles/go-register-for-humbug.html", RequestContext(request, {
                     'confirmation_url': confirmation_url
                     }))

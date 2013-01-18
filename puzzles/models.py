@@ -92,8 +92,8 @@ def send_puzzle_humbug(**kwargs):
         puzzle = kwargs['instance']
         humbug_send(user='b+status',
                     stream='p%d' % (puzzle.id,),
-                    subject='solve',
-                    message='New puzzle %s' % (puzzle.title,))
+                    subject='new',
+                    message='New puzzle "%s"' % (puzzle.title,))
 
 post_save.connect(send_puzzle_humbug, sender=Puzzle)
 
@@ -115,8 +115,8 @@ class Location(OrderedModel):
     def __unicode__(self):
         return self.name
 
-def user_id_to_email(user_id):
-    return 's+%d@metaphysicalplant.com' % (user_id,)
+def user_to_email(user):
+    return 's+%d@metaphysicalplant.com' % (user.id,)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -128,7 +128,7 @@ class UserProfile(models.Model):
     def finished_humbug_registration(self):
         if self.has_humbug_account:
             return True
-        if humbug_registration_finished(user_id_to_email(self.user.id)):
+        if humbug_registration_finished(user_to_email(self.user)):
             self.has_humbug_account = True
             self.save()
             return True
@@ -141,7 +141,7 @@ class HumbugConfirmation(models.Model):
 def humbug_register(**kwargs):
     if kwargs['created']:
         user = kwargs['instance']
-        humbug_register_email(user_id_to_email(user.id))
+        humbug_register_email(user_to_email(user))
 
 post_save.connect(humbug_register, sender=User)
 
