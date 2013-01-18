@@ -87,8 +87,11 @@ class Puzzle(OrderedModel):
 
     def save(self, *args, **kwargs):
         # Grab old instance to see if our answer is new.
-        old_puzzle = Puzzle.objects.get(id=self.id)
-        old_answer = old_puzzle.answer
+        try:
+            old_puzzle = Puzzle.objects.get(id=self.id)
+            old_answer = old_puzzle.answer
+        except Puzzle.DoesNotExist:
+            old_answer = ''
 
         # Save first, so that we don't create a new spreadsheet if the
         # save would fail.
