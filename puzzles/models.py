@@ -94,6 +94,10 @@ def send_puzzle_humbug(**kwargs):
                     stream='p%d' % (puzzle.id,),
                     subject='new',
                     message='New puzzle "%s"' % (puzzle.title,))
+        humbug_send(user='b+status',
+                    stream='status',
+                    subject='new puzzle',
+                    message='New puzzle [%s](%s)' % (puzzle.title, puzzle.url))
 
 post_save.connect(send_puzzle_humbug, sender=Puzzle)
 
