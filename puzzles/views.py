@@ -158,7 +158,7 @@ def handle_puzzle_upload(puzzle, name, file):
     for chunk in file.chunks():
         outfile.write(chunk)
     outfile.close()
-    upload.url = 'http://metaphysical.no-ip.org/uploads/%d/%d/%s' % (puzzle.id, upload.id, file.name)
+    upload.url = 'http://metaphysicalplant.com/uploads/%d/%d/%s' % (puzzle.id, upload.id, file.name)
     upload.save()
 
 @login_required
