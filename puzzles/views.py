@@ -28,6 +28,7 @@ def puzzle_context(request, d):
     d1['path'] = request.path
     if 'body' in request.GET:
         d1['body_only'] = True
+    d1['has_humbug'] = request.user.userprofile.finished_humbug_registration()
     d1['humbug_email'] = user_to_email(request.user)
     return RequestContext(request, d1)
 
