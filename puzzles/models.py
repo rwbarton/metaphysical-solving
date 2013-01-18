@@ -107,6 +107,11 @@ class Puzzle(OrderedModel):
                         subject='solved!',
                         message='!gravatar(b+status+correct@metaphysicalplant.com) **%s**' % self.answer)
 
+            humbug_send(user='b+status',
+                        stream='status',
+                        stream='solved',
+                        message='Puzzle %s solved' % (puzzle.title,))
+
 def send_puzzle_humbug(**kwargs):
     if kwargs['created']:
         puzzle = kwargs['instance']
