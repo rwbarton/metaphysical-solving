@@ -59,7 +59,7 @@
   <strong><img src="/static/img/correct.png" style="vertical-align:middle;"> Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span></strong>
   </div>
   {% else %}
-  <a id="callinanswer" href="{% url puzzles.views.puzzle_call_in_answer puzzle.id %}">Report answer status</a>
+  <a id="callinanswer" href="{% url puzzles.views.puzzle_call_in_answer puzzle.id %}">Call in answer</a>
   {% endif %}
   {% if wrong_answers %}
   Wrong answers:
