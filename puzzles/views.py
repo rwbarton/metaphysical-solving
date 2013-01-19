@@ -14,6 +14,7 @@ from django.db import IntegrityError
 from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_to_email
 from forms import UploadForm, AnswerForm
 from django.contrib.auth.models import User
+import coinheist
 
 def get_motd():
     try:
@@ -180,6 +181,7 @@ def puzzle_upload(request, puzzle_id):
 
 def handle_puzzle_answer(puzzle, answer):
     QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
+    coinheist.submit(puzzle, answer)
 
 @login_required
 def answer_submit_result(request, answer_id, result):
