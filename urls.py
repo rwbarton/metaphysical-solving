@@ -25,6 +25,9 @@ urlpatterns = patterns('',
     url(r'^puzzle/user_location/$', 'puzzles.views.user_location'),
     url(r'^puzzle/go_to_sleep/$', 'puzzles.views.go_to_sleep'),
 
+    url(r'^answers/$', 'puzzles.views.answer_queue'),
+    url(r'^answer/(\d+)/([a-z]+)/$', 'puzzles.views.answer_submit_result'),
+
     url(r'^logout/$', 'puzzles.views.logout_user'),
     url(r'^logout_return/$', 'puzzles.views.logout_return'),
 

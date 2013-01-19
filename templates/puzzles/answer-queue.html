@@ -1,0 +1,38 @@
+{% extends "puzzles/base_generic.html" %}
+
+{% block title %}Answer queue{% endblock %}
+
+{% block content %}
+<div id="overview"> <!-- XXX The css is all wrong here. -->
+  <h1>Answer queue</h1>
+  {% if queued_answers %}
+  <table class="puzzle-list">
+    <tbody>
+      <tr class="puzzle-list-header">
+	<td>Puzzle</td>
+	<td>Answer</td>
+	<td>Result</td>
+      </tr>
+      {% for queued_answer in queued_answers %}
+      <tr class="puzzle-list-regular">
+	<td class="puzzle-list-puzzle">
+	  {{ queued_answer.puzzle.title }}
+	</td>
+	<td class="puzzle-list-status">
+	  <span class="puzzle-answer">
+	    {{ queued_answer.answer }}
+	  </span>
+	</td>
+	<td>
+	  <a href="{% url puzzles.views.answer_submit_result queued_answer.id 'incorrect' %}"><img src="{{ STATIC_URL }}/img/thumbs_down.png" width="24" height="24"/></a>
+	  <a href="{% url puzzles.views.answer_submit_result queued_answer.id 'correct' %}"><img src="{{ STATIC_URL }}/img/thumbs_up.png" width="24" height="24"/></a>
+	</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  The queue is empty.
+  {% endif %}
+</div>
+{% endblock %}

@@ -181,6 +181,13 @@ def puzzle_upload(request, puzzle_id):
 def handle_puzzle_answer(puzzle, answer):
     QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
 
+@login_required
+def answer_submit_result(request, answer_id, result):
+    queued_answer = QueuedAnswer.objects.get(id=answer_id)
+    handle_puzzle_answer_result(queued_answer.puzzle, queued_answer.answer, result)
+    queued_answer.delete()
+    return redirect(reverse('puzzles.views.answer_queue'))
+
 def handle_puzzle_answer_result(puzzle, answer, result):
     if result == 'correct' or result == 'presumed_correct':
         puzzle.answer = answer
@@ -192,6 +199,12 @@ def handle_puzzle_answer_result(puzzle, answer, result):
             PuzzleWrongAnswer.objects.create(puzzle=puzzle, answer=answer)
         except IntegrityError:
             pass
+
+@login_required
+def answer_queue(request):
+    return render_to_response('puzzles/answer-queue.html', RequestContext(request, {
+                'queued_answers': QueuedAnswer.objects.all()
+                }))
 
 @login_required
 def puzzle_call_in_answer(request, puzzle_id):
