@@ -469,6 +469,19 @@ a.puzzle-title {
     border-spacing: 0px;
 }
 
+ul#puzzle-queued-answers {
+    display: inline;
+    padding: 0px;
+}
+
+ul#puzzle-queued-answers > li {
+    display: inline;
+    padding: 0px 3px;
+    background: #e7e7AD;
+    font-family: "Courier New" monospace;
+    font-weight: bold;
+}
+
 ul#puzzle-wrong-answers {
     display: inline;
     padding: 0px;

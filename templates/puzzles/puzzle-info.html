@@ -59,6 +59,14 @@
   <strong><img src="/static/img/correct.png" style="vertical-align:middle;"> Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span></strong>
   </div>
   {% else %}
+  {% if queued_answers %}
+  Queued:
+  <ul id="puzzle-queued-answers">
+    {% for queued_answer in queued_answers %}
+    <li>{{ queued_answer.answer }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
   <a id="callinanswer" href="{% url puzzles.views.puzzle_call_in_answer puzzle.id %}">Call in answer</a>
   {% endif %}
   {% if wrong_answers %}

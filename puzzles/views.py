@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 
-from models import Status, Priority, Tag, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_to_email
+from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_to_email
 from forms import UploadForm, AnswerForm
 from django.contrib.auth.models import User
 
@@ -75,6 +75,7 @@ def puzzle_info(request, puzzle_id):
                    for other_user in User.objects.order_by('first_name', 'last_name')
                    if other_user not in solvers
                    and other_user != request.user]
+    queued_answers = puzzle.queuedanswer_set.order_by('-id')
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     uploaded_files = puzzle.uploadedfile_set.order_by('id')
     return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
@@ -84,6 +85,7 @@ def puzzle_info(request, puzzle_id):
                 'you_solving': you_solving,
                 'other_solvers': other_solvers,
                 'other_users': other_users,
+                'queued_answers': queued_answers,
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
                 'refresh': 30
@@ -176,7 +178,10 @@ def puzzle_upload(request, puzzle_id):
                 'puzzle': puzzle
                 }))
 
-def handle_puzzle_answer(puzzle, answer, result):
+def handle_puzzle_answer(puzzle, answer):
+    QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
+
+def handle_puzzle_answer_result(puzzle, answer, result):
     if result == 'correct' or result == 'presumed_correct':
         puzzle.answer = answer
     if result == 'correct':
@@ -194,7 +199,7 @@ def puzzle_call_in_answer(request, puzzle_id):
     if request.method == 'POST':
         form = AnswerForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_puzzle_answer(puzzle, form.cleaned_data['answer'], form.cleaned_data['result'])
+            handle_puzzle_answer(puzzle, form.cleaned_data['answer'])
             return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
     else:
         form = AnswerForm()

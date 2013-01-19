@@ -6,9 +6,3 @@ class UploadForm(forms.Form):
 
 class AnswerForm(forms.Form):
     answer = forms.CharField(max_length=200)
-    result = forms.ChoiceField(
-        widget=forms.RadioSelect,
-        choices=[('correct', 'correct!'),
-                 ('presumed_correct', 'presumed correct'),
-                 ('incorrect', 'incorrect')],
-        label='')

@@ -42,6 +42,17 @@ class Tag(OrderedModel):
     def __unicode__(self):
         return self.name
 
+class QueuedAnswer(models.Model):
+    # An answer that's not wrong yet!
+    puzzle = models.ForeignKey('Puzzle')
+    answer = models.CharField(max_length=200)
+
+    class Meta:
+        unique_together = ('puzzle', 'answer')
+
+    def __unicode__(self):
+        return 'answer "%s" for puzzle "%s"' % (self.answer, self.puzzle.title)
+
 class PuzzleWrongAnswer(models.Model):
     puzzle = models.ForeignKey('Puzzle')
     answer = models.CharField(max_length=200)
