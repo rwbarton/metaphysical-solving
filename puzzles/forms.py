@@ -6,3 +6,4 @@ class UploadForm(forms.Form):
 
 class AnswerForm(forms.Form):
     answer = forms.CharField(max_length=200)
+    phone = forms.CharField(max_length=64)

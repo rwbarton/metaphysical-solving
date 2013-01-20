@@ -5,7 +5,7 @@ username = config_file.readline().rstrip()
 password = config_file.readline().rstrip()
 
 
-def submit(puzzle, answer):
+def submit(puzzle, answer, phone):
     print "Submitting answer %s for puzzle %s (%s)." % (answer, puzzle.title, puzzle.url)
 
     br = mechanize.Browser()
@@ -22,6 +22,7 @@ def submit(puzzle, answer):
     br.open(answer_url)
     br.select_form(nr=0)
     br['req_text'] = answer
+    br['contact'] = phone
     resp = br.submit()
 
     print "Their server said: %s" % (resp.get_data(),)

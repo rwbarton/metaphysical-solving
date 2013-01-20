@@ -179,9 +179,9 @@ def puzzle_upload(request, puzzle_id):
                 'puzzle': puzzle
                 }))
 
-def handle_puzzle_answer(puzzle, answer):
+def handle_puzzle_answer(puzzle, answer, phone):
     QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
-    coinheist.submit(puzzle, answer)
+    coinheist.submit(puzzle, answer, phone)
 
 @login_required
 def answer_submit_result(request, answer_id, result):
@@ -214,7 +214,7 @@ def puzzle_call_in_answer(request, puzzle_id):
     if request.method == 'POST':
         form = AnswerForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_puzzle_answer(puzzle, form.cleaned_data['answer'])
+            handle_puzzle_answer(puzzle, form.cleaned_data['answer'], form.cleaned_data['phone'])
             return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
     else:
         form = AnswerForm()
