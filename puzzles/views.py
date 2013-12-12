@@ -109,7 +109,7 @@ def puzzle_chat(request, puzzle_id):
                         'confirmation_url': confirmation_url
                         }))
         except HumbugConfirmation.DoesNotExist:
-            response = HttpResponse("Hang tight a minute, we're working on setting up your Humbug account.")
+            response = HttpResponse("Hang tight a minute, we're working on setting up your Zulip account.")
             response['Refresh'] = 5
             return response
 
