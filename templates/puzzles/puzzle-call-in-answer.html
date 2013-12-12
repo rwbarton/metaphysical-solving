@@ -8,5 +8,8 @@
   </ul>
   <input type="submit" value="Submit" />
 </form>
+<form class="callinanswer" action="{% url puzzles.views.puzzle_info puzzle.id %}" method="get">{% csrf_token %}
+  <input type="submit" value="Cancel" />
+</form>
 </div>
 {% endblock %}
