@@ -186,7 +186,7 @@ def humbug_register(**kwargs):
         user = kwargs['instance']
         humbug_register_email(user_to_email(user))
 
-# post_save.connect(humbug_register, sender=User)
+post_save.connect(humbug_register, sender=User)
 
 def make_user_profile(**kwargs):
     user = kwargs['instance']
