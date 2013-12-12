@@ -119,7 +119,7 @@ class Puzzle(OrderedModel):
             humbug_send(user='b+status',
                         stream='p%d' % (self.id,),
                         subject='solved!',
-                        message='!gravatar(b+status+correct@metaphysicalplant.com) **%s**' % self.answer)
+                        message=':thumbsup: **%s**' % self.answer)
 
             humbug_send(user='b+status',
                         stream='status',
