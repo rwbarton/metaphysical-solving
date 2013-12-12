@@ -6,5 +6,8 @@
   {{ form.as_ul }}
   <input type="submit" value="Submit" />
 </form>
+<form class="upload" action="{% url puzzles.views.puzzle_info puzzle.id %}" method="get">{% csrf_token %}
+  <input type="submit" value="Cancel" />
+</form>
 </div>
 {% endblock %}
