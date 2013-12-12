@@ -104,10 +104,15 @@ def puzzle_chat(request, puzzle_id):
     if request.user.userprofile.finished_humbug_registration():
         return redirect("https://p%d.e.plant.humbughq.com/?lurk=p%d" % (int(puzzle_id), int(puzzle_id)))
     else:
-        confirmation_url = HumbugConfirmation.objects.get(email=user_to_email(request.user)).confirmation_url
-        return render_to_response("puzzles/go-register-for-humbug.html", RequestContext(request, {
-                    'confirmation_url': confirmation_url
-                    }))
+        try:
+            confirmation_url = HumbugConfirmation.objects.get(email=user_to_email(request.user)).confirmation_url
+            return render_to_response("puzzles/go-register-for-humbug.html", RequestContext(request, {
+                        'confirmation_url': confirmation_url
+                        }))
+        except HumbugConfirmation.DoesNotExist:
+            response = HttpResponse("Hang tight a minute, we're working on setting up your Humbug account.")
+            response['Refresh'] = 5
+            return response
 
 @login_required
 def puzzle_set_status(request, puzzle_id):
