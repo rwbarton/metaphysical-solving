@@ -159,14 +159,20 @@ class Location(OrderedModel):
         return self.name
 
 def user_to_email(user):
-    return 's+%d@metaphysicalplant.com' % (user.id,)
+    first = ''.join(re.findall("\w", user.first_name))
+    last = ''.join(re.findall("\w", user.last_name))
+    return 's+%s+%s@metaphysicalplant.com' % (first, last)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
     location = models.ForeignKey('Location')
+
+    # Have we filled out the initial registration form on behalf of the user?
+    has_humbug_registration = models.BooleanField()
+
+    # Is the user known to have created a Humbug account?
     has_humbug_account = models.BooleanField()
-    # Humbug account email addresses are based off the *user* id (not user_profile)
 
     def finished_humbug_registration(self):
         if self.has_humbug_account:
@@ -181,13 +187,6 @@ class HumbugConfirmation(models.Model):
     email = models.CharField(max_length=63, unique=True)
     confirmation_url = models.URLField()
 
-def humbug_register(**kwargs):
-    if kwargs['created']:
-        user = kwargs['instance']
-        humbug_register_email(user_to_email(user))
-
-post_save.connect(humbug_register, sender=User)
-
 def make_user_profile(**kwargs):
     user = kwargs['instance']
     default_location = Location.objects.get(name='unknown')
@@ -198,6 +197,16 @@ def make_user_profile(**kwargs):
         pass
 
 post_save.connect(make_user_profile, sender=User)
+
+def humbug_register(**kwargs):
+    user = kwargs['instance']
+    user_profile = UserProfile.objects.get(user=user)
+    if not user_profile.has_humbug_registration and user.first_name != '':
+        humbug_register_email(user_to_email(user))
+        user_profile.has_humbug_registration = True
+        user_profile.save()
+
+post_save.connect(humbug_register, sender=User)
 
 def make_superuser(**kwargs):
     user = kwargs['instance']
