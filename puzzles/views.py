@@ -101,7 +101,7 @@ def puzzle_spreadsheet(request, puzzle_id):
 @login_required
 def puzzle_chat(request, puzzle_id):
     if request.user.userprofile.finished_humbug_registration():
-        return redirect("https://metaphysicalplant.zulip.com/#narrow/stream/p%d" % (int(puzzle_id),))
+        return redirect("https://metaphysicalplant.zulip.com/?narrow=p%d" % (int(puzzle_id),))
     else:
         try:
             confirmation_url = HumbugConfirmation.objects.get(email=user_to_email(request.user)).confirmation_url
