@@ -54,7 +54,7 @@
 	{% for puzzle in tag.puzzles %}
 	  <tr class="priority-{{puzzle.priority.css_name}} status-{{ puzzle.status.css_name }} puzzle-list-regular">
 	    <td class="puzzle-list-puzzle">
-	      <a target="_blank" href="{{ puzzle.url }}"><img src="/static/img/external.png" title="See {{puzzle.title}} on hunt site"></a>
+	      <a target="_blank" href="{{ puzzle.url }}"><img src="{{ STATIC_URL }}img/external.png" title="See {{puzzle.title}} on hunt site"></a>
 	    </td>
 	    <td class="puzzle-list-title">
 	      <a href="{% url puzzles.views.puzzle puzzle.id %}">{{ puzzle.title }}</a>
