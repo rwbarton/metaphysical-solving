@@ -130,6 +130,7 @@ padding: 15px 15px 15px 15px;
  -webkit-column-break-inside: avoid;
  -moz-break-inside: avoid;
  -webkit-break-inside: avoid;
+ display: inline-block;
 }
 
 form {
