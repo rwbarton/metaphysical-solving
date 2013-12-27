@@ -14,6 +14,10 @@ class Config(models.Model):
     default_tag = models.ForeignKey('Tag')
     default_taglist = models.ForeignKey('TagList')
 
+    callback_phone = models.CharField(max_length=255, blank=True,
+                                      help_text="""Phone number on which answer callbacks from Hunt HQ will be received.
+If empty, users will have to enter their own phone number when submitting an answer.""")
+
     motd = models.TextField(blank=True)
 
 class Status(OrderedModel):

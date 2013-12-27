@@ -10,6 +10,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from django import forms
 
 from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_to_email
 from forms import UploadForm, AnswerForm
@@ -220,7 +221,10 @@ def puzzle_call_in_answer(request, puzzle_id):
             handle_puzzle_answer(puzzle, form.cleaned_data['answer'], form.cleaned_data['phone'])
             return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
     else:
-        form = AnswerForm()
+        callback_phone = Config.objects.get().callback_phone
+        form = AnswerForm(initial={'phone': callback_phone})
+        if callback_phone:
+            form.fields['phone'].widget = forms.HiddenInput()
     return render_to_response('puzzles/puzzle-call-in-answer.html', puzzle_context(request, {
                 'form': form,
                 'puzzle': puzzle
