@@ -9,7 +9,8 @@ def humbug_register_email(email):
     br.open("https://zulip.com/accounts/home/")
     br.select_form(nr=0)
     br["email"] = email
-    br.submit()
+    resp = br.submit()
+    return (resp.get_data().find("You've already registered with this email address. Please log in below.") != -1)
 
 def humbug_registration_finished(email):
     try:

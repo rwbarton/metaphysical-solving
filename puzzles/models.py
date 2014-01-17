@@ -206,8 +206,9 @@ def humbug_register(**kwargs):
     user = kwargs['instance']
     user_profile = UserProfile.objects.get(user=user)
     if not user_profile.has_humbug_registration and user.first_name != '':
-        humbug_register_email(user_to_email(user))
+        already_has_account = humbug_register_email(user_to_email(user))
         user_profile.has_humbug_registration = True
+        user_profile.has_humbug_account = already_has_account
         user_profile.save()
 
 post_save.connect(humbug_register, sender=User)
