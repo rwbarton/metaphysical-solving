@@ -34,6 +34,8 @@ class Command(BaseCommand):
                 print r.text
                 sys.exit(1)
 
+            QueuedAnswer.objects.filter(puzzle=puzzle).delete()
+
             mode = 'none'
             skip = True
             for l in r.text.split('\n'):
