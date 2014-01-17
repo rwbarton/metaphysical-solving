@@ -62,6 +62,6 @@ class Command(BaseCommand):
                         if mode == 'queued':
                             print 'QUEUED ' + puzzle.title + ' = ' + rest
                             QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=rest)
-                        if mode == 'wrong':
+                        if mode == 'wrong' and puzzle.status != solved_status:
                             print 'WRONG ' + puzzle.title + ' = ' + rest
                             PuzzleWrongAnswer.objects.get_or_create(puzzle=puzzle, answer=rest)
