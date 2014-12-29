@@ -48,6 +48,15 @@ class Command(BaseCommand):
                     puzzle.status = solved_status
                     puzzle.save()
 
+                solved_prefix2 = '      Solved! Title: <b>'
+                solved_suffix = '</b><br>'
+                if l.startswith(solved_prefix2) and l.endswith(solved_suffix):
+                    answer = l[len(solved_prefix2):len(l)-len(solved_suffix)]
+                    print 'SOLVED ' + puzzle.title + ' = ' + answer
+                    puzzle.answer = answer
+                    puzzle.status = solved_status
+                    puzzle.save()
+
                 if l == '      In the Queue:':
                     mode = 'queued'
                 if l == '      Previous Attempts:':
