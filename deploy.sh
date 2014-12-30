@@ -7,4 +7,4 @@ fi
 cd /home/puzzle/solving
 git pull
 yes yes | python manage.py collectstatic # sigh
-touch wsgi.py
+touch solving/wsgi.py
