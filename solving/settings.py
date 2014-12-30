@@ -2,8 +2,6 @@
 
 import sys
 
-sys.path.append('/srv/dist/django-openid-auth_0.4')
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -121,6 +119,8 @@ OPENID_SSO_SERVER_URL = 'https://www.google.com/accounts/o8/id'
 OPENID_CREATE_USERS = True
 OPENID_UPDATE_DETAILS_FROM_SREG = True
 OPENID_USE_AS_ADMIN_LOGIN = True
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 AUTHENTICATION_BACKENDS = (
     'django_openid_auth.auth.OpenIDBackend',

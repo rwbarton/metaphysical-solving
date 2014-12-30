@@ -24,8 +24,8 @@
 	  </span>
 	</td>
 	<td>
-	  <a href="{% url puzzles.views.answer_submit_result queued_answer.id 'incorrect' %}"><img src="{{ STATIC_URL }}img/thumbs_down.png" width="24" height="24"/></a>
-	  <a href="{% url puzzles.views.answer_submit_result queued_answer.id 'correct' %}"><img src="{{ STATIC_URL }}img/thumbs_up.png" width="24" height="24"/></a>
+	  <a href="{% url 'puzzles.views.answer_submit_result' queued_answer.id 'incorrect' %}"><img src="{{ STATIC_URL }}img/thumbs_down.png" width="24" height="24"/></a>
+	  <a href="{% url 'puzzles.views.answer_submit_result' queued_answer.id 'correct' %}"><img src="{{ STATIC_URL }}img/thumbs_up.png" width="24" height="24"/></a>
 	</td>
       </tr>
       {% endfor %}

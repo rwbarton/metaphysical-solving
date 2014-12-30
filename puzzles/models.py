@@ -173,10 +173,10 @@ class UserProfile(models.Model):
     location = models.ForeignKey('Location')
 
     # Have we filled out the initial registration form on behalf of the user?
-    has_humbug_registration = models.BooleanField()
+    has_humbug_registration = models.BooleanField(default=False)
 
     # Is the user known to have created a Humbug account?
-    has_humbug_account = models.BooleanField()
+    has_humbug_account = models.BooleanField(default=False)
 
     def finished_humbug_registration(self):
         if self.has_humbug_account:
@@ -191,27 +191,19 @@ class HumbugConfirmation(models.Model):
     email = models.CharField(max_length=63, unique=True)
     confirmation_url = models.URLField()
 
-def make_user_profile(**kwargs):
+def make_user_profile_and_humbug_register(**kwargs):
     user = kwargs['instance']
     default_location = Location.objects.get(name='unknown')
-    try:
-        UserProfile(user=user, location=default_location, has_humbug_account=False).save()
-    except IntegrityError:
-        # user profile already exists, do nothing
-        pass
-
-post_save.connect(make_user_profile, sender=User)
-
-def humbug_register(**kwargs):
-    user = kwargs['instance']
-    user_profile = UserProfile.objects.get(user=user)
+    user_profile, _ = UserProfile.objects.get_or_create(
+        user=user,
+        defaults={'location': default_location})
     if not user_profile.has_humbug_registration and user.first_name != '':
         already_has_account = humbug_register_email(user_to_email(user))
         user_profile.has_humbug_registration = True
         user_profile.has_humbug_account = already_has_account
         user_profile.save()
 
-post_save.connect(humbug_register, sender=User)
+post_save.connect(make_user_profile_and_humbug_register, sender=User)
 
 def make_superuser(**kwargs):
     user = kwargs['instance']

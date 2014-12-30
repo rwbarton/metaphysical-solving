@@ -7,7 +7,7 @@
 
     <div id="puzzlestatus">
     Status:
-    <form id="status_form" action="{% url puzzles.views.puzzle_set_status puzzle.id %}" method="post">{% csrf_token %}
+    <form id="status_form" action="{% url 'puzzles.views.puzzle_set_status' puzzle.id %}" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
       <select onchange="document.forms.status_form.submit()" name="status">
 	{% for status in statuses %}
@@ -20,7 +20,7 @@
 
     <div id="puzzlepriority">
     Priority:
-    <form id="priority_form" action="{% url puzzles.views.puzzle_set_priority puzzle.id %}" method="post">{% csrf_token %}
+    <form id="priority_form" action="{% url 'puzzles.views.puzzle_set_priority' puzzle.id %}" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
       <select onchange="document.forms.priority_form.submit()" name="priority">
 	{% for priority in priorities %}
@@ -40,7 +40,7 @@
     </div>
 
     <div id="puzzlefiles">
-  <a id="attachfile" href="{% url puzzles.views.puzzle_upload puzzle.id %}">Attach file</a>
+  <a id="attachfile" href="{% url 'puzzles.views.puzzle_upload' puzzle.id %}">Attach file</a>
   {% if uploaded_files %}Attached files:
    <select id="fileselector">
   {% for upload in uploaded_files %}
@@ -85,7 +85,7 @@
       {% endif %}
       {% if you_solving %}
 	<span class="onesolver"><img src="{{ STATIC_URL }}img/user.png" style="vertical-align:middle;padding-right:2px;">You
-	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+	  <form action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" method="post">{% csrf_token %}
 	    <input type="hidden" name="continue" value="{{ path }}" />
 	    <input type="hidden" name="solver" value="{{ user.id }}" />
 	    <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" style="vertical-align:middle;"/>
@@ -95,7 +95,7 @@
       {% for solver in other_solvers %}
 	<span class="onesolver" title="{{ solver.first_name }} {{ solver.last_name }} ({{ solver.userprofile.location }})">
           <img src="{{ STATIC_URL }}img/user.png" style="vertical-align:middle;padding-right:2px;">{{ solver.first_name }}
-	  <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
+	  <form action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" method="post">{% csrf_token %}
 	    <input type="hidden" name="continue" value="{{ path }}" />
 	    <input type="hidden" name="solver" value="{{ solver.id }}" />
 	    <input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove" style="vertical-align:middle;"/>
@@ -106,13 +106,13 @@
   <span>
     Add:
     {% if not you_solving %}
-    <form action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
+    <form action="{% url 'puzzles.views.puzzle_add_solver' puzzle.id %}" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
       <input type="hidden" name="solver" value="{{ user.id }}" />
       <input type="submit" value="Me" />
     </form>
     {% endif %}
-    <form id="add_other_user" action="{% url puzzles.views.puzzle_add_solver puzzle.id %}" method="post">{% csrf_token %}
+    <form id="add_other_user" action="{% url 'puzzles.views.puzzle_add_solver' puzzle.id %}" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
       <select onchange="document.forms.add_other_user.submit()" name="solver">
 	<option>Other user...</option>

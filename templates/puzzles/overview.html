@@ -11,20 +11,20 @@
       {% if taglist.id == active_taglist_id %}
 	<span class="active-taglist">{{taglist.name}}</span>
       {% else %}
-	<a class="taglink" href="{% url puzzles.views.overview_by taglist.id %}"><span class="taglist">{{ taglist.name }}</span></a>
+	<a class="taglink" href="{% url 'puzzles.views.overview_by' taglist.id %}"><span class="taglist">{{ taglist.name }}</span></a>
       {% endif %}
     {% endfor %}
    </div>
 
   <div id="puzzlesbytag">
    <div id="userwork">
-      Hello, <strong>{{ user.first_name }} {{ user.last_name }}</strong> (<a href="{% url puzzles.views.logout_user %}">switch</a> if that's not you). You are currently in <strong>{{ user.userprofile.location.name }}</strong>, working on:
+      Hello, <strong>{{ user.first_name }} {{ user.last_name }}</strong> (<a href="{% url 'puzzles.views.logout_user' %}">switch</a> if that's not you). You are currently in <strong>{{ user.userprofile.location.name }}</strong>, working on:
       {% if my_puzzles %}
       <ul id="puzzlelist">
         {% for puzzle in my_puzzles %}
         <li>
-          <form action="{% url puzzles.views.puzzle_remove_solver puzzle.id %}" method="post">{% csrf_token %}
-            <a target="_top" href="{% url puzzles.views.puzzle puzzle.id %}">{{ puzzle.title }}</a>
+          <form action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" method="post">{% csrf_token %}
+            <a target="_top" href="{% url 'puzzles.views.puzzle' puzzle.id %}">{{ puzzle.title }}</a>
             <input type="hidden" name="continue" value="{{ path }}" />
             <input type="hidden" name="solver" value="{{ user.id }}" />
             <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" style="float:right;" alt="Remove {{ puzzle.title }} from work list" title="Remove {{ puzzle.title }} from work list" />
@@ -32,7 +32,7 @@
         </li>
         {% endfor %}
       </ul>
-      <form action="{% url puzzles.views.go_to_sleep %}" method="post">{% csrf_token %}
+      <form action="{% url 'puzzles.views.go_to_sleep' %}" method="post">{% csrf_token %}
         <input type="hidden" name="continue" value="{{ path }}" />
         <input type="submit" value="Remove all" />
       </form>
@@ -57,7 +57,7 @@
 	      <a target="_blank" href="{{ puzzle.url }}"><img src="{{ STATIC_URL }}img/external.png" title="See {{puzzle.title}} on hunt site"></a>
 	    </td>
 	    <td class="puzzle-list-title">
-	      <a href="{% url puzzles.views.puzzle puzzle.id %}">{{ puzzle.title }}</a>
+	      <a href="{% url 'puzzles.views.puzzle' puzzle.id %}">{{ puzzle.title }}</a>
 	      {% if puzzle.priority != default_priority %}
 	      <span class="puzzle-priority priority-{{ puzzle.priority.css_name }}">{{ puzzle.priority.text }}</span>
 	      {% endif %}
