@@ -15,13 +15,14 @@ def create_google_spreadsheet(title):
     google_config = get_google_config()
     client = gdata.docs.client.DocsClient(source=google_config['source'])
     client.ClientLogin(google_config['username'], google_config['password'], client.source)
-    new_spreadsheet = client.Create(gdata.docs.data.SPREADSHEET_LABEL, title)
-    acl_entry = gdata.docs.data.Acl(
+    spreadsheet = gdata.docs.data.Resource(gdata.docs.data.SPREADSHEET_LABEL, title)
+    new_spreadsheet = client.CreateResource(spreadsheet)
+    acl_entry = gdata.docs.data.AclEntry(
         scope=gdata.acl.data.AclScope(type='default'),
         role=gdata.acl.data.AclWithKey(
             key='with link',
             role=gdata.acl.data.AclRole(value='writer')
             )
         )
-    client.Post(acl_entry, new_spreadsheet.GetAclFeedLink().href)
+    client.AddAclEntry(new_spreadsheet, acl_entry)
     return new_spreadsheet.GetAlternateLink().href
