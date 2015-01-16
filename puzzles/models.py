@@ -168,6 +168,7 @@ class Location(OrderedModel):
 def user_to_email(user):
     first = ''.join(re.findall("\w", user.first_name))
     last = ''.join(re.findall("\w", user.last_name))
+    if last == '': last = 'Nautilus'
     return 's+%s.%s@metaphysicalplant.com' % (first, last)
 
 class UserProfile(models.Model):
