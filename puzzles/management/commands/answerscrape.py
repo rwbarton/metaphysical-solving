@@ -5,8 +5,8 @@ import sys
 import requests
 
 def submit_url(url):
-    puzzle_prefix = 'http://www.aliceshrugged.com/puzzle/'
-    puzzle_replacement = 'http://www.aliceshrugged.com/dynamic/submit/puzzle/'
+    puzzle_prefix = 'http://www.20000puzzles.com/puzzle/'
+    puzzle_replacement = 'http://www.20000puzzles.com/submit/puzzle/'
 
     if url.startswith(puzzle_prefix):
         return puzzle_replacement + url[len(puzzle_prefix):]
@@ -48,18 +48,9 @@ class Command(BaseCommand):
                     puzzle.status = solved_status
                     puzzle.save()
 
-                solved_prefix2 = '      Solved! Title: <b>'
-                solved_suffix = '</b><br>'
-                if l.startswith(solved_prefix2) and l.endswith(solved_suffix):
-                    answer = l[len(solved_prefix2):len(l)-len(solved_suffix)]
-                    print 'SOLVED ' + puzzle.title + ' = ' + answer
-                    puzzle.answer = answer
-                    puzzle.status = solved_status
-                    puzzle.save()
-
-                if l == '      In the Queue:':
+                if l == '      <h3>In the Queue:</h3>':
                     mode = 'queued'
-                if l == '      Previous Attempts:':
+                if l == '      <h3>Previous Attempts:</h3>':
                     mode = 'wrong'
 
                 non_answer_prefix = '\t  <td>'
@@ -70,6 +61,8 @@ class Command(BaseCommand):
                     else:
                         skip = True
                         rest = l[len(non_answer_prefix):]
+                        if rest.endswith('</td>'):
+                            rest = rest[:-len('</td>')]
                         if mode == 'queued':
                             print 'QUEUED ' + puzzle.title + ' = ' + rest
                             QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=rest)
