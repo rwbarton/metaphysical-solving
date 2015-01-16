@@ -143,7 +143,7 @@ def send_puzzle_humbug(**kwargs):
                     subject='new puzzle',
                     message='New puzzle [%s](%s) ([p%d](%s))' %
                     (puzzle.title, puzzle.url, puzzle.id,
-                     reverse('puzzles.views.puzzle_info', args=[puzzle.id])))
+                     'http://metaphysicalplant.com' + reverse('puzzles.views.puzzle', args=[puzzle.id])))
 
 post_save.connect(send_puzzle_humbug, sender=Puzzle)
 
