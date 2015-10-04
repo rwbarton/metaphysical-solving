@@ -52,3 +52,36 @@ class Command(BaseCommand):
 
             if rnd == 'Chemistry Lab':
                 create_puzzle(title=title, url=url, tag='chemistry lab')
+
+            if rnd == 'School of Fish':
+                create_puzzle(title=title, url=url, tag='school of fish')
+
+            if rnd == 'Pod of Dolphins':
+                create_puzzle(title=title, url=url, tag='pod of dolphins')
+
+            if rnd == 'Coral Reef':
+                create_puzzle(title=title, url=url, tag='coral reef')
+
+            if rnd == 'Treasure Chest':
+                create_puzzle(title=title, url=url, tag='treasure chest')
+
+            if rnd == 'Graveyard':
+                create_puzzle(title=title, url=url, tag='graveyard')
+
+            if rnd == 'Aquatic Acquaintances':
+                create_puzzle(title=title, url=url, tag='aquatic acquaintances')
+
+            if rnd == 'Colorful Tower':
+                create_puzzle(title=title, url=url, tag='colorful tower')
+
+            if rnd == 'Spotted Tower':
+                create_puzzle(title=title, url=url, tag='spotted tower')
+
+            if rnd == 'Spiky Tower':
+                create_puzzle(title=title, url=url, tag='spiky tower')
+
+            if rnd == 'Golden Tower':
+                create_puzzle(title=title, url=url, tag='golden tower')
+
+            if rnd == 'Hunt Round (Metametas)':
+                create_puzzle(title=title, url=url, tag='metameta')

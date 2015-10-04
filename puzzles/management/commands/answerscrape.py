@@ -11,6 +11,9 @@ def submit_url(url):
     if url.startswith(puzzle_prefix):
         return puzzle_replacement + url[len(puzzle_prefix):]
 
+    if not url.endswith('/'):
+        url = url + '/'
+
     return None
 
 password = open('/etc/metaphysical/site-password', 'r').read().rstrip()
