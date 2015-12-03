@@ -112,18 +112,18 @@ TEMPLATE_DIRS = (
     'templates'
 )
 
-LOGIN_URL = '/openid/login/'
+LOGIN_URL = '/login/google-oauth2/'
 LOGIN_REDIRECT_URL = '/'
 
-OPENID_SSO_SERVER_URL = 'https://www.google.com/accounts/o8/id'
-OPENID_CREATE_USERS = True
-OPENID_UPDATE_DETAILS_FROM_SREG = True
-OPENID_USE_AS_ADMIN_LOGIN = True
+GOOGLE_OAUTH2_CLIENT_ID      = open('/etc/metaphysical/google-oauth2-client-id').read().strip()
+GOOGLE_OAUTH2_CLIENT_SECRET  = open('/etc/metaphysical/google-oauth2-client-secret').read().strip()
+
+SOCIAL_AUTH_ENABLED_BACKENDS = ('google-oauth2',)
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 AUTHENTICATION_BACKENDS = (
-    'django_openid_auth.auth.OpenIDBackend',
+    'social_auth.backends.google.GoogleOAuth2Backend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -138,7 +138,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'django_openid_auth',
+    'social_auth',
     'ordered_model',
     'puzzles'
 )
