@@ -5,7 +5,7 @@ from puzzles.models import Puzzle, Tag
 import requests
 from lxml import etree
 
-password = open('/etc/metaphysical/site-password', 'r').read().rstrip()
+password = open('/etc/puzzle/site-password', 'r').read().rstrip()
 
 def create_puzzle(title, url, tag):
     try:

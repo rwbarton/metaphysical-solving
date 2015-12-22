@@ -10,7 +10,7 @@ _google_config = None
 def get_google_config():
     global _google_config
     if _google_config is None:
-        _google_config = json.loads(open('/etc/metaphysical/google.json').read())
+        _google_config = json.loads(open('/etc/puzzle/google.json').read())
     return _google_config
 
 

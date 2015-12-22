@@ -115,8 +115,8 @@ TEMPLATE_DIRS = (
 LOGIN_URL = '/login/google-oauth2/'
 LOGIN_REDIRECT_URL = '/'
 
-GOOGLE_OAUTH2_CLIENT_ID      = open('/etc/metaphysical/google-oauth2-client-id').read().strip()
-GOOGLE_OAUTH2_CLIENT_SECRET  = open('/etc/metaphysical/google-oauth2-client-secret').read().strip()
+GOOGLE_OAUTH2_CLIENT_ID      = open('/etc/puzzle/google-oauth2-client-id').read().strip()
+GOOGLE_OAUTH2_CLIENT_SECRET  = open('/etc/puzzle/google-oauth2-client-secret').read().strip()
 
 SOCIAL_AUTH_ENABLED_BACKENDS = ('google-oauth2',)
 

@@ -16,7 +16,7 @@ def submit_url(url):
 
     return None
 
-password = open('/etc/metaphysical/site-password', 'r').read().rstrip()
+password = open('/etc/puzzle/site-password', 'r').read().rstrip()
 
 solved_status = Status.objects.get(text='solved!')
 

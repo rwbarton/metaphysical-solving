@@ -29,5 +29,5 @@ def humbug_registration_finished(email):
 def humbug_send(user, stream, subject, message):
     print (user, stream, subject, message)
     # Need to wait for this one to finish so that we know the stream exists (blargh).
-    subprocess.call(["/home/puzzle/bin/humbug-subscribe", "--config-file", "/etc/metaphysical/humbug/b+logger.conf", "--streams", stream])
-    subprocess.Popen(["/home/puzzle/bin/humbug-send", "--config-file", "/etc/metaphysical/humbug/%s.conf" % (user,), "--stream", stream, "--subject", subject, "--message", message])
+    subprocess.call(["/home/puzzle/bin/humbug-subscribe", "--config-file", "/etc/puzzle/humbug/b+logger.conf", "--streams", stream])
+    subprocess.Popen(["/home/puzzle/bin/humbug-send", "--config-file", "/etc/puzzle/humbug/%s.conf" % (user,), "--stream", stream, "--subject", subject, "--message", message])
