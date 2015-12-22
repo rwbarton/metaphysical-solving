@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 import re
 
 from puzzles.googlespreadsheet import create_google_spreadsheet
-from puzzles.humbug import humbug_register_email, humbug_registration_finished, humbug_send
+from puzzles.humbug import humbug_send
 
 class Config(models.Model):
     default_status = models.ForeignKey('Status')
@@ -165,49 +165,19 @@ class Location(OrderedModel):
     def __unicode__(self):
         return self.name
 
-def user_to_email(user):
-    first = ''.join(re.findall("\w", user.first_name))
-    last = ''.join(re.findall("\w", user.last_name))
-    if last == '': last = 'Nautilus'
-    return 's+%s.%s@metaphysicalplant.com' % (first, last)
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
     location = models.ForeignKey('Location')
 
-    # Have we filled out the initial registration form on behalf of the user?
-    has_humbug_registration = models.BooleanField(default=False)
-
-    # Is the user known to have created a Humbug account?
-    has_humbug_account = models.BooleanField(default=False)
-
-    def finished_humbug_registration(self):
-        if self.has_humbug_account:
-            return True
-        if humbug_registration_finished(user_to_email(self.user)):
-            self.has_humbug_account = True
-            self.save()
-            return True
-        return False
-
-class HumbugConfirmation(models.Model):
-    email = models.CharField(max_length=63, unique=True)
-    confirmation_url = models.URLField()
-
-def make_user_profile_and_humbug_register(**kwargs):
+def make_user_profile(**kwargs):
     user = kwargs['instance']
     default_location = Location.objects.get(name='unknown')
     user_profile, _ = UserProfile.objects.get_or_create(
         user=user,
         defaults={'location': default_location})
-    if not user_profile.has_humbug_registration and user.first_name != '':
-        already_has_account = humbug_register_email(user_to_email(user))
-        user_profile.has_humbug_registration = True
-        user_profile.has_humbug_account = already_has_account
-        user_profile.save()
 
-post_save.connect(make_user_profile_and_humbug_register, sender=User)
+post_save.connect(make_user_profile, sender=User)
 
 def make_superuser(**kwargs):
     user = kwargs['instance']

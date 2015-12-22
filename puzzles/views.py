@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django import forms
 
-from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, HumbugConfirmation, user_to_email
+from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config
 from forms import UploadForm, AnswerForm
 from django.contrib.auth.models import User
 
@@ -30,7 +30,6 @@ def puzzle_context(request, d):
     d1['path'] = request.path
     if 'body' in request.GET:
         d1['body_only'] = True
-    d1['humbug_email'] = user_to_email(request.user)
     return RequestContext(request, d1)
 
 @login_required
@@ -101,18 +100,7 @@ def puzzle_spreadsheet(request, puzzle_id):
 
 @login_required
 def puzzle_chat(request, puzzle_id):
-    if request.user.userprofile.finished_humbug_registration():
-        return redirect("https://%d.e.zulip.com/?stream=p%d" % (int(puzzle_id),int(puzzle_id)))
-    else:
-        try:
-            confirmation_url = HumbugConfirmation.objects.get(email=user_to_email(request.user)).confirmation_url
-            return render_to_response("puzzles/go-register-for-humbug.html", RequestContext(request, {
-                        'confirmation_url': confirmation_url
-                        }))
-        except HumbugConfirmation.DoesNotExist:
-            response = HttpResponse("Hang tight a minute, we're working on setting up your Zulip account.")
-            response['Refresh'] = 5
-            return response
+    return redirect("https://%d.e.zulip.com/?stream=p%d" % (int(puzzle_id),int(puzzle_id)))
 
 @login_required
 def puzzle_set_status(request, puzzle_id):
