@@ -15,6 +15,7 @@ from django import forms
 from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config
 from forms import UploadForm, AnswerForm
 from django.contrib.auth.models import User
+from django.conf import settings
 
 def get_motd():
     try:
@@ -24,7 +25,9 @@ def get_motd():
 
 def puzzle_context(request, d):
     d1 = dict(d)
+    d1['teamname'] = settings.TEAMNAME
     d1['motd'] = get_motd()
+    d1['hqcontact'] = settings.HQCONTACT
     d1['locations'] = Location.objects.all()
     d1['my_puzzles'] = request.user.puzzle_set.order_by('id')
     d1['path'] = request.path
@@ -100,7 +103,7 @@ def puzzle_spreadsheet(request, puzzle_id):
 
 @login_required
 def puzzle_chat(request, puzzle_id):
-    return redirect("https://%d.e.zulip.com/?stream=p%d" % (int(puzzle_id),int(puzzle_id)))
+    return redirect("%s/?stream=p%d" % (settings.ZULIP_HOSTNAME_BALANCING(),int(puzzle_id)))
 
 @login_required
 def puzzle_set_status(request, puzzle_id):
@@ -144,7 +147,7 @@ def handle_puzzle_upload(puzzle, name, file):
     for chunk in file.chunks():
         outfile.write(chunk)
     outfile.close()
-    upload.url = 'http://metaphysicalplant.com/uploads/%d/%d/%s' % (puzzle.id, upload.id, file.name)
+    upload.url = '%s/uploads/%d/%d/%s' % (settings.BASE_URL, puzzle.id, upload.id, file.name)
     upload.save()
 
 @login_required

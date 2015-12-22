@@ -4,6 +4,7 @@ from ordered_model.models import OrderedModel
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save
 from django.core.urlresolvers import reverse
+from django.conf import settings
 import re
 
 from puzzles.googlespreadsheet import create_google_spreadsheet
@@ -143,7 +144,7 @@ def send_puzzle_humbug(**kwargs):
                     subject='new puzzle',
                     message='New puzzle [%s](%s) ([p%d](%s))' %
                     (puzzle.title, puzzle.url, puzzle.id,
-                     'http://metaphysicalplant.com' + reverse('puzzles.views.puzzle', args=[puzzle.id])))
+                     settings.BASE_URL + reverse('puzzles.views.puzzle', args=[puzzle.id])))
 
 post_save.connect(send_puzzle_humbug, sender=Puzzle)
 

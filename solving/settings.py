@@ -1,17 +1,17 @@
 # Django settings for solving project.
 
+# This file contains settings which you will (probably) not need to change.
+# Per-site settings are found in local_settings.py.
+
 import sys
 import os
 
-DEBUG = True
+from .local_settings import *
+
 TEMPLATE_DEBUG = DEBUG
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                             os.path.pardir))
-
-ADMINS = (
-    ('Reid Barton', 'rwbarton@gmail.com'),
-)
 
 MANAGERS = ADMINS
 
@@ -34,7 +34,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
