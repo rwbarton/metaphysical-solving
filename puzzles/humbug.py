@@ -31,7 +31,7 @@ def humbug_registration_finished(email):
 def humbug_send(user, stream, subject, message):
     print (user, stream, subject, message)
     # Need to wait for this one to finish so that we know the stream exists (blargh).
-    subprocess.call([os.path.join(settings.PROJECT_ROOT,"zulip/api/examples/subscribe"),
+    subprocess.check_call([os.path.join(settings.PROJECT_ROOT,"zulip/api/examples/subscribe"),
                      "--config-file", "/etc/puzzle/zulip/b+logger.conf",
                      "--streams", stream])
     subprocess.Popen([os.path.join(settings.PROJECT_ROOT,"zulip/api/bin/zulip-send"),
