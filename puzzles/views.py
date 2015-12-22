@@ -146,16 +146,6 @@ def puzzle_add_solver(request, puzzle_id):
     puzzle.save()
     return redirect(request.POST['continue'])
 
-@login_required
-def puzzle_logged_chat(request, puzzle_id):
-    chat_dir = '/var/www/muc/puzzle-%d' % int(puzzle_id)
-    files = os.listdir(chat_dir)
-    if files:
-        f = max(files)
-    else:
-        f = '.'
-    return redirect('http://metaphysical.no-ip.org/muc/puzzle-%d/%s' % (int(puzzle_id), f))
-
 def handle_puzzle_upload(puzzle, name, file):
     if file.name == '' or file.name[0] == '.' or '/' in file.name:
         raise ValueError
