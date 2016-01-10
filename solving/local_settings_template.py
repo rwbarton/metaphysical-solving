@@ -39,10 +39,3 @@ HQCONTACT = '555-0123 &nbsp;|&nbsp; ateam@example.com'
 # Zulip server hostname and URL.
 ZULIP_SERVER_HOSTNAME = 'zulip.example.com'
 ZULIP_SERVER_URL = 'https://' + ZULIP_SERVER_HOSTNAME
-
-# Zulip URL balancing used to work around browser limits on simultaneous
-# connections per server. All the URLs returned by this function should be
-# aliases for ZULIP_SERVER_URL.
-import random
-ZULIP_HOSTNAME_BALANCING = lambda: 'https://e%d.%s' % (
-    random.randint(1, 100), ZULIP_SERVER_HOSTNAME)

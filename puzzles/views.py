@@ -103,7 +103,7 @@ def puzzle_spreadsheet(request, puzzle_id):
 
 @login_required
 def puzzle_chat(request, puzzle_id):
-    return redirect("%s/?stream=p%d" % (settings.ZULIP_HOSTNAME_BALANCING(),int(puzzle_id)))
+    return redirect("%s/?stream=p%d" % (settings.ZULIP_SERVER_URL,int(puzzle_id)))
 
 @login_required
 def puzzle_set_status(request, puzzle_id):
