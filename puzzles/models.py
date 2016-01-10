@@ -8,7 +8,7 @@ from django.conf import settings
 import re
 
 from puzzles.googlespreadsheet import create_google_spreadsheet
-from puzzles.humbug import humbug_send
+from puzzles.zulip import zulip_send
 
 class Config(models.Model):
     default_status = models.ForeignKey('Status')
@@ -72,10 +72,10 @@ class PuzzleWrongAnswer(models.Model):
 def wrong_answer_message(**kwargs):
     if kwargs['created']:
         wa = kwargs['instance']
-        humbug_send(user='b+status',
-                    stream='p%d' % (wa.puzzle.id,),
-                    subject='wrong answer',
-                    message='Wrong answer: %s' % wa.answer)
+        zulip_send(user='b+status',
+                   stream='p%d' % (wa.puzzle.id,),
+                   subject='wrong answer',
+                   message='Wrong answer: %s' % wa.answer)
 
 post_save.connect(wrong_answer_message, sender=PuzzleWrongAnswer)
 
@@ -122,31 +122,31 @@ class Puzzle(OrderedModel):
             super(Puzzle, self).save(*args, **kwargs)
 
         if self.answer != old_answer:
-            humbug_send(user='b+status',
-                        stream='p%d' % (self.id,),
-                        subject='solved!',
-                        message=':thumbsup: **%s**' % self.answer)
+            zulip_send(user='b+status',
+                       stream='p%d' % (self.id,),
+                       subject='solved!',
+                       message=':thumbsup: **%s**' % self.answer)
 
-            humbug_send(user='b+status',
-                        stream='status',
-                        subject='solved',
-                        message='Puzzle %s solved' % (self.title,))
+            zulip_send(user='b+status',
+                       stream='status',
+                       subject='solved',
+                       message='Puzzle %s solved' % (self.title,))
 
-def send_puzzle_humbug(**kwargs):
+def send_puzzle_zulip(**kwargs):
     if kwargs['created']:
         puzzle = kwargs['instance']
-        humbug_send(user='b+status',
-                    stream='p%d' % (puzzle.id,),
-                    subject='new',
-                    message='New puzzle "%s"' % (puzzle.title,))
-        humbug_send(user='b+status',
-                    stream='status',
-                    subject='new puzzle',
-                    message='New puzzle [%s](%s) ([p%d](%s))' %
-                    (puzzle.title, puzzle.url, puzzle.id,
-                     settings.BASE_URL + reverse('puzzles.views.puzzle', args=[puzzle.id])))
+        zulip_send(user='b+status',
+                   stream='p%d' % (puzzle.id,),
+                   subject='new',
+                   message='New puzzle "%s"' % (puzzle.title,))
+        zulip_send(user='b+status',
+                   stream='status',
+                   subject='new puzzle',
+                   message='New puzzle [%s](%s) ([p%d](%s))' %
+                   (puzzle.title, puzzle.url, puzzle.id,
+                    settings.BASE_URL + reverse('puzzles.views.puzzle', args=[puzzle.id])))
 
-post_save.connect(send_puzzle_humbug, sender=Puzzle)
+post_save.connect(send_puzzle_zulip, sender=Puzzle)
 
 class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
