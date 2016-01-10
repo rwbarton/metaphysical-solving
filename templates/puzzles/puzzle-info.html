@@ -67,6 +67,9 @@
     {% endfor %}
   </ul>
   {% endif %}
+  {% if answer_callin %}
+  <a id="callinanswer" href="{% url 'puzzles.views.puzzle_call_in_answer' puzzle.id %}">Call in answer</a>
+  {% endif %}
   {% endif %}
   {% if wrong_answers %}
   Wrong answers:

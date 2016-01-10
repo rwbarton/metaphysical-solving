@@ -91,6 +91,7 @@ def puzzle_info(request, puzzle_id):
                 'queued_answers': queued_answers,
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
+                'answer_callin': settings.ANSWER_CALLIN_ENABLED,
                 'refresh': 30
                 }))
 

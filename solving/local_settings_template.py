@@ -39,3 +39,6 @@ HQCONTACT = '555-0123 &nbsp;|&nbsp; ateam@example.com'
 # Zulip server hostname and URL.
 ZULIP_SERVER_HOSTNAME = 'zulip.example.com'
 ZULIP_SERVER_URL = 'https://' + ZULIP_SERVER_HOSTNAME
+
+# Enable answer call-in button?
+ANSWER_CALLIN_ENABLED = False
