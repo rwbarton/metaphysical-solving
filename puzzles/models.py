@@ -8,7 +8,7 @@ from django.conf import settings
 import re
 
 from puzzles.googlespreadsheet import create_google_spreadsheet
-from puzzles.zulip import zulip_send
+from puzzles.zulip import zulip_send, zulip_create_user
 
 class Config(models.Model):
     default_status = models.ForeignKey('Status')
@@ -171,12 +171,34 @@ class UserProfile(models.Model):
 
     location = models.ForeignKey('Location')
 
+class UserZulipStatus(models.Model):
+    user = models.OneToOneField(User)
+
+    NONE = 'none'
+    SUCCESS = 'success'
+    FAILURE = 'failure'
+    STATUS_CHOICES = (
+        (NONE, 'Not created yet'),
+        (SUCCESS, 'Zulip user successfully created'),
+        (FAILURE, 'Zulip user could not be created'),
+        )
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=NONE)
+
 def make_user_profile(**kwargs):
     user = kwargs['instance']
     default_location = Location.objects.get(name='unknown')
     user_profile, _ = UserProfile.objects.get_or_create(
         user=user,
         defaults={'location': default_location})
+    user_zulip_status, _ = UserZulipStatus.objects.get_or_create(user=user)
+    if user_zulip_status.status == UserZulipStatus.NONE \
+            and user.first_name:
+        success = zulip_create_user(user.email, '%s %s' % (user.first_name, user.last_name), user.first_name)
+        if success:
+            user_zulip_status.status = UserZulipStatus.SUCCESS
+        else:
+            user_zulip_status.status = UserZulipStatus.FAILURE
+        user_zulip_status.save()
 
 post_save.connect(make_user_profile, sender=User)
 
