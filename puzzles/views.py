@@ -12,10 +12,11 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django import forms
 
-from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config
+from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, LacrosseTownCrossword
 from forms import UploadForm, AnswerForm
 from django.contrib.auth.models import User
 from django.conf import settings
+from lacrosse_town_crossword import add_crossword_for_puzzle
 
 def get_motd():
     try:
@@ -81,6 +82,22 @@ def puzzle_info(request, puzzle_id):
     queued_answers = puzzle.queuedanswer_set.order_by('-id')
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     uploaded_files = puzzle.uploadedfile_set.order_by('id')
+
+    crosswords = LacrosseTownCrossword.objects.all().filter(puzzle=puzzle, is_deleted=False)
+    collaboration_links = ([
+        {"selected": False, "text": "Spreadsheet",
+            "url": reverse("puzzles.views.puzzle_spreadsheet", args=[puzzle_id]),
+            "id": ""},
+        ] +
+        [ {"selected": False, "text": "Crossword Sheet", "url": crossword.url,
+           "id": str(crossword.id)}
+            for crossword in crosswords ])
+    if len(collaboration_links) > 1:
+        # by default, select the first crossword, if there is at least one
+        collaboration_links[1]["selected"] = True
+    else:
+        collaboration_links[0]["selected"] = True
+
     return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
                 'puzzle': puzzle,
                 'statuses': statuses,
@@ -91,7 +108,9 @@ def puzzle_info(request, puzzle_id):
                 'queued_answers': queued_answers,
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
-                'refresh': 30
+                'refresh': 30,
+                'collaboration_links': collaboration_links,
+                'hide_collaboration_links': len(collaboration_links) == 1,
                 }))
 
 @login_required
@@ -135,6 +154,25 @@ def puzzle_add_solver(request, puzzle_id):
     solver = User.objects.get(id=request.POST['solver'])
     puzzle.solvers.add(solver)
     puzzle.save()
+    return redirect(request.POST['continue'])
+
+@login_required
+def puzzle_add_crossword(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    add_crossword_for_puzzle(puzzle)
+    return redirect(request.POST['continue'])
+
+@login_required
+def puzzle_delete_crossword(request, puzzle_id):
+    # soft delete: just set the `is_deleted` field to True
+    crossword_id = int(request.POST['crossword_id'])
+    crossword = LacrosseTownCrossword.objects.get(id=crossword_id)
+    if crossword.puzzle.id != int(puzzle_id):
+        raise Exception(
+            "puzzle id did not match: crossword_id=%d, puzzle_id=%d, puzzle_id from request=%s" %
+            (crossword_id, crossword.puzzle.id, puzzle_id))
+    crossword.is_deleted = True
+    crossword.save()
     return redirect(request.POST['continue'])
 
 def handle_puzzle_upload(puzzle, name, file):

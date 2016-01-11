@@ -441,6 +441,29 @@ div#answers a#callinanswer:hover {
     padding-left: 10px;
 }
 
+.puzzle-blurb div#add_crossword {
+    display: inline-block;
+    padding-left: 10px;
+}
+
+#delete_crossword_form {
+    padding-left: 200px;
+}
+
+.delete_crossword_form_hidden {
+    display: none;
+}
+
+input[type=button].collaboration_link_button_sel {
+	background-color: #66ffff;
+	border-color: #66ffff;
+	box-shadow: inset;
+}
+
+input[type=button].collaboration_link_button {
+	cursor: pointer;
+}
+
 span.puzzle-title {
     font-weight: bold;
 }

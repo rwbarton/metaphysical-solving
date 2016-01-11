@@ -39,6 +39,13 @@
     </select>
     </div>
 
+    <div id="add_crossword">
+      <form action="{% url 'puzzles.views.puzzle_add_crossword' puzzle.id %}" method="post">{% csrf_token %}
+        <input type="hidden" name="continue" value="{{ path }}" />
+        <input type="submit" value="+ Collabortive Crossword Sheet">
+      </form>
+    </span>
+
     <div id="puzzlefiles">
   <a id="attachfile" href="{% url 'puzzles.views.puzzle_upload' puzzle.id %}">Attach file</a>
   {% if uploaded_files %}Attached files:
@@ -123,5 +130,59 @@
     </form>
   </span>
 </div>
+
+<script type="text/javascript">
+    function collaborationGoTo(target) {
+        // Unselect the previously selected button
+        var currentlySelected = Array.prototype.slice.call(
+            document.getElementsByClassName("collaboration_link_button_sel"));
+        for (var i = 0; i < currentlySelected.length; i++) {
+            currentlySelected[i].setAttribute('class', 'collaboration_link_button')
+            currentlySelected[i].removeAttribute('disabled');
+        }
+
+        // Select the newly-clicked button
+        target.setAttribute('class', 'collaboration_link_button_sel');
+        target.setAttribute('disabled', 'true');
+
+        // Set the frame's source
+        var src = target.getAttribute('data-src');
+        parent.setCollaborationSrc(src);
+
+        // Update the delete button form
+        var crossword_id = target.getAttribute('data-crossword-id');
+        var form = document.getElementById('delete_crossword_form');
+        if (crossword_id == "") {
+            form.setAttribute('class', 'delete_crossword_form_hidden');
+        } else {
+            form.setAttribute('class', '');
+        }
+        document.getElementById('crossword_id_input').value = crossword_id;
+    }
+
+    // Makes sure that all the state is correct for the initially
+    // selected item.
+    window.addEventListener('load', function() {
+        collaborationGoTo(document.getElementsByClassName('collaboration_link_button_sel')[0]);
+    });
+</script>
+<div id="collaboration_links" style="{% if hide_collaboration_links %}display: none{% endif %}">
+    {% for collaboration_link in collaboration_links %}
+        <input type="button"
+            class="{% if collaboration_link.selected %}collaboration_link_button_sel{%else%}collaboration_link_button{%endif%}"
+            onClick="collaborationGoTo(event.target)"
+            value="{{ collaboration_link.text }}"
+            data-src="{{ collaboration_link.url }}"
+            data-crossword-id="{{ collaboration_link.id }}">
+    {% endfor %}
+    <form id="delete_crossword_form" action="{% url 'puzzles.views.puzzle_delete_crossword' puzzle.id %}"
+            method="post" class="delete_crossword_form_hidden"
+            >{% csrf_token %}
+        <input type="hidden" name="continue" value="{{ path }}">
+        <input type="hidden" name="crossword_id" value="" id="crossword_id_input">
+        <input type="submit" value="Delete this crossword sheet">
+    </form>
+</div>
+
 </div>
 {% endblock %}

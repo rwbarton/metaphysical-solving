@@ -3,11 +3,16 @@
 <head>
 <title>{{ title }}</title>
 <link rel="icon" href="{{ STATIC_URL }}img/favicon.ico" />
+<script type="text/javascript">
+	function setCollaborationSrc(src) {
+		document.getElementById('collaboration_frame').setAttribute('src', src);
+	}
+</script>
 </head>
 <frameset rows="150px,*" title="{{ title }}">
   <frame src="{% url 'puzzles.views.puzzle_info' id %}" />
   <frameset cols="*,390px">
-    <frame src="{% url 'puzzles.views.puzzle_spreadsheet' id %}" />
+    <frame src="{% url 'puzzles.views.puzzle_spreadsheet' id %}" id="collaboration_frame" />
     <frame src="{% url 'puzzles.views.puzzle_chat' id %}" />
   </frameset>
 </frameset>

@@ -166,6 +166,14 @@ class Location(OrderedModel):
     def __unicode__(self):
         return self.name
 
+class LacrosseTownCrossword(OrderedModel):
+    puzzle = models.ForeignKey('Puzzle')
+    url = models.CharField(max_length=200)
+    is_deleted = models.BooleanField()
+
+    def __unicode__(self):
+        return self.url
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 

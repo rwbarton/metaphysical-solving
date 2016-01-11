@@ -18,6 +18,8 @@ urlpatterns = patterns('',
     url(r'^puzzle/set_priority/(\d+)/$', 'puzzles.views.puzzle_set_priority'),
     url(r'^puzzle/remove_solver/(\d+)/$', 'puzzles.views.puzzle_remove_solver'),
     url(r'^puzzle/add_solver/(\d+)/$', 'puzzles.views.puzzle_add_solver'),
+    url(r'^puzzle/add_crossword/(\d+)/$', 'puzzles.views.puzzle_add_crossword'),
+    url(r'^puzzle/delete_crossword/(\d+)/$', 'puzzles.views.puzzle_delete_crossword'),
     url(r'^puzzle/upload/(\d+)/$', 'puzzles.views.puzzle_upload'),
     url(r'^puzzle/call_in_answer/(\d+)/$', 'puzzles.views.puzzle_call_in_answer'),
 
