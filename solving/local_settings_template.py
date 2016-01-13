@@ -46,3 +46,5 @@ ZULIP_SERVER_URL = 'https://' + ZULIP_SERVER_HOSTNAME
 import random
 ZULIP_HOSTNAME_BALANCING = lambda: 'https://e%d.%s' % (
     random.randint(1, 100), ZULIP_SERVER_HOSTNAME)
+
+LACROSSE_TOWN_CROSSWORD_DOMAIN = 'http://enigmatic-mountain-8851.herokuapp.com'
