@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from puzzles.models import Puzzle, Status, QueuedAnswer, PuzzleWrongAnswer
 
 import sys
+from datetime import datetime
 
 from puzzles import puzzlelogin
 
@@ -23,6 +24,8 @@ class Command(BaseCommand):
     help = "Visit call-in pages and update answers in database accordingly"
 
     def handle(self, *args, **kwargs):
+        print "Beginning answerscrape run at " + datetime.now().isoformat()
+
         puzzles = Puzzle.objects.all().order_by('id')
         for puzzle in puzzles:
             if puzzle.status == solved_status:
@@ -68,3 +71,5 @@ class Command(BaseCommand):
                         if mode == 'wrong' and puzzle.status != solved_status:
                             print 'WRONG ' + puzzle.title + ' = ' + rest
                             PuzzleWrongAnswer.objects.get_or_create(puzzle=puzzle, answer=rest)
+
+        print "Finished answerscrape run"
