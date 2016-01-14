@@ -151,7 +151,7 @@ class Puzzle(OrderedModel):
             zulip_send(user='b+status',
                        stream='status',
                        subject='solved',
-                       message='Puzzle %s solved' % (self.title,))
+                       message='Puzzle %s solved [%s]' % (self.title, ', '.join(str(tag) for tag in self.tags.all())))
 
 def send_puzzle_zulip(**kwargs):
     if kwargs['created']:
