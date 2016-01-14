@@ -6,18 +6,6 @@ from datetime import datetime
 
 from puzzles import puzzlelogin
 
-def submit_url(url):
-    puzzle_prefix = 'http://www.20000puzzles.com/puzzle/'
-    puzzle_replacement = 'http://www.20000puzzles.com/submit/puzzle/'
-
-    if url.startswith(puzzle_prefix):
-        return puzzle_replacement + url[len(puzzle_prefix):]
-
-    if not url.endswith('/'):
-        url = url + '/'
-
-    return None
-
 solved_status = Status.objects.get(text='solved!')
 
 class Command(BaseCommand):
@@ -30,7 +18,7 @@ class Command(BaseCommand):
         for puzzle in puzzles:
             if puzzle.status == solved_status:
                 continue
-            answer_url = submit_url(puzzle.url)
+            answer_url = puzzle.checkAnswerLink
             if answer_url is None:
                 continue
 
