@@ -206,7 +206,7 @@ def puzzle_call_in_answer(request, puzzle_id):
         callback_phone = Config.objects.get().callback_phone
         form = AnswerForm(initial={'phone': callback_phone})
         if callback_phone:
-            form.fields['phone'].widget = forms.HiddenInput()
+            form.fields['phone'].initial = callback_phone
     return render_to_response('puzzles/puzzle-call-in-answer.html', puzzle_context(request, {
                 'form': form,
                 'puzzle': puzzle
