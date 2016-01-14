@@ -3,6 +3,7 @@ import django.db.utils
 from puzzles.models import Puzzle, Tag, AutoTag, TagList
 
 from lxml import etree
+import urlparse
 from datetime import datetime
 
 from puzzles import puzzlelogin
@@ -11,10 +12,21 @@ def create_puzzle(title, url, tag):
     try:
         existing_puzzle = Puzzle.objects.get(title=title, url=url)
     except Puzzle.DoesNotExist:
+        # Look for Submit Answer link
+        puzzle_page = puzzlelogin.fetch_with_single_login(url)
+        doc = etree.HTML(puzzle_page)
+
+        answer_links = doc.xpath("//ul[@class='nav navbar-nav navbar-right']/li/a[text()='Submit Answer']")
+        if len(answer_links) == 1:
+            answer_link = answer_links[0]
+            checkAnswerLink = urlparse.urljoin(url, answer_link.get('href'))
+        else:
+            checkAnswerLink = None
+
         try:
-            puzzle_object = Puzzle.objects.create(title=title, url=url)
+            puzzle_object = Puzzle.objects.create(title=title, url=url, checkAnswerLink=checkAnswerLink)
             puzzle_object.tags.add(Tag.objects.get(name=tag))
-            print "Created puzzle (%s, %s)" % (title, url)
+            print "Created puzzle (%s, %s, %s)" % (title, url, checkAnswerLink)
         except django.db.utils.IntegrityError:
             # puzzle already exists (race)
             pass
