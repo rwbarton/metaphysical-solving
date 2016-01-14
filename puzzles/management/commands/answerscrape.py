@@ -2,7 +2,8 @@ from django.core.management.base import BaseCommand
 from puzzles.models import Puzzle, Status, QueuedAnswer, PuzzleWrongAnswer
 
 import sys
-import requests
+
+from puzzles import puzzlelogin
 
 def submit_url(url):
     puzzle_prefix = 'http://www.20000puzzles.com/puzzle/'
@@ -15,8 +16,6 @@ def submit_url(url):
         url = url + '/'
 
     return None
-
-password = open('/etc/puzzle/site-password', 'r').read().rstrip()
 
 solved_status = Status.objects.get(text='solved!')
 
@@ -32,16 +31,13 @@ class Command(BaseCommand):
             if answer_url is None:
                 continue
 
-            r = requests.get(answer_url, auth=('plant', password))
-            if r.status_code != 200:
-                print r.text
-                sys.exit(1)
+            text = puzzlelogin.fetch_with_single_login(answer_url)
 
             QueuedAnswer.objects.filter(puzzle=puzzle).delete()
 
             mode = 'none'
             skip = True
-            for l in r.text.split('\n'):
+            for l in text.split('\n'):
                 solved_prefix = '      Solved! Answer: <b>'
                 solved_suffix = '</b><br>'
                 if l.startswith(solved_prefix) and l.endswith(solved_suffix):
@@ -53,7 +49,7 @@ class Command(BaseCommand):
 
                 if l == '      <h3>In the Queue:</h3>':
                     mode = 'queued'
-                if l == '      <h3>Previous Attempts:</h3>':
+                if l == '      <h3>Previous Answers Submitted:</h3>':
                     mode = 'wrong'
 
                 non_answer_prefix = '\t  <td>'

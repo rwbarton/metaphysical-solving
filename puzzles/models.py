@@ -48,6 +48,13 @@ class Tag(OrderedModel):
     def __unicode__(self):
         return self.name
 
+class AutoTag(models.Model):
+    html_name = models.CharField(max_length=200)
+    tag = models.ForeignKey('Tag')
+
+    def __unicode__(self):
+        return self.html_name
+
 class QueuedAnswer(models.Model):
     # An answer that's not wrong yet!
     puzzle = models.ForeignKey('Puzzle')

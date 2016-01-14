@@ -1,11 +1,10 @@
 from django.core.management.base import BaseCommand
 import django.db.utils
-from puzzles.models import Puzzle, Tag
+from puzzles.models import Puzzle, Tag, AutoTag, TagList
 
-import requests
 from lxml import etree
 
-password = open('/etc/puzzle/site-password', 'r').read().rstrip()
+from puzzles import puzzlelogin
 
 def create_puzzle(title, url, tag):
     try:
@@ -18,6 +17,13 @@ def create_puzzle(title, url, tag):
             # puzzle already exists (race)
             pass
 
+def add_tag_to_taglist(tag, taglist_name):
+    taglist = TagList.objects.get(name=taglist_name)
+    taglist.tags.add(tag)
+    taglist.save()
+
+def html_to_tag(html):
+    return html.lower()
 
 class Command(BaseCommand):
     help = "Visit Hunt Overview and create new puzzles"
@@ -25,14 +31,11 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         overview_url = 'http://www.20000puzzles.com/toc.html'
 
-        r = requests.get(overview_url, auth=('plant', password))
-        if r.status_code != 200:
-            print r.text
-            sys.exit(1)
+        text = puzzlelogin.fetch_with_single_login(overview_url)
+        doc = etree.HTML(text)
 
-        doc = etree.HTML(r.text)
-
-        puzzles = doc.xpath("//div[@class='form-container nav-related-container']/ul/li/a[1]")
+        print text
+        puzzles = doc.xpath("//div[@class='form-container nav-related-container']/ul/li/a")
         for puzzle in puzzles:
             title = puzzle.text
             url = puzzle.get('href')
@@ -44,44 +47,16 @@ class Command(BaseCommand):
 
             print title, url, rnd
 
-            if rnd == 'Machine Room':
-                create_puzzle(title=title, url=url, tag='machine room')
+            try:
+                auto_tag = AutoTag.objects.get(html_name=rnd)
+                tag = auto_tag.tag
+            except AutoTag.DoesNotExist:
+                tag, created = Tag.objects.get_or_create(name=html_to_tag(rnd))
+                auto_tag, _ = AutoTag.objects.get_or_create(html_name=rnd, tag=tag)
+                if created:
+                    add_tag_to_taglist(tag, 'unsolved rounds')
+                    add_tag_to_taglist(tag, 'all rounds')
 
-            if rnd == 'Optics Lab':
-                create_puzzle(title=title, url=url, tag='optics lab')
+            create_puzzle(title=title, url=url, tag=tag)
 
-            if rnd == 'Chemistry Lab':
-                create_puzzle(title=title, url=url, tag='chemistry lab')
-
-            if rnd == 'School of Fish':
-                create_puzzle(title=title, url=url, tag='school of fish')
-
-            if rnd == 'Pod of Dolphins':
-                create_puzzle(title=title, url=url, tag='pod of dolphins')
-
-            if rnd == 'Coral Reef':
-                create_puzzle(title=title, url=url, tag='coral reef')
-
-            if rnd == 'Treasure Chest':
-                create_puzzle(title=title, url=url, tag='treasure chest')
-
-            if rnd == 'Graveyard':
-                create_puzzle(title=title, url=url, tag='graveyard')
-
-            if rnd == 'Aquatic Acquaintances':
-                create_puzzle(title=title, url=url, tag='aquatic acquaintances')
-
-            if rnd == 'Colorful Tower':
-                create_puzzle(title=title, url=url, tag='colorful tower')
-
-            if rnd == 'Spotted Tower':
-                create_puzzle(title=title, url=url, tag='spotted tower')
-
-            if rnd == 'Spiky Tower':
-                create_puzzle(title=title, url=url, tag='spiky tower')
-
-            if rnd == 'Golden Tower':
-                create_puzzle(title=title, url=url, tag='golden tower')
-
-            if rnd == 'Hunt Round (Metametas)':
-                create_puzzle(title=title, url=url, tag='metameta')
+        print "The end"
