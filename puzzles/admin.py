@@ -14,12 +14,17 @@ admin.site.register(Tag, ItemAdmin)
 admin.site.register(TagList, ItemAdmin)
 admin.site.register(Location, ItemAdmin)
 class PuzzleAdmin(OrderedModelAdmin):
-    list_display = ('title', 'move_up_down_links')
+    list_display = ('title', 'status', 'priority', 'answer', 'move_up_down_links')
+    list_filter = ('status', 'priority')
+    search_fields = ('title', 'answer')
 admin.site.register(Puzzle, PuzzleAdmin)
 
 admin.site.register(PuzzleWrongAnswer)
 class SubmittedAnswerAdmin(admin.ModelAdmin):
     list_display = ('puzzle', 'answer', 'user', 'backsolved', 'success', 'timestamp')
+    list_filter = ('timestamp', 'backsolved', 'success')
+    search_fields = ('answer',)
+    ordering = ('-timestamp',)
 
 admin.site.register(SubmittedAnswer, SubmittedAnswerAdmin)
 admin.site.register(AutoTag)
