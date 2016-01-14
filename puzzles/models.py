@@ -77,6 +77,9 @@ class SubmittedAnswer(models.Model):
     success = models.BooleanField(default=False)
     response = models.TextField(default='')
 
+    def __unicode__(self):
+        return '%s: %s' % (self.puzzle.title, self.answer)
+
 class PuzzleWrongAnswer(models.Model):
     puzzle = models.ForeignKey('Puzzle')
     answer = models.CharField(max_length=200)
