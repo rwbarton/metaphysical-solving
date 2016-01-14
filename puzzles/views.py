@@ -12,8 +12,10 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django import forms
 
-from models import Status, Priority, Tag, QueuedAnswer, PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config
+from models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
+    PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config
 from forms import UploadForm, AnswerForm
+from submit import submit_answer
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -166,7 +168,13 @@ def puzzle_upload(request, puzzle_id):
                 'puzzle': puzzle
                 }))
 
-def handle_puzzle_answer(puzzle, answer, phone):
+def handle_puzzle_answer(puzzle, user, answer, backsolved, phone):
+    submission = SubmittedAnswer.objects.create(
+        puzzle=puzzle, user=user, answer=answer,
+        backsolved=backsolved, phone=phone)
+    submit_answer(submission)
+    submission.success = True
+    submission.save()
     QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
 
 @login_required
@@ -200,7 +208,7 @@ def puzzle_call_in_answer(request, puzzle_id):
     if request.method == 'POST':
         form = AnswerForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_puzzle_answer(puzzle, form.cleaned_data['answer'], form.cleaned_data['phone'])
+            handle_puzzle_answer(puzzle, request.user, form.cleaned_data['answer'], form.cleaned_data['backsolved'], form.cleaned_data['phone'])
             return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
     else:
         callback_phone = Config.objects.get().callback_phone

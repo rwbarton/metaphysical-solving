@@ -6,4 +6,8 @@ class UploadForm(forms.Form):
 
 class AnswerForm(forms.Form):
     answer = forms.CharField(max_length=200)
-    phone = forms.CharField(max_length=64)
+
+    # The default required=True means you have to check the box...
+    backsolved = forms.BooleanField(label="Backsolved?", required=False)
+
+    phone = forms.CharField(max_length=30)

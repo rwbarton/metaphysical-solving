@@ -66,6 +66,17 @@ class QueuedAnswer(models.Model):
     def __unicode__(self):
         return 'answer "%s" for puzzle "%s"' % (self.answer, self.puzzle.title)
 
+class SubmittedAnswer(models.Model):
+    puzzle = models.ForeignKey('Puzzle')
+    user = models.ForeignKey(User)
+    answer = models.CharField(max_length=200)
+    backsolved = models.BooleanField()
+    phone = models.CharField(max_length=30)
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+    success = models.BooleanField(default=False)
+    response = models.TextField(default='')
+
 class PuzzleWrongAnswer(models.Model):
     puzzle = models.ForeignKey('Puzzle')
     answer = models.CharField(max_length=200)
