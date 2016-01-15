@@ -169,9 +169,9 @@ def puzzle_upload(request, puzzle_id):
                 }))
 
 def handle_puzzle_answer(puzzle, user, answer, backsolved, phone):
-    # submission = SubmittedAnswer.objects.create(
-    #     puzzle=puzzle, user=user, answer=answer,
-    #     backsolved=backsolved, phone=phone)
+    submission = SubmittedAnswer.objects.create(
+        puzzle=puzzle, user=user, answer=answer,
+        backsolved=backsolved, phone=phone)
     # submit_answer(submission)
     # submission.success = True
     # submission.save()
