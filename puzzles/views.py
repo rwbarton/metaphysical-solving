@@ -93,7 +93,7 @@ def puzzle_info(request, puzzle_id):
                 'queued_answers': queued_answers,
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
-                'answer_callin': settings.ANSWER_CALLIN_ENABLED and puzzle.checkAnswerLink,
+                'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
                 'refresh': 30
                 }))
 
@@ -169,12 +169,12 @@ def puzzle_upload(request, puzzle_id):
                 }))
 
 def handle_puzzle_answer(puzzle, user, answer, backsolved, phone):
-    submission = SubmittedAnswer.objects.create(
-        puzzle=puzzle, user=user, answer=answer,
-        backsolved=backsolved, phone=phone)
-    submit_answer(submission)
-    submission.success = True
-    submission.save()
+    # submission = SubmittedAnswer.objects.create(
+    #     puzzle=puzzle, user=user, answer=answer,
+    #     backsolved=backsolved, phone=phone)
+    # submit_answer(submission)
+    # submission.success = True
+    # submission.save()
     QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
 
 @login_required
