@@ -169,13 +169,13 @@ def puzzle_upload(request, puzzle_id):
                 }))
 
 def handle_puzzle_answer(puzzle, user, answer, backsolved, phone):
+    QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
     submission = SubmittedAnswer.objects.create(
         puzzle=puzzle, user=user, answer=answer,
         backsolved=backsolved, phone=phone)
-    # submit_answer(submission)
-    # submission.success = True
-    # submission.save()
-    QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
+    submit_answer(submission)
+    submission.success = True
+    submission.save()
 
 @login_required
 def answer_submit_result(request, answer_id, result):
