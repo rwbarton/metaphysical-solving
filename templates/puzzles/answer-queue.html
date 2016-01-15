@@ -16,7 +16,7 @@
       {% for queued_answer in queued_answers %}
       <tr class="puzzle-list-regular">
 	<td class="puzzle-list-puzzle">
-	  {{ queued_answer.puzzle.title }}
+	  <a href="{{ queued_answer.puzzle.url }}">{{ queued_answer.puzzle.title }}</a>
 	</td>
 	<td class="puzzle-list-status">
 	  <span class="puzzle-answer">

@@ -199,7 +199,8 @@ def handle_puzzle_answer_result(puzzle, answer, result):
 @login_required
 def answer_queue(request):
     return render_to_response('puzzles/answer-queue.html', RequestContext(request, {
-                'queued_answers': QueuedAnswer.objects.all()
+                'queued_answers': QueuedAnswer.objects.all(),
+                'refresh': 5
                 }))
 
 @login_required
