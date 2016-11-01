@@ -2,7 +2,7 @@ import gdata.docs.data
 import gdata.docs.client
 import gdata.acl.data
 import json
-from oauth2client.client import SignedJwtAssertionCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 _google_config = None
@@ -16,8 +16,8 @@ def get_google_config():
 
 def create_google_spreadsheet(title):
     google_config = get_google_config()
-    scope = ['https://spreadsheets.google.com/feeds', 'https://docs.google.com/feeds']
-    credentials = SignedJwtAssertionCredentials(google_config['client_email'], google_config['private_key'].encode(), scope)
+    scopes = ['https://spreadsheets.google.com/feeds', 'https://docs.google.com/feeds']
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(google_config, scopes=scopes)
     client = gdata.docs.client.DocsClient(source=google_config['project_id'])
     token = gdata.gauth.OAuth2TokenFromCredentials(credentials)
     token.authorize(client)

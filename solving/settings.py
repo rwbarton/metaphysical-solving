@@ -106,15 +106,15 @@ ROOT_URLCONF = 'solving.urls'
 LOGIN_URL = '/login/google-oauth2/'
 LOGIN_REDIRECT_URL = '/'
 
-GOOGLE_OAUTH2_CLIENT_ID      = open('/etc/puzzle/google-oauth2-client-id').read().strip()
-GOOGLE_OAUTH2_CLIENT_SECRET  = open('/etc/puzzle/google-oauth2-client-secret').read().strip()
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY    = open('/etc/puzzle/google-oauth2-client-id').read().strip()
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = open('/etc/puzzle/google-oauth2-client-secret').read().strip()
 
 SOCIAL_AUTH_ENABLED_BACKENDS = ('google-oauth2',)
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 AUTHENTICATION_BACKENDS = (
-    'social_auth.backends.google.GoogleOAuth2Backend',
+    'social.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -129,30 +129,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'social_auth',
+    'social.apps.django_app.default',
     'ordered_model',
     'puzzles'
 )
-
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    }
-}
