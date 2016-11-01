@@ -7,6 +7,9 @@ import binascii
 from django.conf import settings
 
 def zulip_send(user, stream, subject, message):
+    if not os.path.exists('/etc/puzzle/zulip/b+logger.conf'):
+        return
+
     print (user, stream, subject, message)
     # Need to wait for this one to finish so that we know the stream exists (blargh).
     subprocess.check_call([os.path.join(settings.PROJECT_ROOT,"zulip/api/examples/subscribe"),
