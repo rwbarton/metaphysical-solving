@@ -123,6 +123,9 @@ class Puzzle(OrderedModel):
         else:
             return {'status': self.status}
 
+    def zulip_stream(self):
+        return 'p%d' % (self.id,)
+
     def save(self, *args, **kwargs):
         # Grab old instance to see if our answer is new.
         try:
@@ -144,7 +147,7 @@ class Puzzle(OrderedModel):
 
         if self.answer != old_answer:
             zulip_send(user='b+status',
-                       stream='p%d' % (self.id,),
+                       stream=self.zulip_stream(),
                        subject='solved!',
                        message=':thumbsup: **%s**' % self.answer)
 
@@ -157,7 +160,7 @@ def send_puzzle_zulip(**kwargs):
     if kwargs['created']:
         puzzle = kwargs['instance']
         zulip_send(user='b+status',
-                   stream='p%d' % (puzzle.id,),
+                   stream=puzzle.zulip_stream(),
                    subject='new',
                    message='New puzzle "%s"' % (puzzle.title,))
         zulip_send(user='b+status',
