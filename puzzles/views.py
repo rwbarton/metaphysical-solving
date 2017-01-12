@@ -16,6 +16,7 @@ from models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
     PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config
 from forms import UploadForm, AnswerForm
 from submit import submit_answer
+from zulip import zulip_send
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -176,6 +177,9 @@ def handle_puzzle_answer(puzzle, user, answer, backsolved, phone):
     submit_answer(submission)
     submission.success = True
     submission.save()
+    zulip_send('b+status', puzzle.zulip_stream(), 'Calling in...',
+               ':telephone_receiver: %s %s called in %s' %
+               (user.first_name, user.last_name, answer))
 
 @login_required
 def answer_submit_result(request, answer_id, result):
