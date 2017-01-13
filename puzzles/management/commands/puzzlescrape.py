@@ -8,7 +8,7 @@ from datetime import datetime
 
 from puzzles import puzzlelogin
 
-def create_puzzle(title, url, tag):
+def create_puzzle(title, url, tag, is_meta=False):
     try:
         existing_puzzle = Puzzle.objects.get(title=title, url=url)
     except Puzzle.DoesNotExist:
@@ -26,6 +26,8 @@ def create_puzzle(title, url, tag):
         try:
             puzzle_object = Puzzle.objects.create(title=title, url=url, checkAnswerLink=checkAnswerLink)
             puzzle_object.tags.add(Tag.objects.get(name=tag))
+            if is_meta:
+                puzzle_object.tags.add(Tag.objects.get(name='metas'))
             print "Created puzzle (%s, %s, %s)" % (title, url, checkAnswerLink)
         except django.db.utils.IntegrityError:
             # puzzle already exists (race)
@@ -49,6 +51,25 @@ class Command(BaseCommand):
 
         text = puzzlelogin.fetch_with_single_login(overview_url)
         doc = etree.HTML(text)
+
+        rnds = doc.xpath("//div[@class='round-list-header']/a")
+        for rnd in rnds:
+            title = rnd.text + ' Meta'
+            rnd_name = rnd.text
+            url = rnd.get('href')
+            url = 'https://monsters-et-manus.com' + url
+
+            try:
+                auto_tag = AutoTag.objects.get(html_name=rnd)
+                tag = auto_tag.tag
+            except AutoTag.DoesNotExist:
+                tag, created = Tag.objects.get_or_create(name=html_to_tag(rnd_name))
+                auto_tag, _ = AutoTag.objects.get_or_create(html_name=rnd, tag=tag)
+                if created:
+                    add_tag_to_taglist(tag, 'unsolved rounds')
+                    add_tag_to_taglist(tag, 'all rounds')
+
+            create_puzzle(title=title, url=url, tag=tag, is_meta=True)
 
         puzzles = doc.xpath("//div[@class='puzzle-list-item']/a")
         for puzzle in puzzles:
