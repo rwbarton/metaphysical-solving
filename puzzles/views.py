@@ -71,7 +71,7 @@ def puzzle(request, puzzle_id):
 
 @login_required
 def puzzle_info(request, puzzle_id):
-    puzzle = Puzzle.objects.get(id=puzzle_id)
+    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
     solvers = puzzle.solvers.order_by('first_name', 'last_name')
