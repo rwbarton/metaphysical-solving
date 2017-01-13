@@ -16,12 +16,12 @@ def create_puzzle(title, url, tag):
         puzzle_page = puzzlelogin.fetch_with_single_login(url)
         doc = etree.HTML(puzzle_page)
 
-        answer_links = doc.xpath("//ul[@class='nav navbar-nav navbar-right']/li/a[text()='Submit Answer']")
+        answer_links = doc.xpath("//div[@class='submit']/a[text()='Check answer']")
         if len(answer_links) == 1:
             answer_link = answer_links[0]
             checkAnswerLink = urlparse.urljoin(url, answer_link.get('href'))
         else:
-            checkAnswerLink = None
+            checkAnswerLink = ''
 
         try:
             puzzle_object = Puzzle.objects.create(title=title, url=url, checkAnswerLink=checkAnswerLink)
@@ -43,21 +43,19 @@ class Command(BaseCommand):
     help = "Visit Hunt Overview and create new puzzles"
 
     def handle(self, *args, **kwargs):
-        overview_url = 'http://www.20000puzzles.com/toc.html'
+        overview_url = 'https://monsters-et-manus.com/puzzle'
 
         print "Beginning puzzlescrape run at " + datetime.now().isoformat()
 
         text = puzzlelogin.fetch_with_single_login(overview_url)
         doc = etree.HTML(text)
 
-        puzzles = doc.xpath("//div[@class='form-container nav-related-container']/ul/li/a")
+        puzzles = doc.xpath("//div[@class='puzzle-list-item']/a")
         for puzzle in puzzles:
             title = puzzle.text
             url = puzzle.get('href')
-            url = 'http://www.20000puzzles.com' + url + '/'
-            rnd = puzzle.getparent().getparent()
-            while rnd.tag != 'h2':
-                rnd = rnd.getprevious()
+            url = 'https://monsters-et-manus.com' + url
+            rnd = puzzle.getparent().getparent().getchildren()[0].getchildren()[0]
             rnd = rnd.text
 
             try:
