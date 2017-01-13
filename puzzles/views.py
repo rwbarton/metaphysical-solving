@@ -205,8 +205,9 @@ def answer_queue(request):
     qas = QueuedAnswer.objects.all()
     for qa in qas:
         try:
-            SubmittedAnswer.objects.get(puzzle=qa.puzzle, answer=qa.answer, success=True)
+            sa = SubmittedAnswer.objects.get(puzzle=qa.puzzle, answer=qa.answer, success=True)
             qa.success = True
+            qa.user = sa.user
         except Exception:
             qa.success = False
     return render_to_response('puzzles/answer-queue.html', RequestContext(request, {
