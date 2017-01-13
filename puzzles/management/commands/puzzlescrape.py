@@ -16,7 +16,7 @@ def create_puzzle(title, url, tag):
         puzzle_page = puzzlelogin.fetch_with_single_login(url)
         doc = etree.HTML(puzzle_page)
 
-        answer_links = doc.xpath("//div[@class='submit']/a[text()='Check answer']")
+        answer_links = doc.xpath("//div[@id='submit']/a[text()='Check answer']")
         if len(answer_links) == 1:
             answer_link = answer_links[0]
             checkAnswerLink = urlparse.urljoin(url, answer_link.get('href'))
