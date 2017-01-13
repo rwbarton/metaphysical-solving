@@ -8,9 +8,10 @@ _br = None
 
 def get_logged_in_browser():
     br = mechanize.Browser()
-    r = br.open('http://20000puzzles.com/accounts/login/')
+    br.set_handle_robots(False)
+    r = br.open('https://monsters-et-manus.com/login')
 
-    br.select_form(nr=1)
+    br.select_form(nr=0)
     br['username'] = username
     br['password'] = password
     br.submit()
