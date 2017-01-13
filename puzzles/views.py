@@ -54,7 +54,7 @@ def overview_by(request, taglist_id):
                     }
                      for tag in tags),
             'default_priority': Config.objects.get().default_priority,
-            'refresh': 60
+            'refresh': 120
             })
     return render_to_response("puzzles/overview.html", context)
 
@@ -95,7 +95,7 @@ def puzzle_info(request, puzzle_id):
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
                 'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
-                'refresh': 30
+                'refresh': 60
                 }))
 
 @login_required
