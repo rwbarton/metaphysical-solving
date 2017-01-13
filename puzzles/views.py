@@ -169,12 +169,12 @@ def puzzle_upload(request, puzzle_id):
                 'puzzle': puzzle
                 }))
 
-def handle_puzzle_answer(puzzle, user, answer, backsolved, phone, request):
+def handle_puzzle_answer(puzzle, user, answer, backsolved, phone):
     QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
     submission = SubmittedAnswer.objects.create(
         puzzle=puzzle, user=user, answer=answer,
         backsolved=backsolved, phone=phone)
-    submit_answer(submission, request)
+    submit_answer(submission, False)
     submission.success = True
     submission.save()
     zulip_send('b+status', puzzle.zulip_stream(), 'Calling in...',
@@ -221,7 +221,7 @@ def puzzle_call_in_answer(request, puzzle_id):
     if request.method == 'POST':
         form = AnswerForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_puzzle_answer(puzzle, request.user, form.cleaned_data['answer'], form.cleaned_data['backsolved'], form.cleaned_data['phone'], request=form.cleaned_data['request'])
+            handle_puzzle_answer(puzzle, request.user, form.cleaned_data['answer'], form.cleaned_data['backsolved'], form.cleaned_data['phone'])
             return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
     else:
         callback_phone = Config.objects.get().callback_phone
