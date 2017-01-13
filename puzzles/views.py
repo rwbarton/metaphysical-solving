@@ -50,7 +50,7 @@ def overview_by(request, taglist_id):
             'active_taglist_id': taglist_id,
             'tags': ({
                     'name': tag.name,
-                    'puzzles': Tag.objects.get(id=tag.id).puzzle_set.all()
+                    'puzzles': Tag.objects.get(id=tag.id).puzzle_set.select_related().all()
                     }
                      for tag in tags),
             'default_priority': Config.objects.get().default_priority,
