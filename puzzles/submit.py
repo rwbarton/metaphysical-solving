@@ -6,9 +6,12 @@ import re
 
 def submit_answer(submission, is_request):
     puzzle = submission.puzzle
-    check_answer = re.sub('https://monsters-et-manus.com/',
-                          'https://monsters-et-manus.com/submit/',
-                          puzzle.url)
+    if puzzle.checkAnswerLink:
+        check_answer = puzzle.checkAnswerLink
+    else:
+        check_answer = re.sub('https://monsters-et-manus.com/',
+                              'https://monsters-et-manus.com/submit/',
+                              puzzle.url)
 
     br = puzzlelogin.get_logged_in_browser()
     br.open(check_answer)
