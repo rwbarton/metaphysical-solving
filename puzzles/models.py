@@ -149,7 +149,7 @@ class Puzzle(OrderedModel):
             zulip_send(user='b+status',
                        stream=self.zulip_stream(),
                        subject='solved!',
-                       message=':thumbsup: **%s**' % self.answer)
+                       message=':thumbs_up: **%s**' % self.answer)
 
             zulip_send(user='b+status',
                        stream='status',
