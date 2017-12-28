@@ -45,7 +45,7 @@ class Command(BaseCommand):
         testing_taglist.tags = [Tag.objects.get(name='testing')]
         testing_taglist.save()
 
-        default_locations = ['Cambridge', 'remote']
+        default_locations = ['Cambridge', 'remote', 'unknown']
         Location.objects.all().delete()
         for location_name in default_locations:
             Location(name=location_name).save()
