@@ -1,7 +1,6 @@
 import random
 import os
 import os.path
-import re
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, redirect
@@ -171,38 +170,20 @@ def puzzle_upload(request, puzzle_id):
                 }))
 
 def handle_puzzle_answer(puzzle, user, answer, backsolved, phone):
-    queued_answer, _ = QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
+    QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
     submission = SubmittedAnswer.objects.create(
         puzzle=puzzle, user=user, answer=answer,
         backsolved=backsolved, phone=phone)
-    submit_answer(submission)
+    submit_answer(submission, False)
     submission.success = True
     submission.save()
     zulip_send('b+status', puzzle.zulip_stream(), 'Calling in...',
                ':telephone_receiver: %s %s called in %s' %
                (user.first_name, user.last_name, answer))
 
-    # GPH: Answer is actually in the page javascript;
-    # process the queued answer accordingly
-    m = re.search('right_answer = \'([A-Z]+)\'', submission.response)
-    if m is None:
-        return
-    correct_answer = m.groups()[0]
-    def normalize_answer(ans):
-        return ''.join(c for c in ans.upper() if 'A' <= c and c <= 'Z')
-    if normalize_answer(correct_answer) == normalize_answer(answer):
-        print(normalize_answer(correct_answer), normalize_answer(answer))
-        result = 'correct'
-    else:
-        result = 'incorrect'
-    do_answer_submit_result(queued_answer, result)
-
 @login_required
 def answer_submit_result(request, answer_id, result):
     queued_answer = QueuedAnswer.objects.get(id=answer_id)
-    return do_answer_submit_result(queued_answer, result)
-
-def do_answer_submit_result(queued_answer, result):
     handle_puzzle_answer_result(queued_answer.puzzle, queued_answer.answer, result)
     queued_answer.delete()
     return redirect(reverse('puzzles.views.answer_queue'))
