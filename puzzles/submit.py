@@ -5,6 +5,8 @@ import mechanize
 import re
 
 def submit_answer(submission, is_request):
+    return
+
     puzzle = submission.puzzle
     check_answer = re.sub('https://head-hunters.org/',
                           'https://head-hunters.org/submit/',
