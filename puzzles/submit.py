@@ -5,11 +5,9 @@ import mechanize
 import re
 
 def submit_answer(submission, is_request):
-    return
-
     puzzle = submission.puzzle
-    check_answer = re.sub('https://head-hunters.org/',
-                          'https://head-hunters.org/submit/',
+    check_answer = re.sub('https://molasses.holiday/',
+                          'https://molasses.holiday/submit/',
                           puzzle.url)
 
     br = puzzlelogin.get_logged_in_browser()
