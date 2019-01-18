@@ -45,6 +45,15 @@ def overview_by(request, taglist_id):
 
     tags = TagList.objects.get(id=taglist_id).tags.all()
 
+    assigned_puzzles = {}
+    unassigned_only = TagList.objects.get(id=taglist_id).name == 'unassigned'
+    if unassigned_only:
+        assigned_tags = TagList.objects.get(name='assigned').tags.all()
+        for atag in assigned_tags:
+            puzzles = atag.puzzle_set.select_related().all()
+            for p in puzzles:
+                assigned_puzzles[p.id] = True
+
     context = puzzle_context(request, {
             'taglists': taglists,
             'active_taglist_id': taglist_id,
@@ -53,6 +62,8 @@ def overview_by(request, taglist_id):
                     'puzzles': Tag.objects.get(id=tag.id).puzzle_set.select_related().all()
                     }
                      for tag in tags),
+            'assigned_puzzles': assigned_puzzles,
+            'unassigned_only': unassigned_only,
             'default_priority': Config.objects.get().default_priority,
             'refresh': 120
             })
