@@ -178,7 +178,7 @@ def handle_puzzle_answer(puzzle, user, answer, backsolved, phone, request):
     submission.success = True
     submission.save()
     zulip_send('b+status', puzzle.zulip_stream(), 'Calling in...',
-               ':telephone_receiver: %s %s called in %s' %
+               ':telephone: %s %s called in %s' %
                (user.first_name, user.last_name, answer))
 
 @login_required
