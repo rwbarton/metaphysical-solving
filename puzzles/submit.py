@@ -6,9 +6,14 @@ import re
 
 def submit_answer(submission, is_request):
     puzzle = submission.puzzle
-    check_answer = re.sub('https://molasses.holiday/',
-                          'https://molasses.holiday/submit/',
-                          puzzle.url)
+    url = puzzle.url
+    url = re.sub('https://molasses.holiday/puzzle/',
+                 'https://molasses.holiday/submit/puzzle/',
+                 url)
+    url = re.sub('https://molasses.holiday/problem/',
+                 'https://molasses.holiday/submit/puzzle/',
+                 url)
+    check_answer = url
 
     br = puzzlelogin.get_logged_in_browser()
     br.open(check_answer)
