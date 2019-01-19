@@ -2,11 +2,13 @@
 
 {% block content %}
 <div id="callinanswer" style="padding-top:2em; padding-bottom:2em; background:#dddddd;width:100%;margin:auto; text-align: center;">
-<form class="callinanswer" action="{% url 'puzzles.views.puzzle_call_in_answer' puzzle.id %}" method="post" enctype="multipart/form-data">{% csrf_token %}
+<form class="callinanswer"
+	onSubmit="document.getElementById('submit').disabled=true; return true;"
+	action="{% url 'puzzles.views.puzzle_call_in_answer' puzzle.id %}" method="post" enctype="multipart/form-data">{% csrf_token %}
   <ul>
     {{ form.as_ul }}
   </ul>
-  <input type="submit" value="Submit" onmousedown="this.disabled = true; return true;"/>
+  <input type="submit" value="Submit" id="submit"/>
 </form>
 <form class="callinanswer" action="{% url 'puzzles.views.puzzle_info' puzzle.id %}" method="get">{% csrf_token %}
   <input type="submit" value="Cancel" />
