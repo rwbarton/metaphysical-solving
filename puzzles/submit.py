@@ -5,6 +5,8 @@ import mechanize
 import re
 
 def submit_answer(submission, is_request):
+    return
+
     puzzle = submission.puzzle
     url = puzzle.url
     url = re.sub('https://molasses.holiday/puzzle/',
