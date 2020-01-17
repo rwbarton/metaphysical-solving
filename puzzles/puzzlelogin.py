@@ -30,7 +30,7 @@ def fetch_with_single_login(url):
 
     r = _br.open(url)
     if r.code != 200:
-        print r.read()
+        print(r.read())
         sys.exit(1)
 
     return r.read()

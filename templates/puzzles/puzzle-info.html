@@ -1,8 +1,10 @@
 {% extends "puzzles/base_generic.html" %}
 
+{% load static %}
+
 {% block content %}
 <div class="puzzle-blurb status-{{ puzzle.status.css_name }}">
-    <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}" title="Go to {{puzzle.title}} on hunt site"><img src="{{ STATIC_URL }}img/external.png" style="vertical-align:middle;"> {{ puzzle.title }}</a>
+    <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}" title="Go to {{puzzle.title}} on hunt site"><img src="{% static "img/external.png" %}" style="vertical-align:middle;"> {{ puzzle.title }}</a>
 
 
     <div id="puzzlestatus">
@@ -44,7 +46,7 @@
   {% if uploaded_files %}Attached files:
    <select id="fileselector">
   {% for upload in uploaded_files %}
-	<option style="background:url({{ STATIC_URL }}img/file.png) no-repeat; padding-left:15px;" value="{{ upload.url }}">{{ upload.name }}</option>
+	<option style="background:url({% static "img/file.png" %}) no-repeat; padding-left:15px;" value="{{ upload.url }}">{{ upload.name }}</option>
   {% endfor %}
    </select>
         <input type="button" value="Open" onclick="window.open(document.getElementById('fileselector').options[document.getElementById('fileselector').selectedIndex].value, '_blank');">
@@ -56,7 +58,7 @@
 <div id="answers">
   {% if puzzle.answer %}
   <div id="puzzleanswer">
-  <strong><img src="{{ STATIC_URL }}img/correct.png" style="vertical-align:middle;"> Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span></strong>
+  <strong><img src="{% static "img/correct.png" %} style="vertical-align:middle;"> Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span></strong>
   </div>
   {% else %}
   {% if queued_answers %}
@@ -87,21 +89,21 @@
       nobody
       {% endif %}
       {% if you_solving %}
-	<span class="onesolver"><img src="{{ STATIC_URL }}img/user.png" style="vertical-align:middle;padding-right:2px;">You
+	<span class="onesolver"><img src="{% static "img/user.png" %}" style="vertical-align:middle;padding-right:2px;">You
 	  <form action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" method="post">{% csrf_token %}
 	    <input type="hidden" name="continue" value="{{ path }}" />
 	    <input type="hidden" name="solver" value="{{ user.id }}" />
-	    <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" alt="Remove" style="vertical-align:middle;"/>
+	    <input type="image" src="{% static "img/remove.png" %}" type="submit" alt="Remove" style="vertical-align:middle;"/>
 	  </form>
         </span>
       {% endif %}
       {% for solver in other_solvers %}
 	<span class="onesolver" title="{{ solver.first_name }} {{ solver.last_name }} ({{ solver.userprofile.location }})">
-          <img src="{{ STATIC_URL }}img/user.png" style="vertical-align:middle;padding-right:2px;">{{ solver.first_name }}
+          <img src="{% static "img/user.png" %}" style="vertical-align:middle;padding-right:2px;">{{ solver.first_name }}
 	  <form action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" method="post">{% csrf_token %}
 	    <input type="hidden" name="continue" value="{{ path }}" />
 	    <input type="hidden" name="solver" value="{{ solver.id }}" />
-	    <input type="image" src="{{ STATIC_URL }}img/remove.png" alt="Remove" style="vertical-align:middle;"/>
+	    <input type="image" src="{% static "img/remove.png" %}" alt="Remove" style="vertical-align:middle;"/>
 	  </form>
         </span>
       {% endfor %}

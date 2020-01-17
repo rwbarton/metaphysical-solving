@@ -7,6 +7,8 @@ import binascii
 from django.conf import settings
 
 def zulip_send(user, stream, subject, message):
+    return
+
     if not os.path.exists('/etc/puzzle/zulip/b+logger.conf'):
         return
 
@@ -25,6 +27,8 @@ except IOError:
     zulip_create_settings = None
 
 def zulip_create_user(email, full_name, short_name):
+    return
+
     if zulip_create_settings is None:
         return
 
@@ -35,7 +39,7 @@ def zulip_create_user(email, full_name, short_name):
          '-u', '%s:%s' % (zulip_create_settings['email'], zulip_create_settings['api_key']),
          settings.ZULIP_SERVER_URL + '/api/v1/users',
          '-d', 'email=' + email,
-         '-d', 'password=' + binascii.b2a_hex(os.urandom(15)),
+         '-d', 'password=' + binascii.b2a_hex(os.urandom(15)).decode(encoding='ASCII'),
          '-d', 'full_name=' + full_name,
          '-d', 'short_name=' + short_name])
 

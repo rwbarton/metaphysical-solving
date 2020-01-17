@@ -3,20 +3,20 @@ import os
 import os.path
 
 from django.http import HttpResponse
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from django.utils.http import urlencode
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import IntegrityError
 from django import forms
 
-from models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
+from puzzles.models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
     PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config
-from forms import UploadForm, AnswerForm
-from submit import submit_answer
-from zulip import zulip_send
+from puzzles.forms import UploadForm, AnswerForm
+from puzzles.submit import submit_answer
+from puzzles.zulip import zulip_send
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -36,7 +36,7 @@ def puzzle_context(request, d):
     d1['path'] = request.path
     if 'body' in request.GET:
         d1['body_only'] = True
-    return RequestContext(request, d1)
+    return d1
 
 @login_required
 def overview_by(request, taglist_id):
@@ -67,7 +67,7 @@ def overview_by(request, taglist_id):
             'default_priority': Config.objects.get().default_priority,
             'refresh': 120
             })
-    return render_to_response("puzzles/overview.html", context)
+    return render(request, "puzzles/overview.html", context=context)
 
 @login_required
 def overview(request):
@@ -75,10 +75,10 @@ def overview(request):
 
 @login_required
 def puzzle(request, puzzle_id):
-    return render_to_response("puzzles/puzzle-frames.html", RequestContext(request, {
+    return render(request, "puzzles/puzzle-frames.html", context={
                 'id': puzzle_id,
                 'title': Puzzle.objects.get(id=puzzle_id).title
-                }))
+                })
 
 @login_required
 def puzzle_info(request, puzzle_id):
@@ -95,7 +95,7 @@ def puzzle_info(request, puzzle_id):
     queued_answers = puzzle.queuedanswer_set.order_by('-id')
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     uploaded_files = puzzle.uploadedfile_set.order_by('id')
-    return render_to_response("puzzles/puzzle-info.html", puzzle_context(request, {
+    return render(request, "puzzles/puzzle-info.html", context=puzzle_context(request, {
                 'puzzle': puzzle,
                 'statuses': statuses,
                 'priorities': priorities,
@@ -175,7 +175,7 @@ def puzzle_upload(request, puzzle_id):
             return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
     else:
         form = UploadForm()
-    return render_to_response('puzzles/puzzle-upload.html', puzzle_context(request, {
+    return render(request, 'puzzles/puzzle-upload.html', context=puzzle_context(request, {
                 'form': form,
                 'puzzle': puzzle
                 }))
@@ -221,10 +221,10 @@ def answer_queue(request):
             qa.user = sa.user
         except Exception:
             qa.success = False
-    return render_to_response('puzzles/answer-queue.html', RequestContext(request, {
+    return render(request, 'puzzles/answer-queue.html', context={
                 'queued_answers': qas,
                 'refresh': 5
-                }))
+                })
 
 @login_required
 def puzzle_call_in_answer(request, puzzle_id):
@@ -239,7 +239,7 @@ def puzzle_call_in_answer(request, puzzle_id):
         form = AnswerForm(initial={'phone': callback_phone})
         if callback_phone:
             form.fields['phone'].initial = callback_phone
-    return render_to_response('puzzles/puzzle-call-in-answer.html', puzzle_context(request, {
+    return render(request, 'puzzles/puzzle-call-in-answer.html', context=puzzle_context(request, {
                 'form': form,
                 'puzzle': puzzle
                 }))
@@ -260,10 +260,10 @@ def go_to_sleep(request):
 
 def logout_user(request):
     logout(request)
-    return render_to_response('puzzles/logout.html', RequestContext(request))
+    return render(request, 'puzzles/logout.html')
 
 def logout_return(request):
-    return render_to_response('puzzles/logout_return.html', RequestContext(request))
+    return render(request, 'puzzles/logout_return.html', )
 
 @login_required
 def welcome(request):

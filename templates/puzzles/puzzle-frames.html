@@ -1,8 +1,9 @@
+{% load static %}
 <!DOCTYPE "HTML Frameset DTD">
 <html>
 <head>
 <title>{{ title }}</title>
-<link rel="icon" href="{{ STATIC_URL }}img/favicon.ico" />
+<link rel="icon" href="{% static "img/favicon.ico" %}" />
 </head>
 <frameset rows="150px,*" title="{{ title }}">
   <frame src="{% url 'puzzles.views.puzzle_info' id %}" />

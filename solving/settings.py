@@ -8,6 +8,20 @@ import os
 
 from .local_settings import *
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages'
+            ]
+        },
+    },
+]
+
 TEMPLATE_DEBUG = DEBUG
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -34,7 +48,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = None
+TIME_ZONE = 'US/Eastern'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -93,13 +107,13 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-)
+]
 
 ROOT_URLCONF = 'solving.urls'
 
@@ -114,7 +128,7 @@ SOCIAL_AUTH_ENABLED_BACKENDS = ('google-oauth2',)
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 AUTHENTICATION_BACKENDS = (
-    'social.backends.google.GoogleOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -129,7 +143,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'social.apps.django_app.default',
+    'social_django',
     'ordered_model',
     'puzzles'
 )

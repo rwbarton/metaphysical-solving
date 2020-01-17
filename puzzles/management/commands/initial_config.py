@@ -42,7 +42,7 @@ class Command(BaseCommand):
         # Leave the rounds taglist empty, since 'testing' is not actually a round
 
         testing_taglist = TagList.objects.get(name='testing')
-        testing_taglist.tags = [Tag.objects.get(name='testing')]
+        testing_taglist.tags.set([Tag.objects.get(name='testing')])
         testing_taglist.save()
 
         default_locations = ['Cambridge', 'remote', 'unknown']

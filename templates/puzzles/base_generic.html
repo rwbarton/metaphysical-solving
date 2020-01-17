@@ -1,11 +1,12 @@
+{% load static %}
 {% if not body_only %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/base.css?3" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/status.css" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/priority.css" />
-    <link rel="icon" href="{{ STATIC_URL }}img/favicon.ico" />
+    <link rel="stylesheet" href="{% static "css/base.css" %}" />
+    <link rel="stylesheet" href="{% static "css/status.css" %}" />
+    <link rel="stylesheet" href="{% static "css/priority.css" %}" />
+    <link rel="icon" href="{% static "img/favicon.ico" %}" />
     <title>{% block title %}{% endblock %}</title>
     {% if refresh %}
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>

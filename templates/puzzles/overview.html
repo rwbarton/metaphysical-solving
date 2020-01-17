@@ -1,5 +1,7 @@
 {% extends "puzzles/base_generic.html" %}
 
+{% load static %}
+
 {% block title %}Overview{% endblock %}
 
 {% block content %}
@@ -27,7 +29,7 @@
             <a target="_top" href="{% url 'puzzles.views.puzzle' puzzle.id %}">{{ puzzle.title }}</a>
             <input type="hidden" name="continue" value="{{ path }}" />
             <input type="hidden" name="solver" value="{{ user.id }}" />
-            <input type="image" src="{{ STATIC_URL }}img/remove.png" type="submit" style="float:right;" alt="Remove {{ puzzle.title }} from work list" title="Remove {{ puzzle.title }} from work list" />
+            <input type="image" src="{% static "img/remove.png" %}" type="submit" style="float:right;" alt="Remove {{ puzzle.title }} from work list" title="Remove {{ puzzle.title }} from work list" />
           </form>
         </li>
         {% endfor %}
@@ -56,7 +58,7 @@
 	{% else %}
 	  <tr class="priority-{{puzzle.priority.css_name}} status-{{ puzzle.status.css_name }} puzzle-list-regular">
 	    <td class="puzzle-list-puzzle">
-	      <a target="_blank" href="{{ puzzle.url }}"><img src="{{ STATIC_URL }}img/external.png" title="See {{puzzle.title}} on hunt site"></a>
+	      <a target="_blank" href="{{ puzzle.url }}"><img src="{% static "img/external.png" %}" title="See {{puzzle.title}} on hunt site"></a>
 	    </td>
 	    <td class="puzzle-list-title">
 	      <a href="{% url 'puzzles.views.puzzle' puzzle.id %}">{{ puzzle.title }}</a>

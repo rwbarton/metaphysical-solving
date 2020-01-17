@@ -3,7 +3,7 @@ from ordered_model.models import OrderedModel
 
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 import re
 
@@ -11,10 +11,10 @@ from puzzles.googlespreadsheet import create_google_spreadsheet
 from puzzles.zulip import zulip_send, zulip_create_user
 
 class Config(models.Model):
-    default_status = models.ForeignKey('Status')
-    default_priority = models.ForeignKey('Priority')
-    default_tag = models.ForeignKey('Tag')
-    default_taglist = models.ForeignKey('TagList')
+    default_status = models.ForeignKey('Status', on_delete=models.CASCADE)
+    default_priority = models.ForeignKey('Priority', on_delete=models.CASCADE)
+    default_tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
+    default_taglist = models.ForeignKey('TagList', on_delete=models.CASCADE)
 
     callback_phone = models.CharField(max_length=255, blank=True,
                                       help_text="""Phone number on which answer callbacks from Hunt HQ will be received.
@@ -29,7 +29,7 @@ class Status(OrderedModel):
     class Meta(OrderedModel.Meta):
         verbose_name_plural = 'statuses'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.text
 
 class Priority(OrderedModel):
@@ -39,36 +39,36 @@ class Priority(OrderedModel):
     class Meta(OrderedModel.Meta):
         verbose_name_plural = 'priorities'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.text
 
 class Tag(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class AutoTag(models.Model):
     html_name = models.CharField(max_length=200)
-    tag = models.ForeignKey('Tag')
+    tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.html_name
 
 class QueuedAnswer(models.Model):
     # An answer that's not wrong yet!
-    puzzle = models.ForeignKey('Puzzle')
+    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     answer = models.CharField(max_length=200)
 
     class Meta:
         unique_together = ('puzzle', 'answer')
 
-    def __unicode__(self):
+    def __str__(self):
         return 'answer "%s" for puzzle "%s"' % (self.answer, self.puzzle.title)
 
 class SubmittedAnswer(models.Model):
-    puzzle = models.ForeignKey('Puzzle')
-    user = models.ForeignKey(User)
+    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     answer = models.CharField(max_length=200)
     backsolved = models.BooleanField()
     phone = models.CharField(max_length=30)
@@ -77,17 +77,17 @@ class SubmittedAnswer(models.Model):
     success = models.BooleanField(default=False)
     response = models.TextField(default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s: %s' % (self.puzzle.title, self.answer)
 
 class PuzzleWrongAnswer(models.Model):
-    puzzle = models.ForeignKey('Puzzle')
+    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     answer = models.CharField(max_length=200)
 
     class Meta:
         unique_together = ('puzzle', 'answer')
 
-    def __unicode__(self):
+    def __str__(self):
         return 'answer "%s" for puzzle "%s"' % (self.answer, self.puzzle.title)
 
 def wrong_answer_message(**kwargs):
@@ -104,9 +104,9 @@ class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)
     url = models.URLField(unique=True)
 
-    status = models.ForeignKey('Status', default=lambda: Config.objects.get().default_status)
-    priority = models.ForeignKey('Priority', default=lambda: Config.objects.get().default_priority)
-    tags = models.ManyToManyField('Tag', default=lambda: [Config.objects.get().default_tag])
+    status = models.ForeignKey('Status', on_delete=models.CASCADE) # default=lambda: Config.objects.get().default_status
+    priority = models.ForeignKey('Priority', on_delete=models.CASCADE) # default=lambda: Config.objects.get().default_priority
+    tags = models.ManyToManyField('Tag') # default=lambda: [Config.objects.get().default_tag]
 
     solvers = models.ManyToManyField(User, blank=True)
 
@@ -114,7 +114,7 @@ class Puzzle(OrderedModel):
     answer = models.CharField(max_length=200, blank=True)
     checkAnswerLink = models.URLField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def answer_or_status(self):
@@ -176,27 +176,27 @@ class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
     tags = models.ManyToManyField('Tag')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class UploadedFile(models.Model):
-    puzzle = models.ForeignKey('Puzzle')
+    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     url = models.URLField()
 
 class Location(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    location = models.ForeignKey('Location')
+    location = models.ForeignKey('Location', on_delete=models.CASCADE)
 
 class UserZulipStatus(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     NONE = 'none'
     SUCCESS = 'success'
