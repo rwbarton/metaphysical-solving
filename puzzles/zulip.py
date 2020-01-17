@@ -7,8 +7,6 @@ import binascii
 from django.conf import settings
 
 def zulip_send(user, stream, subject, message):
-    return
-
     if not os.path.exists('/etc/puzzle/zulip/b+logger.conf'):
         return
 
@@ -27,8 +25,6 @@ except IOError:
     zulip_create_settings = None
 
 def zulip_create_user(email, full_name, short_name):
-    return
-
     if zulip_create_settings is None:
         return
 

@@ -6,5 +6,5 @@ fi
 
 cd /home/puzzle/solving
 git pull
-yes yes | python manage.py collectstatic # sigh
+# yes yes | python manage.py collectstatic # sigh
 touch solving/wsgi.py
