@@ -104,9 +104,9 @@ class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)
     url = models.URLField(unique=True)
 
-    status = models.ForeignKey('Status', on_delete=models.CASCADE) # default=lambda: Config.objects.get().default_status
-    priority = models.ForeignKey('Priority', on_delete=models.CASCADE) # default=lambda: Config.objects.get().default_priority
-    tags = models.ManyToManyField('Tag') # default=lambda: [Config.objects.get().default_tag]
+    status = models.ForeignKey('Status', default=lambda: Config.objects.get().default_status, on_delete=models.CASCADE)
+    priority = models.ForeignKey('Priority', default=lambda: Config.objects.get().default_priority, on_delete=models.CASCADE)
+    tags = models.ManyToManyField('Tag', default=lambda: [Config.objects.get().default_tag])
 
     solvers = models.ManyToManyField(User, blank=True)
 
