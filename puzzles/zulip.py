@@ -36,8 +36,8 @@ def zulip_create_user(email, full_name, short_name):
          settings.ZULIP_SERVER_URL + '/api/v1/users',
          '-d', 'email=' + email,
          '-d', 'password=' + binascii.b2a_hex(os.urandom(15)).decode(encoding='ASCII'),
-         '-d', 'full_name=' + full_name.encode('utf-8'),
-         '-d', 'short_name=' + short_name.encode('utf-8')])
+         '-d', b'full_name=' + full_name.encode('utf-8'),
+         '-d', b'short_name=' + short_name.encode('utf-8')])
 
     success = (json.loads(response.decode('utf-8')))['result'] == 'success'
     if not success:
