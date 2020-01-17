@@ -39,7 +39,7 @@ def zulip_create_user(email, full_name, short_name):
          '-d', 'full_name=' + full_name,
          '-d', 'short_name=' + short_name])
 
-    success = (json.loads(response))['result'] == 'success'
+    success = (json.loads(response.decode('utf-8')))['result'] == 'success'
     if not success:
         sys.stderr.write('Failed to create user (%s, %s, %s): %s' %
                          (email, full_name, short_name, response))
