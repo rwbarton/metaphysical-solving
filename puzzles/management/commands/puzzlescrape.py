@@ -45,7 +45,7 @@ class Command(BaseCommand):
     help = "Visit Hunt Overview and create new puzzles"
 
     def handle(self, *args, **kwargs):
-        overview_url = 'https://molasses.holiday/puzzle'
+        overview_url = 'https://pennypark.fun/puzzle'
 
         print("Beginning puzzlescrape run at " + datetime.now().isoformat())
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
             title = rnd.text + ' Meta'
             rnd_name = rnd.text
             url = rnd.get('href')
-            url = 'https://molasses.holiday' + url
+            url = 'https://pennypark.fun' + url
 
             try:
                 auto_tag = AutoTag.objects.get(html_name=rnd_name)
@@ -79,7 +79,7 @@ class Command(BaseCommand):
         for puzzle in puzzles:
             title = puzzle.text
             url = puzzle.get('href')
-            url = 'https://molasses.holiday' + url
+            url = 'https://pennypark.fun' + url
             rnd = puzzle.getparent().getparent().getchildren()[0].getchildren()[0]
             rnd = rnd.text
 

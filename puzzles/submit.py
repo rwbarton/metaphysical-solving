@@ -9,11 +9,11 @@ def submit_answer(submission, is_request):
 
     puzzle = submission.puzzle
     url = puzzle.url
-    url = re.sub('https://molasses.holiday/puzzle/',
-                 'https://molasses.holiday/submit/puzzle/',
+    url = re.sub('https://pennypark.fun/puzzle/',
+                 'https://pennypark.fun/submit/puzzle/',
                  url)
-    url = re.sub('https://molasses.holiday/problem/',
-                 'https://molasses.holiday/submit/puzzle/',
+    url = re.sub('https://pennypark.fun/problem/',
+                 'https://pennypark.fun/submit/puzzle/',
                  url)
     check_answer = url
 
