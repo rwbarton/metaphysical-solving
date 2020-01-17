@@ -58,7 +58,7 @@
 <div id="answers">
   {% if puzzle.answer %}
   <div id="puzzleanswer">
-  <strong><img src="{% static "img/correct.png" %} style="vertical-align:middle;"> Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span></strong>
+  <strong><img src="{% static "img/correct.png" %}" style="vertical-align:middle;"> Answer: <span class="puzzle-answer">{{ puzzle.answer }}</span></strong>
   </div>
   {% else %}
   {% if queued_answers %}
