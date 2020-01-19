@@ -88,6 +88,6 @@ class Command(BaseCommand):
                 url = 'https://pennypark.fun' + url
                 answer = puzzle.get('answer')
 
-                create_puzzle(title=title, url=url, tag=tag, is_meta=(idx == 0), answer=answer)
+                create_puzzle(title=title, url=url, tag=tag, is_meta=(False), answer=answer)
 
         print("Finished puzzlescrape run")
