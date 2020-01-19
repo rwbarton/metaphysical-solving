@@ -17,7 +17,7 @@ def zulip_send(user, stream, subject, message):
                      "--streams", stream])
     subprocess.Popen([os.path.join(settings.PROJECT_ROOT,"zulip/api/bin/zulip-send"),
                       "--config-file", "/etc/puzzle/zulip/%s.conf" % (user,),
-                      "--stream", stream, "--subject", subject, "--message", message])
+                      "--stream", stream, "--subject", subject, "--message", message.encode('utf-8')])
 
 try:
     zulip_create_settings = json.load(open('/etc/puzzle/zulip/create.json'))
