@@ -1,4 +1,4 @@
-Django==2.2.9
+Django==2.2.13
 # social-auth-app-django==
 # PyMySQL==0.7.2
 mysqlclient
