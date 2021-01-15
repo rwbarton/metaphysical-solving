@@ -36,9 +36,9 @@ def create_puzzle(title, url, tag, is_meta=False, answer=None):
 
         try:
             puzzle = Puzzle.objects.create(title=title, url=url, checkAnswerLink='')
-            puzzle.tags.add(Tag.objects.get_or_create(name=tag))
+            puzzle.tags.add(Tag.objects.get(name=tag))
             if is_meta:
-                puzzle.tags.add(Tag.objects.get_or_create(name='metas'))
+                puzzle.tags.add(Tag.objects.get(name='metas'))
             print("Created puzzle (%s, %s)" % (title, url))
         except django.db.utils.IntegrityError:
             # puzzle already exists (race)
@@ -70,10 +70,15 @@ class Command(BaseCommand):
 
         rnds = doc.xpath("//section/a")
         for rnd in rnds:
+            if not rnd.get('name'):
+                continue
             rnd_tag = rnd.get('name')
 
             rnd_name = rnd[0].text
             rnd_url = rnd.get('href')
+
+            tag_obj, _ = Tag.objects.get_or_create(name=rnd_tag)
+            add_tag_to_taglist(tag_obj, 'rounds')
 
             # metas are listed as ordinary puzzles
             # create_puzzle(rnd_name + ' Meta', rnd_url, rnd_tag, is_meta=True)
