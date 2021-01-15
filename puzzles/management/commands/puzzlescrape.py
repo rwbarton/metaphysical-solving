@@ -80,7 +80,8 @@ class Command(BaseCommand):
 
             puzzles = rnd.xpath('../table//a')
             for puzzle in puzzles:
-                create_puzzle(puzzle.text.strip(), puzzle.get('href'), rnd_tag, is_meta=False)
+                is_meta = (puzzle.xpath('..')[0].get('class') == 'meta')
+                create_puzzle(puzzle.text.strip(), puzzle.get('href'), rnd_tag, is_meta=is_meta)
 
         # puz = json.loads(text.decode('utf-8'))
 
