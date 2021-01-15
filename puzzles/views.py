@@ -106,6 +106,7 @@ def puzzle_info(request, puzzle_id):
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
                 'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
+                'jitsi_room_id': puzzle.jitsi_room_id(),
                 'refresh': 60
                 }))
 

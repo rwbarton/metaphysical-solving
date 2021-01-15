@@ -6,9 +6,18 @@ from django.db.models.signals import pre_save, post_save
 from django.urls import reverse
 from django.conf import settings
 import re
+import hashlib
 
 from puzzles.googlespreadsheet import create_google_spreadsheet
 from puzzles.zulip import zulip_send, zulip_create_user
+
+try:
+    # Secret used to generate Jitsi room names.
+    jitsi_secret = open('/etc/puzzle/jitsi-secret').read()
+    if jitsi_secret == '':
+        jitsi_secret = None
+except IOError:
+    jitsi_secret = None
 
 class Config(models.Model):
     default_status = models.ForeignKey('Status', on_delete=models.CASCADE)
@@ -125,6 +134,12 @@ class Puzzle(OrderedModel):
 
     def zulip_stream(self):
         return 'p%d' % (self.id,)
+
+    def jitsi_room_id(self):
+        if jitsi_secret is None:
+            return None
+        id_hash = hashlib.sha1(('%d-%s' % (self.id, jitsi_secret)).encode()).hexdigest()[0:16]
+        return 'p%d-%s' % (self.id, id_hash)
 
     def save(self, *args, **kwargs):
         # Grab old instance to see if our answer is new.

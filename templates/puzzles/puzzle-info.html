@@ -6,6 +6,11 @@
 <div class="puzzle-blurb status-{{ puzzle.status.css_name }}">
     <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}" title="Go to {{puzzle.title}} on hunt site"><img src="{% static "img/external.png" %}" style="vertical-align:middle;"> {{ puzzle.title }}</a>
 
+    {% if puzzle.jitsi_room_id %}
+    <div id="jitsi">
+      Jitsi <a target="_new" href="https://meet.jit.si/{{ puzzle.jitsi_room_id }}">link</a>
+    </div>
+    {% endif %}
 
     <div id="puzzlestatus">
     Status:

@@ -426,6 +426,11 @@ div#answers a#callinanswer:hover {
     background: #2E961B;
 }
 
+.puzzle-blurb div#jitsi {
+    display: inline-block;
+    padding-left: 10px;
+}
+
 .puzzle-blurb div#puzzlestatus {
     display: inline-block;
     padding-left: 10px;
