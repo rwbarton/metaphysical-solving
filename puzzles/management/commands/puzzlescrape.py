@@ -10,9 +10,11 @@ from datetime import datetime
 
 from puzzles import puzzlelogin
 
+base_url = 'https://perpendicular.institute'
 solved_status = Status.objects.get(text='solved!')
 
 def create_puzzle(title, url, tag, is_meta=False, answer=None):
+    url = base_url + url
     print(title, url, tag, is_meta, answer)
 
     try:
@@ -59,35 +61,50 @@ class Command(BaseCommand):
     help = "Visit Hunt Overview and create new puzzles"
 
     def handle(self, *args, **kwargs):
-        overview_url = 'https://perpendicular.institute/js/puzzles'
+        overview_url = 'https://perpendicular.institute/puzzles'
 
         print("Beginning puzzlescrape run at " + datetime.now().isoformat())
 
         text = puzzlelogin.fetch_with_single_login(overview_url)
-        puz = json.loads(text.decode('utf-8'))
+        doc = etree.HTML(text)
 
-        for rnd in puz['lands']:
-            rnd_name = rnd['title']
+        rnds = doc.xpath("//section/a")
+        for rnd in rnds:
+            rnd_tag = rnd.get('name')
 
-            try:
-                auto_tag = AutoTag.objects.get(html_name=rnd_name)
-                tag = auto_tag.tag
-            except AutoTag.DoesNotExist:
-                tag, created = Tag.objects.get_or_create(name=html_to_tag(rnd_name))
-                auto_tag, _ = AutoTag.objects.get_or_create(html_name=rnd_name, tag=tag)
-                if created:
-                    add_tag_to_taglist(tag, 'unsolved rounds')
-                    add_tag_to_taglist(tag, 'all rounds')
+            # create meta
+            rnd_name = rnd[0].text
+            rnd_url = rnd.get('href')
+            create_puzzle(rnd_name + ' Meta', rnd_url, rnd_tag, is_meta=True)
 
-            # metas are also puzzles
-            # create_puzzle(title=title, url=url, tag=tag, is_meta=True)
+            puzzles = rnd.xpath('../table//a')
+            for puzzle in puzzles:
+                create_puzzle(puzzle.text.strip(), puzzle.get('href'), rnd_tag, is_meta=False)
 
-            for idx, puzzle in enumerate(rnd['puzzles']):
-                title = puzzle['title']
-                url = puzzle['url']
-                url = 'https://perpendicular.institute' + url
-                answer = puzzle.get('answer')
+        # puz = json.loads(text.decode('utf-8'))
 
-                create_puzzle(title=title, url=url, tag=tag, is_meta=(False), answer=answer)
+        # for rnd in puz['lands']:
+        #     rnd_name = rnd['title']
+
+        #     try:
+        #         auto_tag = AutoTag.objects.get(html_name=rnd_name)
+        #         tag = auto_tag.tag
+        #     except AutoTag.DoesNotExist:
+        #         tag, created = Tag.objects.get_or_create(name=html_to_tag(rnd_name))
+        #         auto_tag, _ = AutoTag.objects.get_or_create(html_name=rnd_name, tag=tag)
+        #         if created:
+        #             add_tag_to_taglist(tag, 'unsolved rounds')
+        #             add_tag_to_taglist(tag, 'all rounds')
+
+        #     # metas are also puzzles
+        #     # create_puzzle(title=title, url=url, tag=tag, is_meta=True)
+
+        #     for idx, puzzle in enumerate(rnd['puzzles']):
+        #         title = puzzle['title']
+        #         url = puzzle['url']
+        #         url = 'https://perpendicular.institute' + url
+        #         answer = puzzle.get('answer')
+
+        #         create_puzzle(title=title, url=url, tag=tag, is_meta=(False), answer=answer)
 
         print("Finished puzzlescrape run")
