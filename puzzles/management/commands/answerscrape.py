@@ -15,6 +15,12 @@ class Command(BaseCommand):
         print('WRONG ' + puzzle.title + ' = ' + answer)
         PuzzleWrongAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
 
+    def handle_correct_answer(self, puzzle, answer):
+        print('SOLVED ' + puzzle.title + ' = ' + answer)
+        puzzle.answer = answer
+        puzzle.status = solved_status
+        puzzle.save()
+
     def handle(self, *args, **kwargs):
         print("Beginning answerscrape run at " + datetime.now().isoformat())
 
@@ -46,6 +52,9 @@ class Command(BaseCommand):
 
                 if l == '    <td>Incorrect</td>':
                     self.handle_wrong_answer(puzzle, cur_answer)
+
+                if l == '    <td style="color: #080; font-weight: bold;">Correct!</td>':
+                    self.handle_correct_answer(puzzle, cur_answer)
 
                 # solved_prefix = '      Solved! Answer: <b>'
                 # solved_suffix = '</b><br>'
