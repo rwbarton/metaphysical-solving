@@ -59,7 +59,7 @@ class Command(BaseCommand):
     help = "Visit Hunt Overview and create new puzzles"
 
     def handle(self, *args, **kwargs):
-        overview_url = 'https://pennypark.fun/js/puzzles'
+        overview_url = 'https://perpendicular.institute/js/puzzles'
 
         print("Beginning puzzlescrape run at " + datetime.now().isoformat())
 
@@ -85,7 +85,7 @@ class Command(BaseCommand):
             for idx, puzzle in enumerate(rnd['puzzles']):
                 title = puzzle['title']
                 url = puzzle['url']
-                url = 'https://pennypark.fun' + url
+                url = 'https://perpendicular.institute' + url
                 answer = puzzle.get('answer')
 
                 create_puzzle(title=title, url=url, tag=tag, is_meta=(False), answer=answer)
