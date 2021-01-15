@@ -72,10 +72,11 @@ class Command(BaseCommand):
         for rnd in rnds:
             rnd_tag = rnd.get('name')
 
-            # create meta
             rnd_name = rnd[0].text
             rnd_url = rnd.get('href')
-            create_puzzle(rnd_name + ' Meta', rnd_url, rnd_tag, is_meta=True)
+
+            # metas are listed as ordinary puzzles
+            # create_puzzle(rnd_name + ' Meta', rnd_url, rnd_tag, is_meta=True)
 
             puzzles = rnd.xpath('../table//a')
             for puzzle in puzzles:
