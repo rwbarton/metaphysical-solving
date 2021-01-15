@@ -18,7 +18,7 @@ def create_puzzle(title, url, tag, is_meta=False, answer=None):
     print(title, url, tag, is_meta, answer)
 
     try:
-        puzzle = Puzzle.objects.get(title=title, url=url)
+        puzzle = Puzzle.objects.get(url=url)
         print('Already exists')
     except Puzzle.DoesNotExist:
         # Look for Submit Answer link
@@ -36,9 +36,9 @@ def create_puzzle(title, url, tag, is_meta=False, answer=None):
 
         try:
             puzzle = Puzzle.objects.create(title=title, url=url, checkAnswerLink='')
-            puzzle.tags.add(Tag.objects.get(name=tag))
+            puzzle.tags.add(Tag.objects.get_or_create(name=tag))
             if is_meta:
-                puzzle.tags.add(Tag.objects.get(name='metas'))
+                puzzle.tags.add(Tag.objects.get_or_create(name='metas'))
             print("Created puzzle (%s, %s)" % (title, url))
         except django.db.utils.IntegrityError:
             # puzzle already exists (race)
