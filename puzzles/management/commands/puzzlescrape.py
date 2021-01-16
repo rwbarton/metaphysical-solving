@@ -77,8 +77,10 @@ class Command(BaseCommand):
             rnd_name = rnd[0].text
             rnd_url = rnd.get('href')
 
-            tag_obj, _ = Tag.objects.get_or_create(name=rnd_tag)
-            add_tag_to_taglist(tag_obj, 'rounds')
+            tag_obj, created = Tag.objects.get_or_create(name=rnd_tag)
+            if created:
+                add_tag_to_taglist(tag_obj, 'unsolved rounds')
+                add_tag_to_taglist(tag_obj, 'all rounds')
 
             # metas are listed as ordinary puzzles
             # create_puzzle(rnd_name + ' Meta', rnd_url, rnd_tag, is_meta=True)
