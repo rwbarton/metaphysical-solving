@@ -30,6 +30,7 @@ def zulip_create_user(email, full_name, short_name):
 
     response = subprocess.check_output(
         ['/usr/bin/curl',
+         '--insecure',
          '--silent',
          '-X', 'POST',
          '-u', '%s:%s' % (zulip_create_settings['email'], zulip_create_settings['api_key']),
