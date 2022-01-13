@@ -10,3 +10,4 @@ mechanize
 # wsgiref==0.1.2
 oauth2client
 lxml
+cryptography==1.9
