@@ -10,7 +10,7 @@ from datetime import datetime
 
 from puzzles import puzzlelogin
 
-base_url = 'https://perpendicular.institute'
+base_url = 'https://www.starrats.org'
 solved_status = Status.objects.get(text='solved!')
 
 def create_puzzle(title, url, tag, is_meta=False, answer=None):
@@ -61,20 +61,17 @@ class Command(BaseCommand):
     help = "Visit Hunt Overview and create new puzzles"
 
     def handle(self, *args, **kwargs):
-        overview_url = 'https://perpendicular.institute/puzzles'
+        overview_url = 'https://www.starrats.org/puzzles'
 
         print("Beginning puzzlescrape run at " + datetime.now().isoformat())
 
         text = puzzlelogin.fetch_with_single_login(overview_url)
         doc = etree.HTML(text)
 
-        rnds = doc.xpath("//section/a")
+        rnds = doc.xpath("//section/h2/a")
         for rnd in rnds:
-            if not rnd.get('name'):
-                continue
-            rnd_tag = rnd.get('name')
-
-            rnd_name = rnd[0].text
+            rnd_name = rnd.text
+            rnd_tag = rnd_name
             rnd_url = rnd.get('href')
 
             tag_obj, created = Tag.objects.get_or_create(name=rnd_tag)
@@ -85,9 +82,9 @@ class Command(BaseCommand):
             # metas are listed as ordinary puzzles
             # create_puzzle(rnd_name + ' Meta', rnd_url, rnd_tag, is_meta=True)
 
-            puzzles = rnd.xpath('../table//a')
+            puzzles = rnd.xpath('../../table//a')
             for puzzle in puzzles:
-                is_meta = (puzzle.xpath('..')[0].get('class') == 'meta')
+                is_meta = False # (puzzle.xpath('..')[0].get('class') == 'meta')
                 create_puzzle(puzzle.text.strip(), puzzle.get('href'), rnd_tag, is_meta=is_meta)
 
         # puz = json.loads(text.decode('utf-8'))
