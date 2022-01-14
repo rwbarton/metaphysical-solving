@@ -57,7 +57,7 @@
            <td class="puzzle-list-title">
 <ul style="list-style-type:none;">
 	     {% for room in solver.1 %}
-             <li><a href="https://meet.metaphysicalplant.com/{{ room.0 }}" target="_{{room.0}}"><img src="{% static "img/videocamera.png" %}" width=11></a> {% if room.2 %}<a href={{room.2}}>{% endif %}{{ room.1 }}{% if room.2 %}</a>{% endif %}</li>
+             <li><a href="https://meet.metaphysicalplant.com/{{ room.0 }}" target="_{{room.0}}"><img src="{% static "img/videocamera.png" %}" width=11></a> {% if room.2 %}<a href={%url 'puzzles.views.puzzle' room.2 %}>{% endif %}{{ room.1 }}{% if room.2 %}</a>{% endif %}</li>
              {% endfor %}
 	     </ul>
            </td>

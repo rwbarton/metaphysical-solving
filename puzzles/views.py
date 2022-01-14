@@ -45,8 +45,8 @@ def get_jitsi_data():
                 puzzleUrl = Puzzle.objects.select_related().get(id=roomId).url
             except:
                 roomTitle = roomUrl
-                puzzleUrl = None
-            user_dict[user].append((roomUrl,roomTitle,puzzleUrl))
+                roomId = None
+            user_dict[user].append((roomUrl,roomTitle,roomId))
     user_list = sorted(user_dict.items())
     return user_list
 
