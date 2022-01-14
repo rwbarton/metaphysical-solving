@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
         puzzles = Puzzle.objects.all().order_by('id')
         for puzzle in puzzles:
-            if puzzle.status == solved_status:
+            if puzzle.answer:   #  answer already in database
                 continue
 
             puzzle_prefix = 'https://www.starrats.org/puzzle/'
