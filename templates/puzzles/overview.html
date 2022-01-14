@@ -53,11 +53,13 @@
        </tr>
        {% for solver in jitsi_data %}
        <tr class="solver-list-regular">
-           <td class="puzzle-list-title"> {{ solver.0 }} </td>
-           <td class="puzzle-list-status">
-             {% for room in solver.1 %}
-             <a href="https://meet.metaphysicalplant.com/{{ room.0 }}" target="_{{room.0}}"><img src="{% static "img/videocamera.png" %}" width=11></a> {% if room.2 %}<a href={{room.2}}>{% endif %}{{ room.1 }}{% if room.2 %}</a>{% endif %}{% if not forloop.last %}, {% endif %}
-              {% endfor %}
+           <td class="puzzle-list-status"> {{ solver.0 }} </td>
+           <td class="puzzle-list-title">
+<ul style="list-style-type:none;">
+	     {% for room in solver.1 %}
+             <li><a href="https://meet.metaphysicalplant.com/{{ room.0 }}" target="_{{room.0}}"><img src="{% static "img/videocamera.png" %}" width=11></a> {% if room.2 %}<a href={{room.2}}>{% endif %}{{ room.1 }}{% if room.2 %}</a>{% endif %}</li>
+             {% endfor %}
+	     </ul>
            </td>
        </tr>
        {% endfor %}
