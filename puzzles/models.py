@@ -139,7 +139,7 @@ class Puzzle(OrderedModel):
         if jitsi_secret is None:
             return None
         id_hash = hashlib.sha1(('%d-%s' % (self.id, jitsi_secret)).encode()).hexdigest()[0:16]
-        return 'p%d-%s' % (self.id, id_hash)
+        return '%s-%s' % (re.sub(r'[^a-zA-Z0-9]','',self.title), id_hash)
 
     def save(self, *args, **kwargs):
         # Grab old instance to see if our answer is new.
