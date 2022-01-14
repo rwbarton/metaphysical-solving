@@ -29,9 +29,9 @@ class Command(BaseCommand):
             if puzzle.status == solved_status:
                 continue
 
-            puzzle_prefix = 'https://perpendicular.institute/puzzle/'
+            puzzle_prefix = 'https://www.starrats.org/puzzle/'
             if puzzle.url.startswith(puzzle_prefix):
-                answer_url = 'https://perpendicular.institute/embed/submit/puzzle/' + \
+                answer_url = 'https://www.starrats.org/embed/submit/puzzle/' + \
                              puzzle.url[len(puzzle_prefix):]
             else:
                 continue
@@ -45,15 +45,16 @@ class Command(BaseCommand):
             # skip = True
             cur_answer = None
             for l in text.split('\n'):
-                answer_prefix = '    <td class="answer">'
+                l = l.lstrip()
+                answer_prefix = '<td class="answer">'
                 answer_suffix = '</td>'
                 if l.startswith(answer_prefix) and l.endswith(answer_suffix):
                     cur_answer = l[len(answer_prefix):len(l)-len(answer_suffix)]
 
-                if l == '    <td>Incorrect</td>':
+                if l == '<td class="incorrect">Incorrect</td>':
                     self.handle_wrong_answer(puzzle, cur_answer)
 
-                if l == '    <td style="color: #080; font-weight: bold;">Correct!</td>':
+                if l == '<td class="correct">Correct!</td>':
                     self.handle_correct_answer(puzzle, cur_answer)
 
                 # solved_prefix = '      Solved! Answer: <b>'
