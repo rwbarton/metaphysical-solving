@@ -1,6 +1,10 @@
 import random
 import os
 import os.path
+import urllib
+import json
+
+from collections import defaultdict
 
 from django.http import HttpResponse
 from django.shortcuts import render, render_to_response, redirect
@@ -25,6 +29,26 @@ def get_motd():
         return Config.objects.get().motd
     except (Config.DoesNotExist, Config.MultipleObjectsReturned):
         return "Oops, someone broke this message. Please ask an admin to fix it."
+
+def get_jitsi_data():
+    # TODO: This should probably be wrapped in some try/excepts to avoid failing ungracefully.
+    room_list_json = urllib.request.urlopen(settings.JITSI_ROOMS_URL, timeout = 5)
+    room_list_object = json.loads(room_list_json.read().decode('utf-8'))
+    room_list = room_list_object["room_census"]
+    user_dict = defaultdict(list)
+    for room in room_list:
+        for user in room["participants"]:
+            roomUrl = room["room_name"].split("@")[0]
+            try:
+                roomId = roomUrl.split("-")[1]
+                roomTitle = Puzzle.objects.select_related().get(id=roomId).title
+                puzzleUrl = Puzzle.objects.select_related().get(id=roomId).url
+            except:
+                roomTitle = roomUrl
+                puzzleUrl = None
+            user_dict[user].append((roomUrl,roomTitle,puzzleUrl))
+    user_list = sorted(user_dict.items())
+    return user_list
 
 def puzzle_context(request, d):
     d1 = dict(d)
@@ -63,6 +87,7 @@ def overview_by(request, taglist_id):
                     }
                      for tag in tags),
             'assigned_puzzles': assigned_puzzles,
+            'jitsi_data': get_jitsi_data(),
             'unassigned_only': unassigned_only,
             'default_priority': Config.objects.get().default_priority,
             'refresh': 120

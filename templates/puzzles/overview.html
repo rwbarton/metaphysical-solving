@@ -42,8 +42,29 @@
       nothing. Make sure to add yourself to the work list for any puzzle you work on. That makes sure we don't work on the same thing in parallel.
       {% endif %}
     </div>
-
-
+  {% if jitsi_data %}
+  <div class="onetag">
+     <table class="puzzle-list">
+       <tbody>
+       <tr class="solver-list-header">
+       <th colspan=2>
+         Solvers + Their Active Jitsi Rooms (refresh for latest)
+       </th>
+       </tr>
+       {% for solver in jitsi_data %}
+       <tr class="solver-list-regular">
+           <td class="puzzle-list-title"> {{ solver.0 }} </td>
+           <td class="puzzle-list-status">
+             {% for room in solver.1 %}
+             <a href="https://meet.metaphysicalplant.com/{{ room.0 }}" target="_{{room.0}}"><img src="{% static "img/videocamera.png" %}" width=11></a> {% if room.2 %}<a href={{room.2}}>{% endif %}{{ room.1 }}{% if room.2 %}</a>{% endif %}{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+           </td>
+       </tr>
+       {% endfor %}
+       </tbody>
+    </table>   
+  </div>
+  {% endif %}
   {% for tag in tags %}
    <div class="onetag"> 
    <table class="puzzle-list">

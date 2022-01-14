@@ -245,6 +245,11 @@ tr.puzzle-list-header {
     color: #FFFFFF;
 }
 
+tr.solver-list-header {
+    background: #EDED8C;
+    color: #000000;
+}
+
 tr.puzzle-list-odd {
     background: #f2f8fa;
 }
@@ -255,6 +260,14 @@ tr.puzzle-list-even {
 
 tr.puzzle-list-regular {
     background: #e5edf0;
+}
+
+tr.solver-list-regular {
+    background: #ffffd4;
+}
+
+tr.solver-list-regular:nth-child(odd) {
+    background: #ffffff;
 }
 
 tr.status-not-puzzle {
