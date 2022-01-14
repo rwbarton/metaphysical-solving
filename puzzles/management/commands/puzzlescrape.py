@@ -82,7 +82,7 @@ class Command(BaseCommand):
             # metas are listed as ordinary puzzles
             # create_puzzle(rnd_name + ' Meta', rnd_url, rnd_tag, is_meta=True)
 
-            puzzles = rnd.xpath('../../table//a')
+            puzzles = rnd.getparent().getnext().iter('a')
             for puzzle in puzzles:
                 is_meta = False # (puzzle.xpath('..')[0].get('class') == 'meta')
                 create_puzzle(puzzle.text.strip(), puzzle.get('href'), rnd_tag, is_meta=is_meta)
