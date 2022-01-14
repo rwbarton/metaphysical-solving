@@ -3,6 +3,7 @@ import os
 import os.path
 import urllib
 import json
+import re
 
 from collections import defaultdict
 
@@ -38,9 +39,9 @@ def get_jitsi_data():
     user_dict = defaultdict(list)
     for room in room_list:
         for user in room["participants"]:
-            roomUrl = room["room_name"].split("@")[0]
+            roomUrl = re.sub(r'[[](\w*)[]]',r'\1/',room["room_name"].split("@")[0])
             try:
-                roomId = roomUrl.split("-")[1]
+                roomId = room["room_name"].split("-")[1]
                 roomTitle = Puzzle.objects.select_related().get(id=roomId).title
                 puzzleUrl = Puzzle.objects.select_related().get(id=roomId).url
             except:
