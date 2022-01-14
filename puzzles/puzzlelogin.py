@@ -11,11 +11,11 @@ def get_logged_in_browser():
     br.set_handle_robots(False)
     br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11')]
 
-    r = br.open('https://perpendicular.institute/login')
+    r = br.open('https://www.mitmh2022.com/login')
 
     br.select_form(nr=0)
-    br['team'] = username
-    br['pass'] = password
+    br['username'] = username
+    br['password'] = password
     br.submit()
 
     return br
