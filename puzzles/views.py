@@ -32,23 +32,25 @@ def get_motd():
         return "Oops, someone broke this message. Please ask an admin to fix it."
 
 def get_jitsi_data():
-    # TODO: This should probably be wrapped in some try/excepts to avoid failing ungracefully.
-    room_list_json = urllib.request.urlopen(settings.JITSI_ROOMS_URL, timeout = 5)
-    room_list_object = json.loads(room_list_json.read().decode('utf-8'))
-    room_list = room_list_object["room_census"]
-    user_dict = defaultdict(list)
-    for room in room_list:
-        for user in room["participants"]:
-            roomUrl = re.sub(r'[[](\w*)[]]',r'\1/',room["room_name"].split("@")[0])
-            try:
-                roomId = room["room_name"].split("-")[1]
-                roomTitle = Puzzle.objects.select_related().get(id=roomId).title
-                puzzleUrl = Puzzle.objects.select_related().get(id=roomId).url
-            except:
-                roomTitle = roomUrl
-                roomId = None
-            user_dict[user].append((roomUrl,roomTitle,roomId))
-    user_list = sorted(user_dict.items())
+    try:
+        room_list_json = urllib.request.urlopen(settings.JITSI_ROOMS_URL, timeout = 5)
+        room_list_object = json.loads(room_list_json.read().decode('utf-8'))
+        room_list = room_list_object["room_census"]
+        user_dict = defaultdict(list)
+        for room in room_list:
+            for user in room["participants"]:
+                roomUrl = re.sub(r'[[](\w*)[]]',r'\1/',room["room_name"].split("@")[0])
+                try:
+                    roomId = room["room_name"].split("-")[1]
+                    roomTitle = Puzzle.objects.select_related().get(id=roomId).title
+                    puzzleUrl = Puzzle.objects.select_related().get(id=roomId).url
+                except:
+                    roomTitle = roomUrl
+                    roomId = None
+                user_dict[user].append((roomUrl,roomTitle,roomId))
+        user_list = sorted(user_dict.items())
+    except:
+        user_list = None
     return user_list
 
 def puzzle_context(request, d):
