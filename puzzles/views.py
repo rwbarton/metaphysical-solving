@@ -8,7 +8,7 @@ import re
 from collections import defaultdict
 
 from django.http import HttpResponse
-from django.shortcuts import render, render_to_response, redirect
+from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.utils.http import urlencode
 from django.contrib.auth import logout
