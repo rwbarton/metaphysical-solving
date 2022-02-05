@@ -109,13 +109,20 @@ def wrong_answer_message(**kwargs):
 
 post_save.connect(wrong_answer_message, sender=PuzzleWrongAnswer)
 
+def defaultStatus():
+    return Config.objects.get().default_status
+def defaultPriority():
+    return Config.objects.get().default_priority
+def defaultTags():
+    return [Config.objects.get().default_tag]
+
 class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)
     url = models.URLField(unique=True)
 
-    status = models.ForeignKey('Status', default=lambda: Config.objects.get().default_status, on_delete=models.CASCADE)
-    priority = models.ForeignKey('Priority', default=lambda: Config.objects.get().default_priority, on_delete=models.CASCADE)
-    tags = models.ManyToManyField('Tag', default=lambda: [Config.objects.get().default_tag])
+    status = models.ForeignKey('Status', default=defaultStatus, on_delete=models.CASCADE)
+    priority = models.ForeignKey('Priority', default=defaultPriority, on_delete=models.CASCADE)
+    tags = models.ManyToManyField('Tag', default=defaultTags)
 
     solvers = models.ManyToManyField(User, blank=True)
 
