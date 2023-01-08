@@ -40,5 +40,10 @@ HQCONTACT = '555-0123 &nbsp;|&nbsp; ateam@example.com'
 ZULIP_SERVER_HOSTNAME = 'zulip.example.com'
 ZULIP_SERVER_URL = 'https://' + ZULIP_SERVER_HOSTNAME
 
+JITSI_SERVER_URL = 'https://jitsi.example.com'
+# Endpoint on Jitsi server which provides JSON of in-use rooms
+JITSI_ROOMS_URL = '/json_endpoint'
+
+
 # Enable answer call-in button?
 ANSWER_CALLIN_ENABLED = False

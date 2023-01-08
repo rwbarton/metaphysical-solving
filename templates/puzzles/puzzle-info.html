@@ -8,7 +8,7 @@
 
     {% if puzzle.jitsi_room_id %}
     <div id="jitsi">
-      <a target="_new" href="https://meet.metaphysicalplant.com/{{ puzzle.jitsi_room_id }}"><img src="{% static "img/videocamera.png" %}" width=15/> (Jitsi)</a>
+      <a target="_new" href="{{jitsi_base_url}}/{{ puzzle.jitsi_room_id }}"><img src="{% static "img/videocamera.png" %}" width=15/> (Jitsi)</a>
     </div>
     {% endif %}
 
