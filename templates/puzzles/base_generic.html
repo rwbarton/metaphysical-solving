@@ -32,7 +32,7 @@
     </div>
     <div id="header">
       <ul id="navlist">
-	<li><a target="_top" href="/overview/">Overview</a></li><li><a target="_blank" href="http://www.thewordsword.com/">Allen's wordsearch</a></li><li><a target="_blank" href="/help/">Help</a></li><li><a target="_blank" href="{{jitsi_base_url}}/notapuzzle/quartermaster">Quartermaster</a></li><li><a target="_blank" href="https://meet.metaphysicalplant.com/notapuzzle/teamMeetingRoom">Team Meeting Room</a></li><li><a target="_blank" href="https://meet.metaphysicalplant.com/notapuzzle/socialSpace">Social Space</a></li>
+	<li><a target="_top" href="/overview/">Overview</a></li><li><a target="_blank" href="http://www.thewordsword.com/">Allen's wordsearch</a></li><li><a target="_blank" href="/help/">Help</a></li><li><a target="_blank" href="{{zulip_url}}">Zulip</a></li><li><a target="_blank" href="{{jitsi_base_url}}/notapuzzle/quartermaster">Quartermaster <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li><li><a target="_blank" href="{{jitsi_base_url}}/notapuzzle/teamMeetingRoom">Team Meeting Room <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li><li><a target="_blank" href="{{jitsi_base_url}}/notapuzzle/socialSpace">Social Space <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
       </ul>
     <div id="rightheader">
       <div id="userinfo">{{ user.first_name }} {{ user.last_name }} (<a target="_top" href="{% url 'puzzles.views.logout_user' %}">switch user</a>)</div>
