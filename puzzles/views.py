@@ -62,6 +62,7 @@ def puzzle_context(request, d):
     d1['my_puzzles'] = request.user.puzzle_set.order_by('id')
     d1['path'] = request.path
     d1['jitsi_base_url']=settings.JITSI_SERVER_URL
+    d1['zulip_url']=settings.ZULIP_SERVER_URL
     if 'body' in request.GET:
         d1['body_only'] = True
     return d1
