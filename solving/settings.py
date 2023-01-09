@@ -11,7 +11,7 @@ from .local_settings import *
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': ['/home/puzzle/metaphysical-solving/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -34,7 +34,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'puzzle',
         'OPTIONS': {
-            'read_default_file': '/etc/my.cnf'
+            'read_default_file': '/etc/my.cnf',
+	    'charset': 'utf8mb4',
             },
         'HOST': '',
         'PORT': '',
