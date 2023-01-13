@@ -3,6 +3,7 @@ from puzzles.models import Puzzle, Status, QueuedAnswer, PuzzleWrongAnswer
 
 import json
 import sys
+import time
 from datetime import datetime
 
 from puzzles import puzzlelogin
@@ -51,5 +52,6 @@ class Command(BaseCommand):
                 elif g['response'] == 'Correct!':
                     self.handle_correct_answer(puzzle, answer)
 
+            time.sleep(1)
 
         print("Finished answerscrape run")
