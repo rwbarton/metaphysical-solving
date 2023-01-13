@@ -1,18 +1,20 @@
 {% load static %}
     <div id="infoheader">
-       <div id="teamlogo"><img class="logo" src="{% static "img/mplogo.svg" %}"/></div>
-       <div id="teamname">{{ teamname|safe }}</div>
+       <a target="_top" href="/overview/" style="color:#ffffff"><div id="teamlogo"><img class="logo" src="{% static "img/mplogo.svg" %}"/></div>
+       <div id="teamname">{{ teamname|safe }}</div></a>
        <nav id="navmenu" role="navigation">
         <ul class="menu" id="navlist">
             <li class="topmenuitem"><a href="#" class="topmenulink menulink"><span class="menuicon">☰</span> Menu</a>
               <ul class="dropdown">
                   <li class="menuitem"><a class="menulink" target="_top" href="/overview/">Overview</a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="http://www.thewordsword.com/">Allen's wordsearch</a></li>
-                  <li class="menuitem"><a class="menulink" target="_blank" href="/help/">Help</a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="{{zulip_url}}">Zulip</a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="{{jitsi_base_url}}/notapuzzle/quartermaster">Quartermaster <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="{{jitsi_base_url}}/notapuzzle/teamMeetingRoom">Team Meeting Room <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="{{jitsi_base_url}}/notapuzzle/socialSpace">Social Space <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
+		                    <li class="menuitem"><a class="menulink" target="_blank" href="/planthelp/">General Help</a></li>
+                  <li class="menuitem"><a class="menulink" target="_blank" href="/help/">Server Help</a></li>
+
               </ul>
             </li>
         </ul>
