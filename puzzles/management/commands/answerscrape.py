@@ -32,9 +32,13 @@ class Command(BaseCommand):
                 continue
 
             puzzle_prefix = 'https://interestingthings.museum/puzzles/'
+            factory_prefix = 'https://puzzlefactory.place/factory-floor/'
             if puzzle.url.startswith(puzzle_prefix):
                 api_url = 'https://interestingthings.museum/api/puzzle/' + \
                              puzzle.url[len(puzzle_prefix):]
+            elif puzzle.url.startswith(factory_prefix):
+                api_url = 'https://puzzlefactory.place/api/puzzle/' + \
+                             puzzle.url[len(factory_prefix):]
             else:
                 continue
 

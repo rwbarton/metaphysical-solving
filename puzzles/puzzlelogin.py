@@ -18,6 +18,13 @@ def get_logged_in_browser():
     br['password'] = password
     br.submit()
 
+    r = br.open('https://puzzlefactory.place/login')
+
+    br.select_form(nr=0)
+    br['username'] = username
+    br['password'] = password
+    br.submit()
+
     return br
 
 # Use this in scripts that run for a short time
