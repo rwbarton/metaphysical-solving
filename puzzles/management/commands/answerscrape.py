@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from puzzles.models import Puzzle, Status, QueuedAnswer, PuzzleWrongAnswer
 
+import json
 import sys
 from datetime import datetime
 
@@ -29,63 +30,26 @@ class Command(BaseCommand):
             if puzzle.answer:   #  answer already in database
                 continue
 
-            puzzle_prefix = 'https://www.starrats.org/puzzle/'
+            puzzle_prefix = 'https://interestingthings.museum/puzzles/'
             if puzzle.url.startswith(puzzle_prefix):
-                answer_url = 'https://www.starrats.org/embed/submit/puzzle/' + \
+                api_url = 'https://interestingthings.museum/api/puzzle/' + \
                              puzzle.url[len(puzzle_prefix):]
             else:
                 continue
 
-            print(answer_url)
+            print(api_url)
 
-            text = puzzlelogin.fetch_with_single_login(answer_url).decode('utf-8')
+            text = puzzlelogin.fetch_with_single_login(api_url)
+            res = json.loads(text.decode('utf-8'))
 
             QueuedAnswer.objects.filter(puzzle=puzzle).delete()
 
-            # skip = True
-            cur_answer = None
-            for l in text.split('\n'):
-                l = l.lstrip()
-                answer_prefix = '<td class="answer">'
-                answer_suffix = '</td>'
-                if l.startswith(answer_prefix) and l.endswith(answer_suffix):
-                    cur_answer = l[len(answer_prefix):len(l)-len(answer_suffix)]
+            for g in res['guesses']:
+                answer = g['guess']
+                if g['response'] == 'Incorrect':
+                    self.handle_wrong_answer(puzzle, answer)
+                elif g['response'] == 'Correct!':
+                    self.handle_correct_answer(puzzle, answer)
 
-                if l == '<td class="incorrect">Incorrect</td>':
-                    self.handle_wrong_answer(puzzle, cur_answer)
-
-                if l == '<td class="correct">Correct!</td>':
-                    self.handle_correct_answer(puzzle, cur_answer)
-
-                # solved_prefix = '      Solved! Answer: <b>'
-                # solved_suffix = '</b><br>'
-                # if l.startswith(solved_prefix) and l.endswith(solved_suffix):
-                #     answer = l[len(solved_prefix):len(l)-len(solved_suffix)]
-                #     print 'SOLVED ' + puzzle.title + ' = ' + answer
-                #     puzzle.answer = answer
-                #     puzzle.status = solved_status
-                #     puzzle.save()
-
-                # if l == '      <h3>In the Queue:</h3>':
-                #     mode = 'queued'
-                # if l == '      <h3>Previous Answers Submitted:</h3>':
-                #     mode = 'wrong'
-
-                # non_answer_prefix = '\t  <td>'
-                # if l.startswith(non_answer_prefix):
-                #     if skip:    # Every other match is a header which we ignore
-                #         skip = False
-                #         continue
-                #     else:
-                #         skip = True
-                #         rest = l[len(non_answer_prefix):]
-                #         if rest.endswith('</td>'):
-                #             rest = rest[:-len('</td>')]
-                #         if mode == 'queued':
-                #             print 'QUEUED ' + puzzle.title + ' = ' + rest
-                #             QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=rest)
-                #         if mode == 'wrong' and puzzle.status != solved_status:
-                #             print 'WRONG ' + puzzle.title + ' = ' + rest
-                #             PuzzleWrongAnswer.objects.get_or_create(puzzle=puzzle, answer=rest)
 
         print("Finished answerscrape run")
