@@ -12,6 +12,9 @@ urlpatterns = [
     re_path(r'^overview/(\d+)/$',  views.overview_by, name='puzzles.views.overview_by'),
 
     re_path(r'^puzzle/(\d+)/$',  views.puzzle, name='puzzles.views.puzzle'),
+    #re_path(r'^puzzle_new/(\d+)/$',  views.puzzle_new, name='puzzles.views.puzzle_new'),
+    re_path(r'^puzzle_bottom/(\d+)/$',  views.puzzle_bottom, name='puzzles.views.puzzle_bottom'),
+    #re_path(r'^puzzle_new/info/(\d+)/$',  views.puzzle_new_info, name='puzzles.views.puzzle_new_info'),
     re_path(r'^puzzle/info/(\d+)/$',  views.puzzle_info, name='puzzles.views.puzzle_info'),
     re_path(r'^puzzle/spreadsheet/(\d+)/$',  views.puzzle_spreadsheet, name='puzzles.views.puzzle_spreadsheet'),
     re_path(r'^puzzle/chat/(\d+)/$',  views.puzzle_chat, name='puzzles.views.puzzle_chat'),

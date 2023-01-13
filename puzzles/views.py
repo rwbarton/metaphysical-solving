@@ -103,12 +103,50 @@ def overview_by(request, taglist_id):
 def overview(request):
     return overview_by(request, Config.objects.get().default_taglist.id)
 
+#@login_required
+#def puzzle(request, puzzle_id):
+#    return render(request, "puzzles/puzzle-frames.html", context={
+#                'id': puzzle_id,
+#                'title': Puzzle.objects.get(id=puzzle_id).title
+#                })
+
 @login_required
-def puzzle(request, puzzle_id):
-    return render(request, "puzzles/puzzle-frames.html", context={
+def puzzle_bottom(request, puzzle_id):
+    return render(request, "puzzles/puzzle-bottomframes.html", context={
                 'id': puzzle_id,
                 'title': Puzzle.objects.get(id=puzzle_id).title
                 })
+
+@login_required
+def puzzle(request, puzzle_id):
+    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
+    statuses = Status.objects.all()
+    priorities = Priority.objects.all()
+    solvers = puzzle.solvers.order_by('first_name', 'last_name')
+    you_solving = request.user in solvers
+    other_solvers = [solver for solver in solvers if solver != request.user]
+    other_users = [other_user
+                   for other_user in User.objects.order_by('first_name', 'last_name')
+                   if other_user not in solvers
+                   and other_user != request.user]
+    queued_answers = puzzle.queuedanswer_set.order_by('-id')
+    wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
+    uploaded_files = puzzle.uploadedfile_set.order_by('id')
+    return render(request, "puzzles/puzzle-newframes.html", context=puzzle_context(request, {
+                'id': puzzle_id,
+                'puzzle': puzzle,
+                'statuses': statuses,
+                'priorities': priorities,
+                'you_solving': you_solving,
+                'other_solvers': other_solvers,
+                'other_users': other_users,
+                'queued_answers': queued_answers,
+                'wrong_answers': wrong_answers,
+                'uploaded_files': uploaded_files,
+                'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
+                'jitsi_room_id': puzzle.jitsi_room_id(),
+                'refresh': 60
+                }))
 
 @login_required
 def puzzle_info(request, puzzle_id):
@@ -125,7 +163,7 @@ def puzzle_info(request, puzzle_id):
     queued_answers = puzzle.queuedanswer_set.order_by('-id')
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     uploaded_files = puzzle.uploadedfile_set.order_by('id')
-    return render(request, "puzzles/puzzle-info.html", context=puzzle_context(request, {
+    return render(request, "puzzles/puzzle-newinfo.html", context=puzzle_context(request, {
                 'puzzle': puzzle,
                 'statuses': statuses,
                 'priorities': priorities,
@@ -139,6 +177,36 @@ def puzzle_info(request, puzzle_id):
                 'jitsi_room_id': puzzle.jitsi_room_id(),
                 'refresh': 60
                 }))
+
+#@login_required
+#def puzzle_info(request, puzzle_id):
+#    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
+#    statuses = Status.objects.all()
+#    priorities = Priority.objects.all()
+#    solvers = puzzle.solvers.order_by('first_name', 'last_name')
+#    you_solving = request.user in solvers
+#    other_solvers = [solver for solver in solvers if solver != request.user]
+#    other_users = [other_user
+#                   for other_user in User.objects.order_by('first_name', 'last_name')
+#                   if other_user not in solvers
+#                   and other_user != request.user]
+#    queued_answers = puzzle.queuedanswer_set.order_by('-id')
+#    wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
+#    uploaded_files = puzzle.uploadedfile_set.order_by('id')
+#    return render(request, "puzzles/puzzle-info.html", context=puzzle_context(request, {
+#                'puzzle': puzzle,
+#                'statuses': statuses,
+#                'priorities': priorities,
+#                'you_solving': you_solving,
+#                'other_solvers': other_solvers,
+#                'other_users': other_users,
+#                'queued_answers': queued_answers,
+#                'wrong_answers': wrong_answers,
+#                'uploaded_files': uploaded_files,
+#                'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
+#                'jitsi_room_id': puzzle.jitsi_room_id(),
+#                'refresh': 60
+#                }))
 
 @login_required
 def puzzle_spreadsheet(request, puzzle_id):

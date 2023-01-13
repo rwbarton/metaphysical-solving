@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;300;600&display=swap');
+
 body {
     margin: 0px;
     min-width: 900px;
-    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+    font-family: "Source Sans Pro","lucida grande",tahoma,verdana,arial,sans-serif;
+    font-weight: 300;
     font-size: 0.9em;
 }
 
@@ -14,39 +17,243 @@ a:hover {
     text-decoration: underline;
 }
 
-div#infoheader {
-  height: 25px;
-  line-height: 25px;
-  padding-left: 30px;
-  background: #000000 url(/static/img/plant.png) no-repeat 10px center; 
+#infoheader {
+  height: 30px;
+  line-height: 30px;
+  padding-left: 10px;
+  background: #333333;
   color: #ffffff;
   font-size: 11px;
   font-weight: bold;
 }
 
+#infoheader #teamlogo {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+#infoheader .logo {
+    width: 20px;
+    height: auto;
+    display: inline-block;
+    position: relative;
+    top: -2px;
+}
+
+#overviewtopbar .logo {
+    top: 0;
+}
+
+#infoheader #navmenu {
+    display: inline-block;
+    padding: 0 8px;
+    border-left: 1px solid #888;
+    border-right: 1px solid #888;
+    position: relative;
+    top: -1px;
+    left: 8px;
+}
+
+#infoheader #navmenu:hover {
+    background: #515151;
+}
+
+.menuicon {
+    font-size: 15px;
+}
+
+.iconimage {
+    width: 18px;
+    height: auto;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.iconimage.gray {
+    filter: invert(0.4);
+}
+
 div#infoheader #teamname {
   display: inline;
+  text-transform: lowercase;
+  font-weight: 200;
+  font-size: 15px;
 }
 
 div#infoheader #motdbanner {
-  display: inline;
-  margin-left: 20px;
-  padding: 5px 0px 5px 30px;
-  height: 30px;
-  width: 300px;
-  background: url(/static/img/info.png) no-repeat 5px center;
-  color: #ffee00; 
+    display: inline;
+    margin-left: 15px;
+    color: #c1ffb8;
+    font-weight: 200;
+    font-size: 14px;
+    position: relative;
+    top: -1px;
 }
 
-div#infoheader div#hqcontact {
+#hqcontact {
     float: right;
-    background: url(/static/img/whitephone.png) no-repeat 10px center; 
-    padding-right: 15px;
-    padding-left: 30px;
-    font-weight: bold;
+    margin-right: 8px;
+    position: relative;
+    top: 5px;
 }
 
+#overviewtopbar #hqcontact {
+    top: -1px;
+}
 
+#hqcontact .contactinfo {
+    display: none;
+    position: absolute;
+    right: 12px;
+    top: 22px;
+    width: 300px;
+    text-align: center;
+    border: 1px solid;
+    border-radius: 4px;
+    box-shadow: 1px 2px 3px #ccc;
+    background: #303030;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+#hqcontact:hover {
+    cursor: pointer;
+}
+
+#hqcontact:hover .contactinfo {
+    display: block;
+    position: absolute;
+    right: 12px;
+    top: 22px;
+    z-index: 2;
+}
+
+.menu, .dropdown {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.topmenulink {
+    text-transform: uppercase;
+    font-weight: 200;
+    letter-spacing: 0.05rem;
+}
+
+.menulink,
+.menulink:visited,
+.menulink:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+.menulink:hover {
+    color: #eee;
+}
+
+.menuitem {
+    background: #515151;
+    display: block;
+    padding: 5px 0 5px 10px;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.menuitem:hover {
+    background: #303030;
+}
+
+.topmenuitem:hover {
+    cursor: pointer;
+}
+
+.dropdown {
+    display: none;
+}
+
+.topmenuitem:hover > .dropdown,
+.dropdown:hover {
+    display: block;
+    width: 200px;
+    position: absolute;
+    left: -8px;
+    top: 31px;
+    z-index: 3;
+}
+
+#rightheader {
+    float: right;
+    margin-right: 8px;
+    padding-right: 8px;
+    border-right: 1px solid #ccc;
+    position: relative;
+    top: -1px;
+    font-size: 13px;
+}
+
+#rightheader .usermenucontent {
+    display: none;
+}
+
+#rightheader:hover {
+    cursor: pointer;
+    background: #515151;
+}
+
+#rightheader:hover .usermenucontent {
+    display: block;
+    position: absolute;
+    right: 0px;
+    top: 30px;
+    width: 200px;
+    background: #303030;
+    text-align: center;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+#rightheader .switchuser {
+    margin-top: -12px;
+}
+
+#rightheader .switchuser a {
+    font-size: 10px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid #ddd;
+    color: #ddd;
+}
+
+#rightheader .switchuser a:hover {
+    border-bottom: 1px solid #fff;
+    color: #fff;
+}
+
+.dropdownselector {
+    padding: 2px;
+    font-family: "Source Sans Pro","lucida grande",tahoma,verdana,arial,sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    background: #606060;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.lightdropdown {
+    padding: 3px;
+    font-family: "Source Sans Pro","lucida grande",tahoma,verdana,arial,sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    background: none;
+    color: #202020;
+    border: none;
+    border-bottom: 1px solid #aaa;
+}
+
+/*
 div#header {
     background: #1f2861;
     height: 2.1em;
@@ -84,7 +291,7 @@ div#header div#rightheader {
 div#header div#rightheader a {
     color: #3B49A3;
 }
-
+*/
 
 div#header div#userinfo {
     display:inline-block;
@@ -131,6 +338,7 @@ form {
     display: inline;
 }
 
+/*
 ul#navlist {
     display: inline;
     height: 2em;
@@ -144,6 +352,7 @@ ul#navlist li {
     padding: 0px;
     margin: 0px;    
 }
+*/
 
 ul#puzzlelist {
     padding: 0px;
@@ -340,10 +549,9 @@ span.puzzle-answer {
 }
 
 div.puzzle-blurb {
-    padding: 3px;
     padding-left: 10px;
     background: #dddddd;
-    line-height:1.5em;
+    height: 35px;
 }
 
 div#answers {
@@ -370,24 +578,6 @@ div#workers {
     background: #F2E3CB;
 }
 
-div#workers .onesolver {
-    display: inline-block;
-    height: 2em;
-    background: #F2CD91;
-    margin-right: 5px;
-    padding-left: 2px;
-    padding-right: 2px;
-}
-
-div#answers div#puzzleanswer {
-    height: 2em;
-    padding-left: 4px;
-    padding-right: 4px;
-    display:inline-block;
-    margin-right:15px;
-    background: #11F023; 
-}
-
 div#tags {
     display: inline-block;
     margin-right: 15px;
@@ -395,25 +585,26 @@ div#tags {
 }
 
 div#puzzlefiles a#attachfile {
-    position:relative;
-    text-transform: uppercase;
-    font-size: 0.6em;
-    font-weight: bold;
-    color: #ffffff;
-    background: #120C38;
-    border: #120C38 1px solid;
-    padding: 2px 4px 2px 4px;
-    top: -2px;
-    margin-right: 5px;
+    font-family: "Source Sans Pro","lucida grande",tahoma,verdana,arial,sans-serif;
+    font-weight: 300;
+    padding: 4px;
+    display: block;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: #efefef;
+    border: 1px solid #515151;
+    border-radius: 4px;
+    width: 80px;
+    line-height: 20px;
+    font-size: 14px;
+    text-decoration: none;
+    color: #000000;
 }
 
 div#puzzlefiles a#attachfile:hover {
-    text-decoration: none;
-    background: #111100;
+    background: #eeeeee;
 }
-
-
-
 
 div#answers a#callinanswer {
     text-transform: uppercase;
@@ -436,12 +627,105 @@ div#answers a#callinanswer:hover {
 }
 
 .puzzle-blurb.status-solved {
-    background: #2E961B;
+    background: #acd6a5;
 }
 
 .puzzle-blurb div#jitsi {
     display: inline-block;
-    padding-left: 10px;
+    padding-left: 8px;
+    margin-left: 8px;
+    position: relative;
+    top: -1px;
+    line-height: 35px;
+}
+
+#jitsi .iconimage {
+    filter: invert(0.5);
+    position: relative;
+    top: -1px;
+}
+
+#jitsi:hover .iconimage {
+    filter: invert(0);
+}
+
+#people, #files, #responses {
+    display: inline-block;
+    padding: 0 8px;
+    margin: 0 8px;
+    position: relative;
+}
+
+#people, #files {
+    margin-right: 0px;
+}
+
+#files, #responses {
+    margin-left: 0px;
+}
+
+#people .selector,
+#files .selector,
+#responses .selector {
+    display: none;
+}
+
+#people:hover,
+#files:hover,
+#responses:hover {
+    cursor: pointer;
+    background: #ccc;
+}
+
+#people:hover .selector,
+#files:hover .selector,
+#responses:hover .selector {
+    cursor: default;
+    display: block;
+    position: absolute;
+    top: 35px;
+    left: 0px;
+    background: #ccc;
+    padding: 7px;
+    text-align: center;
+    width: 200px;
+    border-radius: 0 0 3px 3px;
+}
+
+#answers {
+    text-align: center;
+}
+
+.answerlabel {
+    font-size: 12px;
+    font-weight: 200;
+    color: #515151;
+    display: block;
+    margin: 10px auto 0 auto;
+}
+
+.onesolver {
+    display: block;
+    text-align: left;
+}
+
+.onesolver .iconimage {
+    margin-right: 3px;
+}
+
+.addme {
+    font-family: "Source Sans Pro","lucida grande",tahoma,verdana,arial,sans-serif;
+    font-weight: 300;
+    padding: 4px;
+    display: block;
+    margin: auto;
+    margin-top: 10px;
+}
+
+.floatright {
+    float: right;
+    position: relative;
+    top: 10px;
 }
 
 .puzzle-blurb div#puzzlestatus {
@@ -449,12 +733,13 @@ div#answers a#callinanswer:hover {
     padding-left: 10px;
 }
 
-.puzzle-blurb div#puzzlepriority {
-    display: inline-block;
-    padding-left: 10px;
+.blurbblock {
+    line-height: 35px;
+    position: relative;
+    top: -2px;
 }
 
-.puzzle-blurb div#puzzlefiles {
+.puzzle-blurb div#puzzlepriority {
     display: inline-block;
     padding-left: 10px;
 }
@@ -463,9 +748,34 @@ span.puzzle-title {
     font-weight: bold;
 }
 
-a.puzzle-title {
-    font-size: 1.2em;
+a.puzzle-title,
+a.puzzle-title:visited {
+    font-size: 1.3em;
     font-weight: bold;
+    text-decoration: none;
+    color: #404040;
+    line-height: 35px;
+    display: inline-block;
+}
+
+a.puzzle-title .puzzleicon {
+    filter: invert(0.5);
+}
+
+a.puzzle-title:hover {
+    color: #000000;
+}
+
+a.puzzle-title:hover .puzzleicon {
+    filter: invert(0);
+}
+
+.puzzleicon {
+    width: 20px;
+    height: auto;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
 }
 
 #whos-working {
@@ -485,27 +795,6 @@ a.puzzle-title {
 ul#puzzle-queued-answers {
     display: inline;
     padding: 0px;
-}
-
-ul#puzzle-queued-answers > li {
-    display: inline;
-    padding: 0px 3px;
-    background: #e7e7AD;
-    font-family: "Courier New" monospace;
-    font-weight: bold;
-}
-
-ul#puzzle-wrong-answers {
-    display: inline;
-    padding: 0px;
-}
-
-ul#puzzle-wrong-answers > li {
-    display: inline;
-    padding: 0px 3px;
-    background: #f7ADAD;
-    font-family: "Courier New" monospace;
-    font-weight: bold;
 }
 
 div#fileuploads {

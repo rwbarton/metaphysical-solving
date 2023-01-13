@@ -1,4 +1,4 @@
-{% extends "puzzles/base_generic.html" %}
+{% extends "puzzles/base_newgeneric.html" %}
 
 {% load static %}
 
@@ -28,18 +28,18 @@
         nobody
         {% endif %}
         {% if you_solving %}
-    <span class="onesolver"><img src="{% static "img/user.svg" %}" class="iconimage">You
-      <form class="floatright" action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" method="post">{% csrf_token %}
-        <input type="hidden" name="continue" value="{{ path }}" />
-        <input type="hidden" name="solver" value="{{ user.id }}" />
-        <input type="image" src="{% static "img/remove.svg" %}" type="submit" alt="Remove" class="iconimage"/>
-      </form>
-          </span>
+        <span class="onesolver"><img src="{% static "img/user.svg" %}" class="iconimage">Yourself
+          <form class="floatright" action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
+            <input type="hidden" name="continue" value="{{ path }}" />
+            <input type="hidden" name="solver" value="{{ user.id }}" />
+            <input type="image" src="{% static "img/remove.svg" %}" type="submit" alt="Remove" class="iconimage"/>
+          </form>
+              </span>
         {% endif %}
         {% for solver in other_solvers %}
     <span class="onesolver" title="{{ solver.first_name }} {{ solver.last_name }} ({{ solver.userprofile.location }})">
             <img src="{% static "img/user.svg" %}" class="iconimage">{{ solver.first_name }}
-      <form class="floatright" action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" method="post">{% csrf_token %}
+      <form class="floatright" action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
         <input type="hidden" name="continue" value="{{ path }}" />
         <input type="hidden" name="solver" value="{{ solver.id }}" />
         <input type="image" src="{% static "img/remove.svg" %}" alt="Remove" class="iconimage"/>
@@ -48,15 +48,15 @@
         {% endfor %}
     <span>
       {% if not you_solving %}
-      <form action="{% url 'puzzles.views.puzzle_add_solver' puzzle.id %}" method="post">{% csrf_token %}
+      <form action="{% url 'puzzles.views.puzzle_add_solver' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
         <input type="hidden" name="continue" value="{{ path }}" />
         <input type="hidden" name="solver" value="{{ user.id }}" />
         <input type="submit" value="Add me" class="addme"/>
       </form>
       {% endif %}
-      <form id="add_other_user" action="{% url 'puzzles.views.puzzle_add_solver' puzzle.id %}" method="post">{% csrf_token %}
+      <form id="add_other_user" action="{% url 'puzzles.views.puzzle_add_solver' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
         <input type="hidden" name="continue" value="{{ path }}" />
-        <select onchange="document.forms.add_other_user.submit()" name="solver" class="lightdropdown">
+        <select onchange="document.forms.add_other_user.requestSubmit()" name="solver" class="lightdropdown">
     <option>Add others...</option>
     {% for other_user in other_users %}
     <option value="{{ other_user.id }}">{{ other_user.first_name }} {{ other_user.last_name }}</option>
@@ -71,8 +71,15 @@
       <img src="{% static "img/files.svg" %}" class="iconimage"/>
       {{ uploaded_files|length }}
       <div id="puzzlefiles" class="selector">
-        <a id="attachfile" href="{% url 'puzzles.views.puzzle_upload' puzzle.id %}">Attach file</a>
-        {% if uploaded_files %}Attached files:
+        <form class="upload" action="{% url 'puzzles.views.puzzle_upload' puzzle.id %}" onsubmit="submitform(event);" method="post" enctype="multipart/form-data">{% csrf_token %}
+          File:
+          <input type="file" name="file" />
+          Name:
+          <input type="text" name="name" />
+          <input type="submit" value="Upload" />
+        </form>
+        {% if uploaded_files %}
+        <div>Attached files:</div>
          <select id="fileselector" class="lightdropdown">
         {% for upload in uploaded_files %}
         <option style="background:url({% static "img/file.png" %}) no-repeat; padding-left:15px;" value="{{ upload.url }}">{{ upload.name }}</option>
@@ -101,7 +108,7 @@
         {% if queued_answers %}
         <span class="answerlabel">QUEUED ANSWERS</span>
           {% for queued_answer in queued_answers %}
-          <div></div>{{ queued_answer.answer }}</div>
+          <div>{{ queued_answer.answer }}</div>
           {% endfor %}
         {% endif %}
         {% if answer_callin %}
@@ -120,9 +127,9 @@
 
     <div id="puzzlestatus" class="blurbblock">
     <img src="{% static "img/progress.svg" %}" class="iconimage gray" title = "Puzzle status"/>
-    <form id="status_form" action="{% url 'puzzles.views.puzzle_set_status' puzzle.id %}" method="post">{% csrf_token %}
+    <form id="status_form" action="{% url 'puzzles.views.puzzle_set_status' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
-      <select onchange="document.forms.status_form.submit()" name="status" class="lightdropdown">
+      <select onchange="document.forms.status_form.requestSubmit()" name="status" class="lightdropdown">
 	{% for status in statuses %}
 	<option{% if puzzle.status == status %} selected="true"{% endif %}>{{ status.text }}</option>
 	{% endfor %}
@@ -132,9 +139,9 @@
 
     <div id="puzzlepriority" class="blurbblock">
     <img src="{% static "img/priority.svg" %}" class="iconimage gray" title = "Puzzle priority"/>
-    <form id="priority_form" action="{% url 'puzzles.views.puzzle_set_priority' puzzle.id %}" method="post">{% csrf_token %}
+    <form id="priority_form" action="{% url 'puzzles.views.puzzle_set_priority' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
       <input type="hidden" name="continue" value="{{ path }}" />
-      <select onchange="document.forms.priority_form.submit()" name="priority" class="lightdropdown">
+      <select onchange="document.forms.priority_form.requestSubmit()" name="priority" class="lightdropdown">
 	{% for priority in priorities %}
 	<option{% if puzzle.priority == priority %} selected="true"{% endif %}>{{ priority.text }}</option>
 	{% endfor %}
@@ -153,11 +160,5 @@
     </div>
     -->
 
-</div>
-
-<!--
-<div id="workers">
-</div>
--->
 </div>
 {% endblock %}

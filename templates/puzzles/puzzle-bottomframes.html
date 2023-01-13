@@ -1,0 +1,11 @@
+{% load static %}
+<!DOCTYPE "HTML Frameset DTD">
+<html>
+  <head>
+    <title>{{ title }}</title>
+  </head>
+    <frameset cols="*,390px">
+      <frame src="{% url 'puzzles.views.puzzle_spreadsheet' id %}" />
+      <frame src="{% url 'puzzles.views.puzzle_chat' id %}" />
+    </frameset>
+</html>

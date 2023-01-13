@@ -1,29 +1,4 @@
 {% load static %}
-{% if not body_only %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <link rel="stylesheet" href="{% static "css/base.css" %}?1" />
-    <link rel="stylesheet" href="{% static "css/status.css" %}" />
-    <link rel="stylesheet" href="{% static "css/priority.css" %}" />
-    <link rel="icon" href="{% static "img/favicon.ico" %}" />
-    <title>{% block title %}{% endblock %}</title>
-    {% if refresh %}
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
-    <script type="text/javascript">
-      function reload() {
-        $.ajax({
-          url: "?body",
-          success: function (data, textStatus, jqXHR) { document.body.innerHTML = data; },
-        });
-      };
-      $(document).ready(function () { setInterval(reload, {{ refresh }} * 1000); });
-    </script>
-    {% endif %}
-  </head>
-{% endif %}
-  <body>
-    <div id="overviewtopbar">
     <div id="infoheader">
        <div id="teamlogo"><img class="logo" src="{% static "img/mplogo.svg" %}"/></div>
        <div id="teamname">{{ teamname|safe }}</div>
@@ -61,9 +36,9 @@
                   <div id="userinfo">{{ user.first_name }} {{ user.last_name }}</div>
                   <div class="switchuser"><a target="_top" href="{% url 'puzzles.views.logout_user' %}">switch user</a></div>
                   <div id="locationinfo">      
-                    <form id="user_location" action="{% url 'puzzles.views.user_location' %}" method="post">{% csrf_token %}
+                    <form id="user_location" action="{% url 'puzzles.views.user_location' %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
                         <input type="hidden" name="continue" value="{{ path }}" />
-                        <select onchange="document.forms.user_location.submit()" name="location" class="dropdownselector">
+                        <select onchange="document.forms.user_location.requestSubmit()" name="location" class="dropdownselector">
                            {% for location in locations %}
                                <option{% if location == user.userprofile.location %} selected="true"{% endif %}>{{ location.name }}</option>
                            {% endfor %}
@@ -73,9 +48,4 @@
               </div>
        </div>
     </div>
-  </div>
     <div id="content">{% block content %}{% endblock %}</div>
-  </body>
-{% if not body_only %}
-</html>
-{% endif %}
