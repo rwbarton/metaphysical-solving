@@ -5,6 +5,7 @@ import json
 import sys
 import time
 from datetime import datetime
+from urllib.error import HTTPError
 
 from puzzles import puzzlelogin
 
@@ -44,7 +45,14 @@ class Command(BaseCommand):
 
             print(api_url)
 
-            text = puzzlelogin.fetch_with_single_login(api_url)
+            try:
+                text = puzzlelogin.fetch_with_single_login(api_url)
+            except HTTPError as e:
+                if e.code == 404:
+                    print(e)
+                    continue
+                else:
+                    raise
             res = json.loads(text.decode('utf-8'))
 
             QueuedAnswer.objects.filter(puzzle=puzzle).delete()
