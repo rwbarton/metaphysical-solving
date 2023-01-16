@@ -61,7 +61,7 @@ class Command(BaseCommand):
     help = "Visit Hunt Overview and create new puzzles"
 
     def handle(self, *args, **kwargs):
-        overview_url = 'https://interestingthings.museum/api/puzzle_list'
+        overview_url = 'https://puzzlefactory.place/api/puzzle_list'
 
         print("Beginning puzzlescrape run at " + datetime.now().isoformat())
 
