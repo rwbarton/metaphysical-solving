@@ -33,7 +33,7 @@ def get_motd():
 
 def get_jitsi_data():
     try:
-        room_list_json = urllib.request.urlopen(settings.JITSI_ROOMS_URL, timeout = 5)
+        room_list_json = urllib.request.urlopen(urllib.parse.urljoin(settings.JITSI_SERVER_URL,settings.JITSI_ROOMS_URL), timeout = 5)
         room_list_object = json.loads(room_list_json.read().decode('utf-8'))
         room_list = room_list_object["room_census"]
         user_dict = defaultdict(list)
