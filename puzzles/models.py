@@ -8,7 +8,7 @@ from django.conf import settings
 import re
 import hashlib
 
-from puzzles.googlespreadsheet import create_google_spreadsheet
+from puzzles.googlespreadsheet import create_google_spreadsheet, grant_folder_access
 from puzzles.zulip import zulip_send, zulip_create_user
 
 try:
@@ -236,6 +236,7 @@ def make_user_profile(**kwargs):
     user_profile, _ = UserProfile.objects.get_or_create(
         user=user,
         defaults={'location': default_location})
+    grant_folder_access(user.email)
     user_zulip_status, _ = UserZulipStatus.objects.get_or_create(user=user)
     if user_zulip_status.status == UserZulipStatus.NONE \
             and user.first_name:
