@@ -126,7 +126,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = open('/etc/puzzle/google-oauth2-client-secret
 
 SOCIAL_AUTH_ENABLED_BACKENDS = ('google-oauth2',)
 
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
