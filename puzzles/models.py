@@ -5,8 +5,10 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save
 from django.urls import reverse
 from django.conf import settings
+from django.utils.timezone import now
 import re
 import hashlib
+import datetime
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, grant_folder_access
 from puzzles.zulip import zulip_send, zulip_create_user
@@ -148,6 +150,10 @@ class Puzzle(OrderedModel):
         id_hash = hashlib.sha1(('%d-%s' % (self.id, jitsi_secret)).encode()).hexdigest()[0:16]
         return '%s-%d-%s' % (re.sub(r'[^a-zA-Z0-9]','',self.title),self.id, id_hash)
 
+    def recent_solvers(self):
+        logs=AccessLog.objects.filter(puzzle__exact=self).filter(stamp__gte=now()-datetime.timedelta(minutes=5))
+        return logs.order_by("user").values("user").distinct()
+    
     def save(self, *args, **kwargs):
         # Grab old instance to see if our answer is new.
         try:
@@ -255,3 +261,9 @@ def make_superuser(**kwargs):
     user.is_superuser = True
 
 pre_save.connect(make_superuser, sender=User)
+
+class AccessLog(OrderedModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
+    stamp = models.DateTimeField(auto_now_add=True)
+    

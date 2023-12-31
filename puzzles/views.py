@@ -4,6 +4,7 @@ import os.path
 import urllib
 import json
 import re
+import time
 
 from collections import defaultdict
 
@@ -18,7 +19,7 @@ from django.db import IntegrityError
 from django import forms
 
 from puzzles.models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
-    PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config
+    PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, AccessLog
 from puzzles.forms import UploadForm, AnswerForm
 from puzzles.submit import submit_answer
 from puzzles.zulip import zulip_send
@@ -89,7 +90,7 @@ def overview_by(request, taglist_id):
             'active_taglist_id': taglist_id,
             'tags': ({
                     'name': tag.name,
-                    'puzzles': Tag.objects.get(id=tag.id).puzzle_set.select_related().all()
+                    'puzzles': ({'puzzle':puzz,'solvers':len(puzz.recent_solvers())} for puzz in Tag.objects.get(id=tag.id).puzzle_set.select_related().all())
                     }
                      for tag in tags),
             'assigned_puzzles': assigned_puzzles,
@@ -149,11 +150,17 @@ def puzzle(request, puzzle_id):
                 'refresh': 60
                 }))
 
+def puzzle_access(request,puzzle_id):
+    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
+    accesses = AccessLog.objects.filter(puzzle__exact=puzzle)
+    return render(request, "puzzles/a2.html",context={'id': puzzle_id,'accesses':accesses})
+
 @login_required
 def puzzle_info(request, puzzle_id):
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
+    #solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')
     solvers = puzzle.solvers.order_by('first_name', 'last_name')
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
@@ -164,6 +171,13 @@ def puzzle_info(request, puzzle_id):
     queued_answers = puzzle.queuedanswer_set.order_by('-id')
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     uploaded_files = puzzle.uploadedfile_set.order_by('id')
+    accessTime =time.gmtime()
+
+    if (settings.ENABLE_ACCESS_LOG):
+        a = AccessLog(user=request.user,puzzle=puzzle)
+        a.save()
+#    for entry in AccessLog.objects.all():
+#        print("%s@ %d:%d"%(entry.user,entry.stamp.hour,entry.stamp.minute))
     return render(request, "puzzles/puzzle-newinfo.html", context=puzzle_context(request, {
                 'puzzle': puzzle,
                 'statuses': statuses,
