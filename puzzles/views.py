@@ -90,7 +90,7 @@ def overview_by(request, taglist_id):
             'active_taglist_id': taglist_id,
             'tags': ({
                     'name': tag.name,
-                    'puzzles': ({'puzzle':puzz,'solvers':len(puzz.recent_solvers())} for puzz in Tag.objects.get(id=tag.id).puzzle_set.select_related().all())
+                    'puzzles': ({'puzzle':puzz,'solvers':puzz.recent_count()} for puzz in Tag.objects.get(id=tag.id).puzzle_set.select_related().all())
                     }
                      for tag in tags),
             'assigned_puzzles': assigned_puzzles,

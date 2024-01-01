@@ -150,8 +150,13 @@ class Puzzle(OrderedModel):
         id_hash = hashlib.sha1(('%d-%s' % (self.id, jitsi_secret)).encode()).hexdigest()[0:16]
         return '%s-%d-%s' % (re.sub(r'[^a-zA-Z0-9]','',self.title),self.id, id_hash)
 
+    def recent_logs(self):
+        return AccessLog.objects.filter(puzzle__exact=self).filter(stamp__gte=now()-datetime.timedelta(minutes=5))
+    def recent_count(self):
+        return self.recent_logs().order_by("user").values("user").distinct().count()
+    
     def recent_solvers(self):
-        logs=AccessLog.objects.filter(puzzle__exact=self).filter(stamp__gte=now()-datetime.timedelta(minutes=5))
+        logs=self.recent_logs()
         return User.objects.filter(id__in=[urec["user"] for urec in logs.order_by("user").values("user").distinct()])
     
     def save(self, *args, **kwargs):

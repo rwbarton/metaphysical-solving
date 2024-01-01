@@ -36,15 +36,6 @@
             <img src="{% static "img/user.svg" %}" class="iconimage">{{ solver.first_name }}
           </span>
         {% endfor %}
-    <span>
-      {% if not you_solving %}
-      <form action="{% url 'puzzles.views.puzzle_add_solver' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
-        <input type="hidden" name="continue" value="{{ path }}" />
-        <input type="hidden" name="solver" value="{{ user.id }}" />
-        <input type="submit" value="Add me" class="addme"/>
-      </form>
-      {% endif %}
-    </span>
       </div>
     </div>
 
