@@ -29,21 +29,11 @@
         {% endif %}
         {% if you_solving %}
         <span class="onesolver"><img src="{% static "img/user.svg" %}" class="iconimage">Yourself
-          <form class="floatright" action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
-            <input type="hidden" name="continue" value="{{ path }}" />
-            <input type="hidden" name="solver" value="{{ user.id }}" />
-            <input type="image" src="{% static "img/remove.svg" %}" type="submit" alt="Remove" class="iconimage"/>
-          </form>
               </span>
         {% endif %}
         {% for solver in other_solvers %}
     <span class="onesolver" title="{{ solver.first_name }} {{ solver.last_name }} ({{ solver.userprofile.location }})">
             <img src="{% static "img/user.svg" %}" class="iconimage">{{ solver.first_name }}
-      <form class="floatright" action="{% url 'puzzles.views.puzzle_remove_solver' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
-        <input type="hidden" name="continue" value="{{ path }}" />
-        <input type="hidden" name="solver" value="{{ solver.id }}" />
-        <input type="image" src="{% static "img/remove.svg" %}" alt="Remove" class="iconimage"/>
-      </form>
           </span>
         {% endfor %}
     <span>
@@ -54,15 +44,6 @@
         <input type="submit" value="Add me" class="addme"/>
       </form>
       {% endif %}
-      <form id="add_other_user" action="{% url 'puzzles.views.puzzle_add_solver' puzzle.id %}" onsubmit="submitform(event);" method="post">{% csrf_token %}
-        <input type="hidden" name="continue" value="{{ path }}" />
-        <select onchange="document.forms.add_other_user.requestSubmit()" name="solver" class="lightdropdown">
-    <option>Add others...</option>
-    {% for other_user in other_users %}
-    <option value="{{ other_user.id }}">{{ other_user.first_name }} {{ other_user.last_name }}</option>
-    {% endfor %}
-        </select>
-      </form>
     </span>
       </div>
     </div>

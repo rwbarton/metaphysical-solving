@@ -77,25 +77,26 @@
 	  </th>
 	</tr>
 	{% for puzzle in tag.puzzles %}
-	{% if puzzle.id in assigned_puzzles %}
+	{% if puzzle.puzzle.id in assigned_puzzles %}
 	{% else %}
-	  <tr class="priority-{{puzzle.priority.css_name}} status-{{ puzzle.status.css_name }} puzzle-list-regular">
+	  <tr class="priority-{{puzzle.puzzle.priority.css_name}} status-{{ puzzle.puzzle.status.css_name }} puzzle-list-regular">
 	    <td class="puzzle-list-puzzle">
-	      <a target="_blank" href="{{ puzzle.url }}"><img src="{% static "img/external.png" %}" title="See {{puzzle.title}} on hunt site"></a>
+	      <a target="_blank" href="{{ puzzle.puzzle.url }}"><img src="{% static "img/external.png" %}" title="See {{puzzle.puzzle.title}} on hunt site"></a>
 	    </td>
 	    <td class="puzzle-list-title">
-	      <a href="{% url 'puzzles.views.puzzle' puzzle.id %}">{{ puzzle.title }}</a>
+	      <a href="{% url 'puzzles.views.puzzle' puzzle.puzzle.id %}">{{ puzzle.puzzle.title }}</a>
 	      {% if puzzle.priority != default_priority %}
-	      <span class="puzzle-priority priority-{{ puzzle.priority.css_name }}">{{ puzzle.priority.text }}</span>
+	      <span class="puzzle-priority priority-{{ puzzle.puzzle.priority.css_name }}">{{ puzzle.puzzle.priority.text }}</span>
 	      {% endif %}
 	    </td>
-	    <td class="puzzle-list-status answercolumn-{{puzzle.status.css_name}}">
-	      {% if puzzle.answer_or_status.answer %}
-	      <span class="puzzle-answer">{{ puzzle.answer_or_status.answer }}</span>
+	    <td class="puzzle-list-status answercolumn-{{puzzle.puzzle.status.css_name}}">
+	      {% if puzzle.puzzle.answer_or_status.answer %}
+	      <span class="puzzle-answer">{{ puzzle.puzzle.answer_or_status.answer }}</span>
 	      {% else %}
-	      {{ puzzle.answer_or_status.status.text }}
+	      {{ puzzle.puzzle.answer_or_status.status.text }}
 	      {% endif %}
 	    </td>
+	    <td> {{puzzle.solvers}} </td>
 	  </tr>
         {% endif %}
 	{% endfor %}

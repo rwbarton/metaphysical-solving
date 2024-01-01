@@ -152,7 +152,7 @@ class Puzzle(OrderedModel):
 
     def recent_solvers(self):
         logs=AccessLog.objects.filter(puzzle__exact=self).filter(stamp__gte=now()-datetime.timedelta(minutes=5))
-        return logs.order_by("user").values("user").distinct()
+        return User.objects.filter(id__in=[urec["user"] for urec in logs.order_by("user").values("user").distinct()])
     
     def save(self, *args, **kwargs):
         # Grab old instance to see if our answer is new.
