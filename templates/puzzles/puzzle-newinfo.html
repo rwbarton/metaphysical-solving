@@ -28,12 +28,12 @@
         nobody
         {% endif %}
         {% if you_solving %}
-        <span class="onesolver"><img src="{% static "img/user.svg" %}" class="iconimage">Yourself
+        <span class="onesolver"><img src="{% static "img/user.svg" %}" class="iconimage">You
               </span>
         {% endif %}
         {% for solver in other_solvers %}
-    <span class="onesolver" title="{{ solver.first_name }} {{ solver.last_name }} ({{ solver.userprofile.location }})">
-            <img src="{% static "img/user.svg" %}" class="iconimage">{{ solver.first_name }}
+    <span class="onesolver" title="Location: {{ solver.userprofile.location }}">
+            <img src="{% static "img/user.svg" %}" class="iconimage">{{ solver.first_name }} {{ solver.last_name }}
           </span>
         {% endfor %}
       </div>
