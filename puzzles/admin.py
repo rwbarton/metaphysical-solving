@@ -30,6 +30,6 @@ admin.site.register(SubmittedAnswer, SubmittedAnswerAdmin)
 admin.site.register(AutoTag)
 admin.site.register(Config)
 class LogAdmin(OrderedModelAdmin):
-	list_display = ('user','puzzle','stamp')
-	list_filter = ('puzzle','stamp')
+	list_display = ('user','puzzle','intStamp')
+	list_filter = ('puzzle','intStamp')
 admin.site.register(AccessLog, LogAdmin)

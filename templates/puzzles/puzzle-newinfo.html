@@ -35,7 +35,8 @@
     <span class="onesolver" title="Location: {{ solver.userprofile.location }}">
             <img src="{% static "img/user.svg" %}" class="iconimage">{{ solver.first_name }} {{ solver.last_name }}
           </span>
-        {% endfor %}
+    {% endfor %}
+    <a href="{% url 'puzzles.views.puzzle_view_history' puzzle.id %}">History</a>
       </div>
     </div>
 

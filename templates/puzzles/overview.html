@@ -74,7 +74,7 @@
 	      {{ puzzle.puzzle.answer_or_status.status.text }}
 	      {% endif %}
 	    </td>
-	    <td> {{puzzle.solvers}}</td>
+	    <td> <a href="{% url 'puzzles.views.puzzle_view_history' puzzle.puzzle.id %}">{{puzzle.solvers}}</a></td>
 	  </tr>
         {% endif %}
 	{% endfor %}

@@ -6,7 +6,7 @@ import json
 import re
 import time
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -19,7 +19,7 @@ from django.db import IntegrityError
 from django import forms
 
 from puzzles.models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
-    PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, AccessLog
+    PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, AccessLog, quantizedTime
 from puzzles.forms import UploadForm, AnswerForm
 from puzzles.submit import submit_answer
 from puzzles.zulip import zulip_send
@@ -156,8 +156,7 @@ def puzzle_info(request, puzzle_id):
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
     if (settings.ENABLE_ACCESS_LOG):
-        a = AccessLog(user=request.user,puzzle=puzzle)
-        a.save()
+        AccessLog.objects.create(user=request.user,puzzle=puzzle,intStamp = quantizedTime())
     solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
@@ -377,3 +376,14 @@ def logout_return(request):
 @login_required
 def welcome(request):
     return redirect(reverse('puzzles.views.overview'))
+
+@login_required
+def puzzle_view_history(request, puzzle_id):
+    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
+    countTuples = Counter(puzzle.all_distinct_logs().values_list("user")).most_common()
+    displayTuples = [(User.objects.get(id=c[0][0]),c[1]/30) for c in countTuples]
+    return render(request, "puzzles/view_history.html", context=puzzle_context(request, {
+        'puzzle': puzzle,
+        'current_solvers': puzzle.recent_solvers(),
+        'historical_solvers': displayTuples
+                }))

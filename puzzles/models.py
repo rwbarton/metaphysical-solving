@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils.timezone import now
 import re
 import hashlib
-import datetime
+import time
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, grant_folder_access
 from puzzles.zulip import zulip_send, zulip_create_user
@@ -21,6 +21,9 @@ try:
 except IOError:
     jitsi_secret = None
 
+def quantizedTime():
+    return int(time.time()/120)
+    
 class Config(models.Model):
     default_status = models.ForeignKey('Status', on_delete=models.CASCADE)
     default_priority = models.ForeignKey('Priority', on_delete=models.CASCADE)
@@ -150,8 +153,10 @@ class Puzzle(OrderedModel):
         id_hash = hashlib.sha1(('%d-%s' % (self.id, jitsi_secret)).encode()).hexdigest()[0:16]
         return '%s-%d-%s' % (re.sub(r'[^a-zA-Z0-9]','',self.title),self.id, id_hash)
 
+    def all_distinct_logs(self):
+        return AccessLog.objects.filter(puzzle__exact=self).distinct()
     def recent_logs(self):
-        return AccessLog.objects.filter(puzzle__exact=self).filter(stamp__gte=now()-datetime.timedelta(minutes=5))
+        return self.all_distinct_logs().filter(intStamp__gte=quantizedTime()-1)
     def recent_count(self):
         return self.recent_logs().order_by("user").values("user").distinct().count()
     
@@ -270,5 +275,5 @@ pre_save.connect(make_superuser, sender=User)
 class AccessLog(OrderedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
-    stamp = models.DateTimeField(auto_now_add=True)
-    
+#    stamp = models.DateTimeField(auto_now_add=True)
+    intStamp = models.IntegerField(default=0)
