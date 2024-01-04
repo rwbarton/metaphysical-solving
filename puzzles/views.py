@@ -380,10 +380,21 @@ def welcome(request):
 @login_required
 def puzzle_view_history(request, puzzle_id):
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
-    countTuples = Counter(puzzle.all_distinct_logs().values_list("user")).most_common()
+    dedupedLogs = puzzle.all_distinct_logs().values_list("user","intStamp").order_by("user","intStamp").distinct()
+    countTuples = Counter(dedupedLogs.values_list("user")).most_common()
     displayTuples = [(User.objects.get(id=c[0][0]),c[1]/30) for c in countTuples]
     return render(request, "puzzles/view_history.html", context=puzzle_context(request, {
         'puzzle': puzzle,
         'current_solvers': puzzle.recent_solvers(),
         'historical_solvers': displayTuples
                 }))
+
+@login_required
+def who_what(request):
+    all_recent = AccessLog.objects.filter(intStamp__gte=quantizedTime()-1).distinct()
+    rdict = defaultdict(set)
+    for el in all_recent:
+        rdict[el.user].add(el.puzzle)
+    people = list(rdict.items())
+    return render(request, "puzzles/whowhat.html", context = puzzle_context(request,{
+        'people':people}))

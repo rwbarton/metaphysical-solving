@@ -10,6 +10,7 @@ urlpatterns = [
 
     re_path(r'^overview/$', views.overview, name='puzzles.views.overview'),
     re_path(r'^overview/(\d+)/$',  views.overview_by, name='puzzles.views.overview_by'),
+    re_path(r'^whowhat/$', views.who_what, name='puzzles.views.who_what'),
 
     re_path(r'^puzzle/(\d+)/$',  views.puzzle, name='puzzles.views.puzzle'),
     #re_path(r'^puzzle_new/(\d+)/$',  views.puzzle_new, name='puzzles.views.puzzle_new'),

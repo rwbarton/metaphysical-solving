@@ -1,0 +1,20 @@
+{% extends "puzzles/base_generic.html" %}
+
+{% load static %}
+
+{% block title %}Who's on What{% endblock %}
+
+{% block content %}
+<table>
+  <tr>
+    <th>Person</th>
+    <th>Puzzles open in the last few minutes</th>
+  </tr>
+  {% for record in people %}
+  <tr>
+    <td>{{record.0.first_name}} {{record.0.last_name}}</td>
+    <td>{% for puzzle in record.1 %} {{puzzle.title}},{% endfor %}</td>
+  </tr>
+  {% endfor %}
+  </table>
+{% endblock %}

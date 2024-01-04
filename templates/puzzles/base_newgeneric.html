@@ -9,11 +9,13 @@
                   <li class="menuitem"><a class="menulink" target="_top" href="/overview/">Overview</a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="http://www.thewordsword.com/">Allen's wordsearch</a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="{{zulip_url}}">Zulip</a></li>
+		  <li class="menuitem"><a class="menulink" href="/whowhat">Who's on What</a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="{{jitsi_base_url}}/notapuzzle/quartermaster">Quartermaster <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="{{jitsi_base_url}}/notapuzzle/teamMeetingRoom">Team Meeting Room <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="{{jitsi_base_url}}/notapuzzle/socialSpace">Social Space <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
 		                    <li class="menuitem"><a class="menulink" target="_blank" href="/planthelp/">General Help</a></li>
                   <li class="menuitem"><a class="menulink" target="_blank" href="/help/">Server Help</a></li>
+                  {% if admin_link %}<li class="menuitem"><a class="menulink" target="_blank" href="/admin/">Admin Interface</a></li>{% endif %}
 
               </ul>
             </li>
