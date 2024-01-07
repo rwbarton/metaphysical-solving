@@ -26,7 +26,9 @@ urlpatterns = [
     re_path(r'^puzzle/upload/(\d+)/$',  views.puzzle_upload, name='puzzles.views.puzzle_upload'),
     re_path(r'^puzzle/call_in_answer/(\d+)/$',  views.puzzle_call_in_answer, name='puzzles.views.puzzle_call_in_answer'),
     re_path(r'^puzzle/history/(\d+)/$',  views.puzzle_view_history, name='puzzles.views.puzzle_view_history'),
-
+    re_path(r'^puzzle/jitsi/(\d+)/$',  views.puzzle_jitsi_page, name='puzzles.views.puzzle_jitsi_page'),
+    re_path(r'^imajoinendpointandimok',views.join_webhook),
+    re_path(r'^iworkallnightandiacceptleavewebhooksallday',views.leave_webhook),
 
     re_path(r'^puzzle/user_location/$',  views.user_location, name='puzzles.views.user_location'),
     re_path(r'^puzzle/go_to_sleep/$',  views.go_to_sleep, name='puzzles.views.go_to_sleep'),

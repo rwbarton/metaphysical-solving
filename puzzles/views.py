@@ -17,14 +17,23 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db import IntegrityError
 from django import forms
+from django.db.transaction import atomic, non_atomic_requests
+from django.http import HttpResponse, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from puzzles.models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
     PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, AccessLog, quantizedTime
 from puzzles.forms import UploadForm, AnswerForm
 from puzzles.submit import submit_answer
 from puzzles.zulip import zulip_send
+from puzzles.jaas_jwt import JaaSJwtBuilder
 from django.contrib.auth.models import User
 from django.conf import settings
+
+jaas_api_key = open('/etc/puzzle/jaas_api_key').read()
+jaas_app_id = open('/etc/puzzle/jaas_app_id').read()
+jaas_private_key = open('/etc/puzzle/id_rsa_jaas').read()
 
 def get_motd():
     try:
@@ -390,6 +399,26 @@ def puzzle_view_history(request, puzzle_id):
                 }))
 
 @login_required
+def puzzle_jitsi_page(request, puzzle_id):
+    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
+    token = JaaSJwtBuilder().withDefaults() \
+        .withApiKey(jaas_api_key) \
+            .withUserName(request.user.first_name+" "+request.user.last_name) \
+                .withUserEmail(request.user.email) \
+                    .withModerator(False) \
+                        .withAppID(jaas_app_id) \
+                            .withUserAvatar("https://asda.com/avatar") \
+                                .signWith(jaas_private_key)
+    
+    return render(request, "puzzles/jitsi_page.html",
+                  context=puzzle_context(request, {
+                      'puzzle':puzzle,
+                      'jaas_app_id':jaas_app_id,
+                      'jitsi_room_id':jaas_app_id+"/"+puzzle.jitsi_room_id(),
+                      'jwt':token.decode(encoding='utf-8'),
+                  } ))
+
+@login_required
 def who_what(request):
     all_recent = AccessLog.objects.filter(intStamp__gte=quantizedTime()-1).distinct()
     rdict = defaultdict(set)
@@ -398,3 +427,17 @@ def who_what(request):
     people = list(rdict.items())
     return render(request, "puzzles/whowhat.html", context = puzzle_context(request,{
         'people':people}))
+
+@csrf_exempt
+@require_POST
+@non_atomic_requests
+def join_webhook(request):
+    print("received join webhook!")
+    return HttpResponse("Message received okay.", content_type="text/plain")
+
+@csrf_exempt
+@require_POST
+@non_atomic_requests
+def leave_webhook(request):
+    print("received leave webhook!")
+    return HttpResponse("Message received okay.", content_type="text/plain")
