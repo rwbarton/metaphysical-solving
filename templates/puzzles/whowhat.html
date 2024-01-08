@@ -5,15 +5,18 @@
 {% block title %}Who's on What{% endblock %}
 
 {% block content %}
-<table>
+<h2 class="stat-page-header">Who's on What</h2>
+<table class="stat-page-table">
   <tr>
     <th>Person</th>
-    <th>Puzzles open in the last few minutes</th>
+    <th>Recently Accessed Puzzles</th>
+    <th>Current Jitsi Rooms</th>
   </tr>
   {% for record in people %}
   <tr>
-    <td>{{record.0.first_name}} {{record.0.last_name}}</td>
-    <td>{% for puzzle in record.1 %} {{puzzle.title}},{% endfor %}</td>
+    <td class="person left">{{record.0.first_name}} {{record.0.last_name}}</td>
+    <td class="left">{% for puzzle in record.1.puzzles %}<span class="puzzle-link"><a href="/puzzle/{{puzzle.id}}">{{puzzle.title}}</a></span>{% endfor %}</td>
+    <td>{% for puzzle in record.1.rooms %}<span class="puzzle-link"><a href="/puzzle/jitsi/{{puzzle.id}}"><img src="{% static "img/videochat.svg" %}" class="iconimage" style="opacity:0.5;"> {{puzzle.title}}</a></span>{% endfor %}</td>
   </tr>
   {% endfor %}
   </table>

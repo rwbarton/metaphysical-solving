@@ -827,3 +827,41 @@ td input {
     display: inline;
     padding: 0px 3px;
 }
+
+.stat-page-table {
+    margin: auto 20px;
+    text-align: left;
+    line-height: 35px;
+    font-size: 16px;
+    border-spacing: 0;
+}
+
+.stat-page-table .puzzle-link {
+    white-space: nowrap;
+    background: #e0f1f3;
+    padding: 5px;
+    margin: 0 5px 5px 0;
+    border-radius: 2px;
+}
+
+.stat-page-table td, .stat-page-table th {
+    vertical-align: top;
+    padding: 10px 0 10px 0;
+    min-width: 150px;
+    max-width: 600px;
+    border-bottom: 1px solid #ccc
+}
+
+.stat-page-table td.left {
+    padding-right: 45px;
+}
+
+.stat-page-table .person {
+    font-weight: 600;
+}
+
+.stat-page-header {
+    margin: 20px;
+    display: block;
+    width: fit-content;
+}
