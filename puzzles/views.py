@@ -449,16 +449,18 @@ def jaas_webhook(request):
         if match_obj:
             puzzle_id = int(match_obj[2])
             puzzle = Puzzle.objects.get(id=puzzle_id)
+            other_id = ''
         else:
             puzzle = None
+            other_id = room_id
 
         event_type = bdict["eventType"]
         if event_type=="PARTICIPANT_JOINED":
             #            webhooklog.write("%s joined %d!\n"%(email,puzzle_id))
-            JitsiRooms(user=solver,puzzle=puzzle).save()
+            JitsiRooms(user=solver,puzzle=puzzle,string_id=other_id).save()
         elif event_type=="PARTICIPANT_LEFT":
             #            webhooklog.write("%s left %d!\n"%(email,puzzle_id))
-            jr = JitsiRooms.objects.filter(user=solver,puzzle=puzzle).first()
+            jr = JitsiRooms.objects.filter(user=solver,puzzle=puzzle, string_id=other_id).first()
             jr.delete()
             #        else:
             #            webhooklog.write("unhandled event type %s\n"%bdict["event_type"])

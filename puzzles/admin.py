@@ -35,6 +35,6 @@ class LogAdmin(OrderedModelAdmin):
 admin.site.register(AccessLog, LogAdmin)
 
 class JitsiAdmin(OrderedModelAdmin):
-	list_display = ('user','puzzle')
-	list_filter = ('user','puzzle')
+	list_display = ('user','puzzle','string_id')
+	list_filter = ('user','puzzle','string_id')
 admin.site.register(JitsiRooms,JitsiAdmin)
