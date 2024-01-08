@@ -277,3 +277,8 @@ class AccessLog(OrderedModel):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
 #    stamp = models.DateTimeField(auto_now_add=True)
     intStamp = models.IntegerField(default=0)
+
+class JitsiRooms(OrderedModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
+    

@@ -11,7 +11,7 @@
 
     {% if puzzle.jitsi_room_id %}
     <div id="jitsi">
-      <a target="_new" href="{{jitsi_base_url}}/{{ puzzle.jitsi_room_id }}"><img src="{% static "img/videochat.svg" %}" class="iconimage" title = "Go to {{puzzle.title}} Jitsi room"/></a>
+      <a target="_new" href="{% url 'puzzles.views.puzzle_jitsi_page' puzzle.id %}"><img src="{% static "img/videochat.svg" %}" class="iconimage" title = "Go to {{puzzle.title}} Jitsi room"/></a>
     </div>
     {% endif %}
 

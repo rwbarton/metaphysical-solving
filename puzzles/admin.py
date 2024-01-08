@@ -1,6 +1,6 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
-from puzzles.models import Status, Priority, Tag, AutoTag, TagList, Location, Puzzle, SubmittedAnswer, PuzzleWrongAnswer, Config, AccessLog
+from puzzles.models import Status, Priority, Tag, AutoTag, TagList, Location, Puzzle, SubmittedAnswer, PuzzleWrongAnswer, Config, AccessLog, JitsiRooms
 
 class SlugAdmin(OrderedModelAdmin):
     list_display = ('text', 'move_up_down_links')
@@ -33,3 +33,8 @@ class LogAdmin(OrderedModelAdmin):
 	list_display = ('user','puzzle','intStamp')
 	list_filter = ('puzzle','intStamp')
 admin.site.register(AccessLog, LogAdmin)
+
+class JitsiAdmin(OrderedModelAdmin):
+	list_display = ('user','puzzle')
+	list_filter = ('user','puzzle')
+admin.site.register(JitsiRooms,JitsiAdmin)

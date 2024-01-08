@@ -5,6 +5,8 @@ import urllib
 import json
 import re
 import time
+import hmac
+import base64
 
 from collections import defaultdict, Counter
 
@@ -23,7 +25,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from puzzles.models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
-    PuzzleWrongAnswer, Puzzle, TagList, UploadedFile, Location, Config, AccessLog, quantizedTime
+    PuzzleWrongAnswer, Puzzle, User, TagList, UploadedFile, Location, Config, AccessLog, quantizedTime, JitsiRooms
 from puzzles.forms import UploadForm, AnswerForm
 from puzzles.submit import submit_answer
 from puzzles.zulip import zulip_send
@@ -34,6 +36,9 @@ from django.conf import settings
 jaas_api_key = open('/etc/puzzle/jaas_api_key').read()
 jaas_app_id = open('/etc/puzzle/jaas_app_id').read()
 jaas_private_key = open('/etc/puzzle/id_rsa_jaas').read()
+jaas_webhook_secret = open('/etc/puzzle/jaas_webhook_secret').read().strip()
+#webhooklog = open("/home/puzzle/webhooklog","a")
+
 
 def get_motd():
     try:
@@ -431,13 +436,33 @@ def who_what(request):
 @csrf_exempt
 @require_POST
 @non_atomic_requests
-def join_webhook(request):
-    print("received join webhook!")
-    return HttpResponse("Message received okay.", content_type="text/plain")
+def jaas_webhook(request):
+    jaas_signature = request.headers["X-Jaas-Signature"]
+    sigdict = {k:v for k,v in (element.split('=',maxsplit=1)
+                for element in jaas_signature.split(','))}
+    payload_to_sign = sigdict["t"]+"."+request.body.decode("utf-8")
+    signed = base64.b64encode(hmac.digest(
+        jaas_webhook_secret.encode(),
+        payload_to_sign.encode(),digest='sha256'))
+    if hmac.compare_digest(signed,sigdict["v1"].encode()):
+        bdict = json.loads(request.body)
+        email = bdict["data"]["email"]
+        solver = User.objects.get(email=email)
+        puzzle_id = int(bdict["fqn"].split("/")[1].split("-")[1])
+        puzzle = Puzzle.objects.get(id=puzzle_id)
 
-@csrf_exempt
-@require_POST
-@non_atomic_requests
-def leave_webhook(request):
-    print("received leave webhook!")
+        event_type = bdict["eventType"]
+        if event_type=="PARTICIPANT_JOINED":
+            #            webhooklog.write("%s joined %d!\n"%(email,puzzle_id))
+            JitsiRooms(user=solver,puzzle=puzzle).save()
+        elif event_type=="PARTICIPANT_LEFT":
+            #            webhooklog.write("%s left %d!\n"%(email,puzzle_id))
+            jr = JitsiRooms.objects.filter(user=solver,puzzle=puzzle).first()
+            jr.delete()
+            #        else:
+            #            webhooklog.write("unhandled event type %s\n"%bdict["event_type"])
+            #    else:
+            #        webhooklog.write("verification failed\n")
+            #    webhooklog.flush()
+        
     return HttpResponse("Message received okay.", content_type="text/plain")
