@@ -6,6 +6,7 @@ from django.db.models.signals import pre_save, post_save
 from django.urls import reverse
 from django.conf import settings
 from django.utils.timezone import now
+from collections import defaultdict
 import re
 import hashlib
 import time
@@ -153,6 +154,8 @@ class Puzzle(OrderedModel):
         id_hash = hashlib.sha1(('%d-%s' % (self.id, jitsi_secret)).encode()).hexdigest()[0:16]
         return '%s-%d-%s' % (re.sub(r'[^a-zA-Z0-9]','',self.title),self.id, id_hash)
 
+    def jitsi_room_url(self):
+        return reverse("puzzles.views.puzzle_jitsi_page",args=[self.id])
     def all_distinct_logs(self):
         return AccessLog.objects.filter(puzzle__exact=self).distinct()
     def recent_logs(self):

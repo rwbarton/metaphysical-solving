@@ -48,25 +48,16 @@ def get_motd():
 
 def get_jitsi_data():
     try:
-        room_list_json = urllib.request.urlopen(urllib.parse.urljoin(settings.JITSI_SERVER_URL,settings.JITSI_ROOMS_URL), timeout = 5)
-        room_list_object = json.loads(room_list_json.read().decode('utf-8'))
-        room_list = room_list_object["room_census"]
-        user_dict = defaultdict(list)
-        for room in room_list:
-            for user in room["participants"]:
-                roomUrl = re.sub(r'[[](\w*)[]]',r'\1/',room["room_name"].split("@")[0])
-                try:
-                    roomId = room["room_name"].split("-")[1]
-                    roomTitle = Puzzle.objects.select_related().get(id=roomId).title
-                    puzzleUrl = Puzzle.objects.select_related().get(id=roomId).url
-                except:
-                    roomTitle = roomUrl
-                    roomId = None
-                user_dict[user].append((roomUrl,roomTitle,roomId))
-        user_list = sorted(user_dict.items())
+        table = JitsiRooms.objects.all()
+        byUserDict = defaultdict(set)
+        for row in table:
+            byUserDict[row.user].add(row.puzzle)
+        user_list = sorted(byUserDict.items())
     except:
         user_list = None
     return user_list
+
+
 
 def puzzle_context(request, d):
     d1 = dict(d)
