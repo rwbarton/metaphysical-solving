@@ -283,5 +283,5 @@ class AccessLog(OrderedModel):
 
 class JitsiRooms(OrderedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
+    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE, null=True)
     

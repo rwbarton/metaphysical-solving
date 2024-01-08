@@ -52,6 +52,7 @@ def get_jitsi_data():
         byUserDict = defaultdict(set)
         for row in table:
             byUserDict[row.user].add(row.puzzle)
+
         user_list = sorted(byUserDict.items())
     except:
         user_list = None
@@ -395,8 +396,7 @@ def puzzle_view_history(request, puzzle_id):
                 }))
 
 @login_required
-def puzzle_jitsi_page(request, puzzle_id):
-    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
+def jitsi_page(request,room_id):
     token = JaaSJwtBuilder().withDefaults() \
         .withApiKey(jaas_api_key) \
             .withUserName(request.user.first_name+" "+request.user.last_name) \
@@ -410,9 +410,14 @@ def puzzle_jitsi_page(request, puzzle_id):
                   context=puzzle_context(request, {
                       'puzzle':puzzle,
                       'jaas_app_id':jaas_app_id,
-                      'jitsi_room_id':jaas_app_id+"/"+puzzle.jitsi_room_id(),
+                      'jitsi_room_id':jaas_app_id+"/"+room_id,
                       'jwt':token.decode(encoding='utf-8'),
                   } ))
+    
+@login_required
+def puzzle_jitsi_page(request, puzzle_id):
+    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
+    return jitsi_page(request,puzzle.jitsi_room_id())
 
 @login_required
 def who_what(request):
@@ -439,8 +444,13 @@ def jaas_webhook(request):
         bdict = json.loads(request.body)
         email = bdict["data"]["email"]
         solver = User.objects.get(email=email)
-        puzzle_id = int(bdict["fqn"].split("/")[1].split("-")[1])
-        puzzle = Puzzle.objects.get(id=puzzle_id)
+        room_id = bdict["fqn"].split("/")[1]
+        match_obj = re.match(r"^(\w+)-(\d+)-(\w+)$",room_id)
+        if match_obj:
+            puzzle_id = int(match_obj[2])
+            puzzle = Puzzle.objects.get(id=puzzle_id)
+        else:
+            puzzle = None
 
         event_type = bdict["eventType"]
         if event_type=="PARTICIPANT_JOINED":
