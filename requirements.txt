@@ -1,13 +1,10 @@
-Django==2.2.9
-# social-auth-app-django==
-# PyMySQL==0.7.2
+django
 mysqlclient
-django-ordered-model==3.3.0
-# python-social-auth==0.2.13
+django-ordered-model
 social-auth-app-django
 google-api-python-client
 mechanize
-# wsgiref==0.1.2
 oauth2client
 lxml
-cryptography==1.9
+cryptography
+authlib
