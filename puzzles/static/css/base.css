@@ -640,13 +640,14 @@ div#answers a#callinanswer:hover {
 }
 
 #jitsi .iconimage {
-    filter: invert(0.5);
+    opacity: 0.5;
     position: relative;
     top: -1px;
 }
 
-#jitsi:hover .iconimage {
-    filter: invert(0);
+#jitsi .iconimage:hover {
+    cursor: pointer;
+    opacity: 1;
 }
 
 #people, #files, #responses {
@@ -897,6 +898,24 @@ td input {
     top: 2px;
     left: 2px;
     opacity: 0.5;
+}
+
+.jitsi-popup-link {
+    width: 13px;
+    height: auto;
+    vertical-align: middle;
+    display: inline-block;
+    opacity: 0.5;
+    position: relative;
+    top: -1px;
+}
+
+#jitsi-popup-link:hover {
+    cursor: pointer;
+}
+
+#jitsi-popup-link:hover .jitsi-popup-link {
+    opacity: 1;
 }
 
 .jitsi-popup-snapout-icon {

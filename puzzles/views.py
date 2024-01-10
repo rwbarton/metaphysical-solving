@@ -100,7 +100,7 @@ def overview_by(request, taglist_id):
                     }
                      for tag in tags),
             'assigned_puzzles': assigned_puzzles,
-            'jitsi_data': get_jitsi_data(),
+            # 'jitsi_data': get_jitsi_data(),
             'unassigned_only': unassigned_only,
             'default_priority': Config.objects.get().default_priority,
             'refresh': 120
