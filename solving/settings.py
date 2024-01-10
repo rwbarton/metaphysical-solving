@@ -11,7 +11,7 @@ from .local_settings import *
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['/home/puzzle/metaphysical-solving/templates'],
+        'DIRS': ['/home/allen/metaphysical-solving/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -21,7 +21,8 @@ TEMPLATES = [
         },
     },
 ]
-
+ENABLE_ACCESS_LOG=True
+FOLDER_ID = False
 TEMPLATE_DEBUG = DEBUG
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__),

@@ -396,7 +396,7 @@ def puzzle_view_history(request, puzzle_id):
                 }))
 
 @login_required
-def jitsi_page(request,room_id):
+def jitsi_page(request,room_id, start_muted):
     token = JaaSJwtBuilder().withDefaults() \
         .withApiKey(jaas_api_key) \
             .withUserName(request.user.first_name+" "+request.user.last_name) \
@@ -412,12 +412,14 @@ def jitsi_page(request,room_id):
                       'jaas_app_id':jaas_app_id,
                       'jitsi_room_id':jaas_app_id+"/"+room_id,
                       'jwt':token.decode(encoding='utf-8'),
+                      'start_muted': start_muted,
                   } ))
     
 @login_required
 def puzzle_jitsi_page(request, puzzle_id):
+    start_muted = bool(request.GET.get('start_muted'))
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
-    return jitsi_page(request,puzzle.jitsi_room_id())
+    return jitsi_page(request,puzzle.jitsi_room_id(), start_muted)
 
 @login_required
 def who_what(request):
@@ -427,7 +429,8 @@ def who_what(request):
     for el in all_recent:
         rdict[el.user]["puzzles"].add(el.puzzle)
     for room in jitsi_rooms:
-        rdict[el.user]["rooms"].add(room.puzzle)
+        if room.puzzle:
+            rdict[room.user]["rooms"].add(room.puzzle)
     people = list(rdict.items())
     print(people)
     return render(request, "puzzles/whowhat.html", context = puzzle_context(request,{

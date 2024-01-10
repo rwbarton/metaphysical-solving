@@ -4,7 +4,7 @@
     <html>
       <head>
         <script src='https://8x8.vc/{{jaas_app_id}}/external_api.js' async></script>
-        <style>html, body, #jaas-container { height: 100%; }</style>
+        <style>html, body, #jaas-container { height: 100%; margin:0; border: 0;}</style>
         <script type="text/javascript">
           window.onload = () => {
             const api = new JitsiMeetExternalAPI("8x8.vc", {
@@ -13,6 +13,10 @@
 		jwt: "{{jwt}}",
 	    configOverwrite: {
 		prejoinPageEnabled: false,
+    {% if start_muted %}
+    startWithAudioMuted: true,
+    startWithVideoMuted: true,
+    {% endif %}
 	    },
             });
           }

@@ -5,14 +5,14 @@
 {% block title %}History{% endblock %}
 
 {% block content %}
-<h1> Viewing 	      <a href="{% url 'puzzles.views.puzzle' puzzle.id %}">{{ puzzle.title }}</a></h1>
+<h2 class="stat-page-header">View Stats for "<a href="{% url 'puzzles.views.puzzle' puzzle.id %}">{{ puzzle.title }}</a>"</h2>
 
 <div>
-   <h2>In the last few minutes</h2>
+   <h2 class="stat-page-small-header">In the last few minutes</h2>
   {% if current_solvers %}
-<table>
+<table class="stat-page-table">
   {% for solver in current_solvers %}
-  <tr> <td>{{solver.first_name}} {{solver.last_name}} ({{solver.userprofile.location}})</td></tr>
+  <tr> <td class="person left">{{solver.first_name}} {{solver.last_name}} ({{solver.userprofile.location}})</td></tr>
   {% endfor %}
 </table>
 {% else %}
@@ -20,14 +20,14 @@
 {% endif %}
 </div>
 <div>
-  <h2> Historical Views </h2>
-  <table>
+  <h2 class="stat-page-small-header" style="margin-top:40px;">Historical Views</h2>
+  <table class="stat-page-table">
     <tr>
-      <th>Person</th> <th>Cumulative hours with tab open</th>
+      <th>Person</th> <th>Total Open Puzzle Tab Hours</th>
     </tr>
   {% for record in historical_solvers %}
     <tr>
-      <td>{{record.0.first_name}} {{record.0.last_name}} ({{record.0.userprofile.location}})</td>
+      <td class="person left">{{record.0.first_name}} {{record.0.last_name}} ({{record.0.userprofile.location}})</td>
       <td>{{record.1|floatformat}}</td>
     </tr>
     {% endfor %}

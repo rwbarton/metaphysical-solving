@@ -865,3 +865,50 @@ td input {
     display: block;
     width: fit-content;
 }
+
+.stat-page-small-header {
+    margin: 20px;
+    display: block;
+    width: fit-content;
+    font-size: 18px;
+    margin-top: 40px;
+}
+
+#jitsi-popup {
+    z-index: 20;
+    background-color: #6bb174;
+    position: absolute;
+    bottom: 20px;
+    left:calc(50% - 150px);
+    width: 400px;
+    height: 200px;
+    padding-top:20px;
+    cursor: move;
+  }
+  
+.jitsi-popup-icon, 
+.jitsi-popup-snapout-icon,
+.jitsi-popup-close-icon  {
+    position: absolute;
+    width: 16px;
+}
+
+.jitsi-popup-icon {
+    top: 2px;
+    left: 2px;
+    opacity: 0.5;
+}
+
+.jitsi-popup-snapout-icon {
+    left: calc(50% - 6px);
+    top: 4px;
+    width: 12px;
+    cursor: pointer;
+}
+
+.jitsi-popup-close-icon {
+    right: 4px;
+    top: 4px;
+    width: 12px;
+    cursor: pointer;
+}
