@@ -14,7 +14,7 @@
         function reload() {
           $.ajax({
             url: "{% url 'puzzles.views.puzzle_info' id %}",
-            success: function (data, textStatus, jqXHR) { document.getElementById("topbar").innerHTML = data; },
+            success: function (data, textStatus, jqXHR) { document.getElementById("topbar").innerHTML = data; console.log("Refreshed puzzle info"); $("#open-video-chat-button").click(openVideoChat);},
           });
         };
         $(document).ready(
