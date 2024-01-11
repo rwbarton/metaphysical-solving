@@ -396,7 +396,7 @@ def puzzle_view_history(request, puzzle_id):
                 }))
 
 @login_required
-def jitsi_page(request,room_id, start_muted):
+def jitsi_page(request,room_id, start_muted=False):
     token = JaaSJwtBuilder().withDefaults() \
         .withApiKey(jaas_api_key) \
             .withUserName(request.user.first_name+" "+request.user.last_name) \
