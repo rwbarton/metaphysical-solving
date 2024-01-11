@@ -14,29 +14,13 @@
         function reload() {
           $.ajax({
             url: "{% url 'puzzles.views.puzzle_info' id %}",
-            success: function (data, textStatus, jqXHR) { document.getElementById("topbar").innerHTML = data; },
+            success: function (data, textStatus, jqXHR) { document.getElementById("topbar").innerHTML = data; console.log("Refreshed puzzle info"); $("#open-video-chat-button").click(openVideoChat);},
           });
         };
         $(document).ready(
           function () {
-            $("#jitsi-popup").resizable({
-              minWidth: 100,
-              minHeight: 100,
-              maxWidth: 600,
-              maxHeight: 600
-            }).draggable({
-              containment: "window"
-            });
+            $("#open-video-chat-button").click(openVideoChat);
             setInterval(reload, {{ refresh }} * 1000);
-
-            $("#close-popup-button").click(function() {
-              $("#jitsi-popup").remove();
-            });
-
-            $("#snapout-popup-button").click(function() {
-              window.open("{% url 'puzzles.views.puzzle_jitsi_page' id %}", "_new"); 
-              $("#jitsi-popup").remove();
-            });
           });
 
         function submitform (event) {
@@ -56,6 +40,39 @@
           return false; 
         };
 
+        function openVideoChat (event) {
+          if (!$("#jitsi-popup").length) {
+          $("#topbar").after(
+            '<div id="jitsi-popup">' +
+            '<img src="{% static "img/videochat.svg" %}" class="jitsi-popup-icon">' + 
+            '<img src="{% static "img/popup-link-icon.svg" %}" id="snapout-popup-button" class="jitsi-popup-snapout-icon">' +
+            '<img src="{% static "img/close-icon.svg" %}" id="close-popup-button" class="jitsi-popup-close-icon">' +
+            '<iframe src="{% url 'puzzles.views.puzzle_jitsi_page' id %}?start_muted=1" style="position:relative; top:-50%; left:-50%; width:200%; height:200%; border: none; transform: scale(0.5);"></iframe>' +
+            '</div>'
+          );
+          $("#jitsi-popup").resizable({
+              minWidth: 100,
+              minHeight: 100,
+              maxWidth: 600,
+              maxHeight: 600
+            }).draggable({
+              containment: "window"
+            });
+            
+            $("#close-popup-button").click(function() {
+              $("#jitsi-popup").remove();
+            });
+
+            $("#snapout-popup-button").click(function() {
+              window.open("{% url 'puzzles.views.puzzle_jitsi_page' id %}", "_new"); 
+              $("#jitsi-popup").remove();
+            });
+
+            $(".jitsi-popup-link").click(function() {
+              $("#jitsi-popup").remove();
+            });
+          }
+        };
       </script>
       {% endif %}
     </head>
@@ -65,12 +82,6 @@
 <body style="width:100%; height:100%;position:relative;"">
   <div id="topbar" style="height: 65px;">
      {% include "puzzles/puzzle-newinfo.html" %}
-  </div>
-  <div id="jitsi-popup">
-    <img src="{% static "img/videochat.svg" %}" class="jitsi-popup-icon">
-    <img src="{% static "img/popup-link-icon.svg" %}" id="snapout-popup-button" class="jitsi-popup-snapout-icon">
-    <img src="{% static "img/close-icon.svg" %}" id="close-popup-button" class="jitsi-popup-close-icon">
-    <iframe src="{% url 'puzzles.views.puzzle_jitsi_page' id %}?start_muted=1" style="position:relative; top:-50%; left:-50%; width:200%; height:200%; border: none; transform: scale(0.5);"></iframe>
   </div>
   <iframe src="{% url 'puzzles.views.puzzle_bottom' id %}" style="width:100%; height:calc(100% - 65px);"></iframe>
 </body>
