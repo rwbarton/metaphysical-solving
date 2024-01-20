@@ -11,8 +11,8 @@
 
     {% if puzzle.jitsi_room_id %}
     <div id="jitsi">
-      <img src="{% static "img/videochat.svg" %}" class="iconimage" id="open-video-chat-button" title = "Open puzzle video chat in page"/>
-      <a target="_new" href="{% url 'puzzles.views.puzzle_jitsi_page' puzzle.id %}" id="jitsi-popup-link"><img src="{% static "img/popup-link-icon.svg" %}" class="jitsi-popup-link" title = "Open puzzle video chat in a new tab"/></a>
+      <img src="{% static "img/videochat.svg" %}" class="iconimage" id="open-video-chat-button" title = "Open puzzle video chat in page" onclick="openVideoChat()"/>
+      <a target="_new" href="{% url 'puzzles.views.puzzle_jitsi_page' puzzle.id %}" id="jitsi-popup-link" onclick="closeVideoChat()"><img src="{% static "img/popup-link-icon.svg" %}" class="jitsi-popup-link" title = "Open puzzle video chat in a new tab"/></a>
       
     </div>
     {% endif %}
