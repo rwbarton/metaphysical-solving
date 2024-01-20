@@ -1,5 +1,7 @@
 from django.urls import re_path, include, path
+from django.views.generic.base import RedirectView
 from puzzles import views
+from django.conf import settings
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -29,7 +31,6 @@ urlpatterns = [
     re_path(r'^puzzle/jitsi/(\d+)/$',  views.puzzle_jitsi_page, name='puzzles.views.puzzle_jitsi_page'),
     re_path(r'^notapuzzle/jitsi/(\w+)/$',  views.jitsi_page, name='puzzles.views.jitsi_page'),
 
-    #re_path(r'^imajoinendpointandimok',views.join_webhook),
     re_path(r'^iworkallnightandiaccept8x8jaaswebhooksallday',views.jaas_webhook),
 
     re_path(r'^puzzle/user_location/$',  views.user_location, name='puzzles.views.user_location'),
@@ -48,4 +49,7 @@ urlpatterns = [
 
     # Uncomment the next line to enable the admin:
     re_path(r'^admin/', admin.site.urls),
+    re_path(r'^privacy/',RedirectView.as_view(url=settings.PRIVACY_URL),name='privacy'),
+    re_path(r'^help/',RedirectView.as_view(url=settings.HELP_URL),name='help'),
+    re_path(r'^generalhelp/',RedirectView.as_view(url=settings.GENERALHELP_URL),name='generalhelp'),
 ]
