@@ -49,7 +49,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'US/Eastern'
+TIME_ZONE = 'America/New_York'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -123,6 +123,11 @@ LOGIN_REDIRECT_URL = '/'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY    = open('/etc/puzzle/google-oauth2-client-id').read().strip()
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = open('/etc/puzzle/google-oauth2-client-secret').read().strip()
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+'https://www.googleapis.com/auth/userinfo.email',
+'https://www.googleapis.com/auth/userinfo.profile'
+]
 
 SOCIAL_AUTH_ENABLED_BACKENDS = ('google-oauth2',)
 
