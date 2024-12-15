@@ -3,6 +3,7 @@ import sys
 import subprocess
 import json
 import binascii
+import zulip
 
 from django.conf import settings
 
@@ -11,16 +12,26 @@ def zulip_send(user, stream, subject, message):
         return
 
     print (user, stream, subject, message)
-    try:
+
+    client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
+    print (client.add_subscriptions(streams=[{"name":stream,},],) )
+
+    client = zulip.Client(config_file="/etc/puzzle/zulip/%s.conf" % (user,))
+    print (client.send_message( { "type": "stream",
+                                  "to": stream,
+                                  "topic": subject,
+                                  "content": message,
+                                 } ) )
+    #    try:
         # Need to wait for this one to finish so that we know the stream exists (blargh).
-        subprocess.check_call([os.path.join(settings.PROJECT_ROOT,"zulip/api/examples/subscribe"),
-                               "--config-file", "/etc/puzzle/zulip/b+logger.conf",
-                               "--streams", stream])
-        subprocess.Popen([os.path.join(settings.PROJECT_ROOT,"zulip/api/bin/zulip-send"),
-                          "--config-file", "/etc/puzzle/zulip/%s.conf" % (user,),
-                          "--stream", stream, "--subject", subject, "--message", message.encode('utf-8')])
-    except FileNotFoundError:
-        sys.stderr.write('Failed find Zulip API\n')
+#        subprocess.check_call([os.path.join(settings.PROJECT_ROOT,"zulip/api/examples/subscribe"),
+#                               "--config-file", "/etc/puzzle/zulip/b+logger.conf",
+#                               "--streams", stream])
+#        subprocess.Popen([os.path.join(settings.PROJECT_ROOT,"zulip/api/bin/zulip-send"),
+#                          "--config-file", "/etc/puzzle/zulip/%s.conf" % (user,),
+#                          "--stream", stream, "--subject", subject, "--message", message.encode('utf-8')])
+#    except FileNotFoundError:
+#        sys.stderr.write('Failed find Zulip API\n')
 
 try:
     zulip_create_settings = json.load(open('/etc/puzzle/zulip/create.json'))
