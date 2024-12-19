@@ -42,11 +42,11 @@
        </tr>
        {% endfor %}
        </tbody>
-    </table>   
+    </table>
   </div>
   {% endif %}
   {% for tag in tags %}
-   <div class="onetag"> 
+   <div class="onetag">
    <table class="puzzle-list">
       <tbody>
 	<tr class="puzzle-list-header">
@@ -72,6 +72,9 @@
 	      <span class="puzzle-answer">{{ puzzle.puzzle.answer_or_status.answer }}</span>
 	      {% else %}
 	      {{ puzzle.puzzle.answer_or_status.status.text }}
+          {% if puzzle.puzzle.unopened %}
+          <span class="unopened"></span>
+          {% endif %}
 	      {% endif %}
 	    </td>
 	    <td> <a href="{% url 'puzzles.views.puzzle_view_history' puzzle.puzzle.id %}">{{puzzle.solvers}}</a></td>

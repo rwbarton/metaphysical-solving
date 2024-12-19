@@ -24,7 +24,7 @@ except IOError:
 
 def quantizedTime():
     return int(time.time()/120)
-    
+
 class Config(models.Model):
     default_status = models.ForeignKey('Status', on_delete=models.CASCADE)
     default_priority = models.ForeignKey('Priority', on_delete=models.CASCADE)
@@ -162,11 +162,16 @@ class Puzzle(OrderedModel):
         return self.all_distinct_logs().filter(intStamp__gte=quantizedTime()-1)
     def recent_count(self):
         return self.recent_logs().order_by("user").values("user").distinct().count()
-    
+    def all_count(self):
+        return self.all_distinct_logs().count()
+    def unopened(self):
+        return self.status == defaultStatus() and self.all_count() <= 0
+
+
     def recent_solvers(self):
         logs=self.recent_logs()
         return User.objects.filter(id__in=[urec["user"] for urec in logs.order_by("user").values("user").distinct()])
-    
+
     def save(self, *args, **kwargs):
         # Grab old instance to see if our answer is new.
         try:
