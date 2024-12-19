@@ -165,7 +165,7 @@ class Puzzle(OrderedModel):
     def all_count(self):
         return self.all_distinct_logs().count()
     def unopened(self):
-        return self.all_count() > 0
+        return self.status == defaultStatus() and self.all_count() <= 0
 
 
     def recent_solvers(self):
