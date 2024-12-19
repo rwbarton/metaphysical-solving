@@ -540,11 +540,12 @@ span.puzzle-priority {
 }
 
 span.unopened {
-    height: 25px;
-    width: 25px;
+    height: 15px;
+    width: 15px;
     background-color: #bad209;
     border-radius: 50%;
     display: inline-block;
+    transform: translate(5px,3px);
 }
 
 span.puzzle-answer {
