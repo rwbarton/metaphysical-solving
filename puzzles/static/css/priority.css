@@ -6,7 +6,8 @@
 }
 
 .priority-high {
-    color: #ff8080;
+    color: #d04040;
+    font-weight: bold;
 }
 
 .priority-asap {
