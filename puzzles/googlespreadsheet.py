@@ -23,32 +23,56 @@ def create_google_spreadsheet(title):
     service = discovery.build('sheets', 'v4', http=http,
                               discoveryServiceUrl=discoveryUrl)
     driveService = discovery.build('drive','v3',credentials=credentials)
-    new_spreadsheet = service.spreadsheets().create(
-        body={"properties": {"title": title}}).execute()
-    if (settings.FOLDER_ID):
-        file_id = new_spreadsheet['spreadsheetId']
-        file = driveService.files().get(fileId=file_id, fields="parents").execute()
-        previous_parents = ",".join(file.get("parents"))    
-        driveService.files().update(
-            fileId=file_id,
-            addParents=settings.FOLDER_ID,
-            removeParents=previous_parents,
-            fields="id, parents",
-        ).execute()
+    try:
+        folder = settings.PUZZLE_FOLDER
+        puzzle_template = settings.PUZZLE_TEMPLATE
+    except:
+        folder = None
+        puzzle_template = None
+
+    if (puzzle_template):
+        if (folder):
+            spreadsheet_file = driveService.files().copy( fileId = puzzle_template,
+                                                         body = {"name": title,
+                                                                 "parents": [folder],}
+                                                         ).execute()
+        else:
+            spreadsheet_file = driveService.files().copy( fileId = puzzle_template,
+                                                         body = {"name": title,}
+                                                         ).execute()
+        new_spreadsheet = service.spreadsheets().get(
+            spreadsheetId=spreadsheet_file['id']).execute()
     else:
+        new_spreadsheet = service.spreadsheets().create(
+            body={"properties": {"title": title,}}
+                  ).execute()
+        file_id = new_spreadsheet['spreadsheetId']
+        if (folder):
+            spreadsheet_file = driveService.files().get(fileId=file_id, fields="parents").execute()
+            previous_parents = ",".join(spreadsheet_file.get("parents"))
+            driveService.files().update(
+                fileId=file_id,
+                addParents=folder,
+                removeParents=previous_parents,
+                fields="id, parents",
+            ).execute()
+    if (not folder):
         acl_entry = {
             'type': 'anyone',
             'role': 'writer',
             'allowFileDiscovery': False
         }
-        service = discovery.build('drive', 'v3', http=http)
-        service.permissions().create(fileId=new_spreadsheet['spreadsheetId'],
-                                body=acl_entry).execute()
+        driveService.permissions().create(fileId=new_spreadsheet['spreadsheetId'],
+                                          body=acl_entry).execute()
 
     return new_spreadsheet['spreadsheetUrl']
 
 def grant_folder_access(user):
-    if (not settings.FOLDER_ID):
+    try:
+        folder = settings.PUZZLE_FOLDER
+    except:
+        folder = None
+    if (not folder):
         return
     
     google_config = get_google_config()
@@ -63,7 +87,7 @@ def grant_folder_access(user):
         'role': 'writer',
     }
     service = discovery.build('drive', 'v3', http=http)
-    service.permissions().create(fileId=settings.FOLDER_ID,
+    service.permissions().create(fileId=folder,
                                  body=acl_entry,
                                  sendNotificationEmail=False).execute()
 

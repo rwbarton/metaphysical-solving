@@ -11,9 +11,6 @@ import re
 import hashlib
 import time
 
-from puzzles.googlespreadsheet import create_google_spreadsheet, grant_folder_access
-from puzzles.zulip import zulip_send, zulip_create_user
-
 try:
     # Secret used to generate Jitsi room names.
     jitsi_secret = open('/etc/puzzle/jitsi-secret').read()
@@ -36,7 +33,13 @@ class Config(models.Model):
 If empty, users will have to enter their own phone number when submitting an answer.""")
 
     motd = models.TextField(blank=True)
+    
 
+
+from puzzles.googlespreadsheet import create_google_spreadsheet, grant_folder_access
+from puzzles.zulip import zulip_send, zulip_create_user
+
+    
 class Status(OrderedModel):
     text = models.CharField(max_length=200)
     css_name = models.SlugField(max_length=200, unique=True)
