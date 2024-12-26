@@ -1,3 +1,4 @@
 *.pyc
 solving/local_settings.py
 puzzles/__pycache__
+env/

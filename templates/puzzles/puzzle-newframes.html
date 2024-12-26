@@ -84,6 +84,6 @@
   <div id="topbar" style="height: 65px;">
      {% include "puzzles/puzzle-newinfo.html" %}
   </div>
-  <iframe src="{% url 'puzzles.views.puzzle_bottom' id %}" style="width:100%; height:calc(100% - 65px);"></iframe>
+  <iframe src="{% url 'puzzles.views.puzzle_bottom' id %}" style="width:100%; height:calc(100% - 65px); border: 0;"></iframe>
 </body>
 </html>
