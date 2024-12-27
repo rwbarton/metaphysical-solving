@@ -295,7 +295,7 @@ div#header div#rightheader a {
 
 div#header div#userinfo {
     display:inline-block;
-    background: url(/static/img/user.png) no-repeat 5px center; 
+    background: url(/static/img/user.png) no-repeat 5px center;
     padding-right: 10px;
     padding-left: 25px;
     font-weight: bold;
@@ -308,7 +308,7 @@ div#header div#locationinfo select {
 
 div#header div#locationinfo {
     display:inline-block;
-    background: url(/static/img/location.png) no-repeat 5px center; 
+    background: url(/static/img/location.png) no-repeat 5px center;
     padding-right: 10px;
     padding-left: 20px;
     font-weight: bold;
@@ -350,7 +350,7 @@ ul#navlist li {
     display: inline;
     height: 2em;
     padding: 0px;
-    margin: 0px;    
+    margin: 0px;
 }
 */
 
@@ -425,7 +425,7 @@ div#puzzlesbytag {
   column-count: 3;
   column-gap: 1em;
   column-rule: none;
-  column-width: 400px;  
+  column-width: 400px;
 }
 
 .onetag {
@@ -495,7 +495,7 @@ tr.status-being-worked {
 
 tr.priority-low {
     background: #C4C4C4;
-    color: #8A8A8A; 
+    color: #8A8A8A;
 }
 
 tr.priority-normal {
@@ -507,7 +507,7 @@ tr.priority-high {
 }
 
 span.priority-high, span.priority-asap {
-    text-transform: uppercase;   
+    text-transform: uppercase;
 }
 
 tr.priority-asap {
@@ -537,6 +537,15 @@ td.puzzle-list-status {
 
 span.puzzle-priority {
     font-size: 80%;
+}
+
+span.unopened {
+    height: 15px;
+    width: 15px;
+    background-color: #bad209;
+    border-radius: 50%;
+    display: inline-block;
+    transform: translate(5px,3px);
 }
 
 span.puzzle-answer {
@@ -886,8 +895,8 @@ td input {
     padding-top:20px;
     cursor: move;
   }
-  
-.jitsi-popup-icon, 
+
+.jitsi-popup-icon,
 .jitsi-popup-snapout-icon,
 .jitsi-popup-close-icon  {
     position: absolute;
