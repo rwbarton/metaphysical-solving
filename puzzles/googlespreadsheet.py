@@ -13,7 +13,7 @@ def get_google_config():
     return _google_config
 
 
-def create_google_spreadsheet(title):
+def create_google_spreadsheet(title,folder=None,puzzle_template=None):
     google_config = get_google_config()
     scopes = ['https://www.googleapis.com/auth/spreadsheets',
               'https://www.googleapis.com/auth/drive.file']
@@ -23,32 +23,47 @@ def create_google_spreadsheet(title):
     service = discovery.build('sheets', 'v4', http=http,
                               discoveryServiceUrl=discoveryUrl)
     driveService = discovery.build('drive','v3',credentials=credentials)
-    new_spreadsheet = service.spreadsheets().create(
-        body={"properties": {"title": title}}).execute()
-    if (settings.FOLDER_ID):
-        file_id = new_spreadsheet['spreadsheetId']
-        file = driveService.files().get(fileId=file_id, fields="parents").execute()
-        previous_parents = ",".join(file.get("parents"))    
-        driveService.files().update(
-            fileId=file_id,
-            addParents=settings.FOLDER_ID,
-            removeParents=previous_parents,
-            fields="id, parents",
-        ).execute()
+
+    if (puzzle_template):
+        if (folder):
+            spreadsheet_file = driveService.files().copy( fileId = puzzle_template.fid,
+                                                         body = {"name": title,
+                                                                 "parents": [folder.fid],}
+                                                         ).execute()
+        else:
+            spreadsheet_file = driveService.files().copy( fileId = puzzle_template.fid,
+                                                         body = {"name": title,}
+                                                         ).execute()
+        new_spreadsheet = service.spreadsheets().get(
+            spreadsheetId=spreadsheet_file['id']).execute()
     else:
+        new_spreadsheet = service.spreadsheets().create(
+            body={"properties": {"title": title,}}
+                  ).execute()
+        file_id = new_spreadsheet['spreadsheetId']
+        if (folder):
+            spreadsheet_file = driveService.files().get(fileId=file_id, fields="parents").execute()
+            previous_parents = ",".join(spreadsheet_file.get("parents"))
+            driveService.files().update(
+                fileId=file_id,
+                addParents=folder.fid,
+                removeParents=previous_parents,
+                fields="id, parents",
+            ).execute()
+    if (not folder):
         acl_entry = {
             'type': 'anyone',
             'role': 'writer',
             'allowFileDiscovery': False
         }
-        service = discovery.build('drive', 'v3', http=http)
-        service.permissions().create(fileId=new_spreadsheet['spreadsheetId'],
-                                body=acl_entry).execute()
+        driveService.permissions().create(fileId=new_spreadsheet['spreadsheetId'],
+                                          body=acl_entry).execute()
 
-    return new_spreadsheet['spreadsheetUrl']
+    return new_spreadsheet
 
-def grant_folder_access(user):
-    if (not settings.FOLDER_ID):
+
+def grant_access(fid_list,user_list):
+    if (not fid_list or not user_list):
         return
     
     google_config = get_google_config()
@@ -56,15 +71,52 @@ def grant_folder_access(user):
               'https://www.googleapis.com/auth/drive.file']
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(google_config, scopes=scopes)
     http = credentials.authorize(httplib2.Http())
-    driveService = discovery.build('drive','v3',credentials=credentials)
+    ids = []
+    service = discovery.build("drive", "v3", credentials=credentials)
+
+    def callback(request_id, response, exception):
+      if exception:
+        # Handle error
+        print(exception)
+      else:
+        print(f"Request_Id: {request_id}")
+        print(f'Permission Id: {response.get("id")}')
+        ids.append(response.get("id"))
+
+    # pylint: disable=maybe-no-member
+    batch = service.new_batch_http_request(callback=callback)
     acl_entry = {
         'type': 'user',
-        'emailAddress': user,
+        'emailAddress': '',
         'role': 'writer',
     }
-    service = discovery.build('drive', 'v3', http=http)
-    service.permissions().create(fileId=settings.FOLDER_ID,
-                                 body=acl_entry,
-                                 sendNotificationEmail=False).execute()
 
+    for user in user_list:
+        for fid in fid_list:
+            batch.add(
+                service.permissions().create(fileId=fid,
+                                             body={'type':'user',
+                                                   'emailAddress':user,
+                                                   'role':'writer',},
+                                             sendNotificationEmail=False)
+            )
+    batch.execute()
+    
+    
+def create_google_folder(name):
+    google_config = get_google_config()
+    scopes = ['https://www.googleapis.com/auth/spreadsheets',
+              'https://www.googleapis.com/auth/drive.file']
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(google_config, scopes=scopes)
+    http = credentials.authorize(httplib2.Http())
+    driveService = discovery.build('drive','v3',credentials=credentials)
+
+    metadata = {
+        "name": name,
+        "mimeType": "application/vnd.google-apps.folder",
+        }
+    folder = driveService.files().create(body=metadata,fields="id").execute()
+    fid = folder.get("id")
+    return fid
+    
     

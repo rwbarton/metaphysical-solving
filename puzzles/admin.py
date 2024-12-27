@@ -1,6 +1,6 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
-from puzzles.models import Status, Priority, Tag, AutoTag, TagList, Location, Puzzle, SubmittedAnswer, PuzzleWrongAnswer, Config, AccessLog, JitsiRooms
+from puzzles.models import Status, Priority, Tag, AutoTag, TagList, Location, Puzzle, SubmittedAnswer, PuzzleWrongAnswer, Config, AccessLog, JitsiRooms, PuzzleFolder, PuzzleTemplate
 
 class SlugAdmin(OrderedModelAdmin):
     list_display = ('text', 'move_up_down_links')
@@ -17,6 +17,12 @@ class PuzzleAdmin(OrderedModelAdmin):
     list_display = ('title', 'status', 'priority', 'answer', 'move_up_down_links')
     list_filter = ('status', 'priority')
     search_fields = ('title', 'answer')
+    def get_readonly_fields(self,request, obj=None):
+        if obj:
+            return ['template','folder']
+        else:
+            return []
+
 admin.site.register(Puzzle, PuzzleAdmin)
 
 admin.site.register(PuzzleWrongAnswer)
@@ -28,6 +34,7 @@ class SubmittedAnswerAdmin(admin.ModelAdmin):
 
 admin.site.register(SubmittedAnswer, SubmittedAnswerAdmin)
 admin.site.register(AutoTag)
+
 admin.site.register(Config)
 class LogAdmin(OrderedModelAdmin):
 	list_display = ('user','puzzle','intStamp')
@@ -38,3 +45,7 @@ class JitsiAdmin(OrderedModelAdmin):
 	list_display = ('user','puzzle','string_id')
 	list_filter = ('user','puzzle','string_id')
 admin.site.register(JitsiRooms,JitsiAdmin)
+class DriveAdmin(OrderedModelAdmin):
+    list_display = ('name','fid')
+admin.site.register(PuzzleFolder,DriveAdmin)
+admin.site.register(PuzzleTemplate,DriveAdmin)

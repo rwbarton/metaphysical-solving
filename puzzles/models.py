@@ -11,8 +11,9 @@ import re
 import hashlib
 import time
 
-from puzzles.googlespreadsheet import create_google_spreadsheet, grant_folder_access
+from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 from puzzles.zulip import zulip_send, zulip_create_user
+
 
 try:
     # Secret used to generate Jitsi room names.
@@ -31,12 +32,16 @@ class Config(models.Model):
     default_tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
     default_taglist = models.ForeignKey('TagList', on_delete=models.CASCADE)
 
+    default_template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,on_delete=models.CASCADE,
+                                         help_text="Default spreadsheet to use to create new puzzles.  Leave null to create completely blank ones")
+    default_folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,on_delete=models.CASCADE,
+                                       help_text="Default Folder to use to share new puzzles.  Leave null to share by making world-editable instead")
     callback_phone = models.CharField(max_length=255, blank=True,
                                       help_text="""Phone number on which answer callbacks from Hunt HQ will be received.
 If empty, users will have to enter their own phone number when submitting an answer.""")
 
     motd = models.TextField(blank=True)
-
+        
 class Status(OrderedModel):
     text = models.CharField(max_length=200)
     css_name = models.SlugField(max_length=200, unique=True)
@@ -121,6 +126,11 @@ def defaultPriority():
     return Config.objects.get().default_priority
 def defaultTags():
     return [Config.objects.get().default_tag]
+def defaultTemplate():
+    return Config.objects.get().default_template
+def defaultFolder():
+    return Config.objects.get().default_folder
+
 
 class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)
@@ -135,6 +145,10 @@ class Puzzle(OrderedModel):
     spreadsheet = models.URLField(blank=True)
     answer = models.CharField(max_length=200, blank=True)
     checkAnswerLink = models.URLField(blank=True)
+    template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,default=defaultTemplate, on_delete=models.CASCADE,
+                                 help_text="Template to copy when first making this puzzle.  Leave null to create from scratch.")
+    folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,default=defaultFolder, on_delete=models.CASCADE,
+                               help_text="Google Drive folder to use to share this puzzle spreadsheet when first making it.  Leave null to share by making world-editable instead.")
 
     def __str__(self):
         return self.title
@@ -185,7 +199,10 @@ class Puzzle(OrderedModel):
         super(Puzzle, self).save(*args, **kwargs)
 
         if self.spreadsheet == '':
-            self.spreadsheet = create_google_spreadsheet(self.title)
+            self.spreadsheet = create_google_spreadsheet(title = self.title,
+                                                         folder= self.folder,
+                                                         puzzle_template=self.template,
+                                                         )['spreadsheetUrl']
             # create() uses force_insert, override that here.
             kwargs['force_update'] = True
             kwargs['force_insert'] = False
@@ -260,7 +277,7 @@ def make_user_profile(**kwargs):
     user_profile, _ = UserProfile.objects.get_or_create(
         user=user,
         defaults={'location': default_location})
-    grant_folder_access(user.email)
+    grant_access((folder.fid for folder in PuzzleFolder.objects.filter(shareOnly__isnull=True)),[user.email])
     user_zulip_status, _ = UserZulipStatus.objects.get_or_create(user=user)
     if user_zulip_status.status == UserZulipStatus.NONE \
             and user.first_name:
@@ -283,10 +300,52 @@ pre_save.connect(make_superuser, sender=User)
 class AccessLog(OrderedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
-#    stamp = models.DateTimeField(auto_now_add=True)
     intStamp = models.IntegerField(default=0)
 
 class JitsiRooms(OrderedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE, null=True)
     string_id = models.CharField(max_length=200,default='')
+
+class PuzzleFolder(OrderedModel):
+    name = models.CharField(max_length=200,unique=True)
+    fid = models.CharField(max_length=200,blank=True)
+    shareOnly = models.ForeignKey(User,null=True, blank=True, on_delete=models.CASCADE,
+                                  help_text="User to share this folder with.  Leave null (default) to share with all users")
+    def save(self, *args, **kwargs):
+
+        super(PuzzleFolder, self).save(*args, **kwargs)
+
+        if (self.fid == ''):
+            self.fid = create_google_folder(self.name)
+            kwargs['force_update'] = True
+            kwargs['force_insert'] = False
+            super(PuzzleFolder, self).save(*args, **kwargs)
+
+        if (self.shareOnly):
+            grant_access([self.fid],[self.shareOnly.email])
+        else:
+            grant_access([self.fid],(user.email for user in User.objects.all()))
+
+    def __str__(self):
+        return self.name
+
+
+
+class PuzzleTemplate(OrderedModel):
+    name = models.CharField(max_length=200,unique=True)
+    folder = models.ForeignKey('PuzzleFolder',on_delete = models.CASCADE,null=True)
+    fid = models.CharField(max_length=200,blank=True)
+    def save(self, *args, **kwargs):
+
+        super(PuzzleTemplate, self).save(*args, **kwargs)
+
+        if self.fid == '':
+            self.fid = create_google_spreadsheet(self.name,folder=self.folder,puzzle_template=None)['spreadsheetId']
+            kwargs['force_update'] = True
+            kwargs['force_insert'] = False
+            super(PuzzleTemplate, self).save(*args, **kwargs)
+            
+    def __str__(self):
+        return self.name
+        
