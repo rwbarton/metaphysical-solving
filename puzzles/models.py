@@ -157,7 +157,7 @@ class Puzzle(OrderedModel):
     priority = models.ForeignKey('Priority', default=defaultPriority, on_delete=models.CASCADE)
     tags = models.ManyToManyField('Tag', default=defaultTags)
 
-    round = models.ForeignKey('Round', null=True, blank=True, help_text="The round a given puzzle belongs to.")
+    round = models.ForeignKey('Round', null=True, blank=True, on_delete=models.SET_NULL, help_text="The round a given puzzle belongs to.")
 
     solvers = models.ManyToManyField(User, blank=True)
 
