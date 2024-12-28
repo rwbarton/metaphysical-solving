@@ -1,15 +1,89 @@
 {% load static %}
-<!DOCTYPE "HTML Frameset DTD">
-<html>
-<head>
+<html style="width:100%; height:100%;">
+    <head>
+      <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
+      <link rel="stylesheet" href="{% static "css/base.css" %}?1" />
+      <link rel="stylesheet" href="{% static "css/status.css" %}" />
+      <link rel="stylesheet" href="{% static "css/priority.css" %}" />
+      <link rel="icon" href="{% static "img/favicon.ico" %}" />
+      <title>{% block title %}{{puzzle.title}}{% endblock %}</title>
+      {% if refresh %}
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+      <script type="text/javascript">
+        function reload() {
+          $.ajax({
+            url: "{% url 'puzzles.views.puzzle_info' id %}",
+            success: function (data, textStatus, jqXHR) { document.getElementById("topbar").innerHTML = data; console.log("Refreshed puzzle info");},
+          });
+        };
+        $(document).ready(
+          function () {
+            $("#open-video-chat-button").click(openVideoChat);
+            setInterval(reload, {{ refresh }} * 1000);
+          });
+
+        function submitform (event) {
+          event.preventDefault();
+          const target = event.currentTarget;
+          console.log(target.action);
+          var xhr = new XMLHttpRequest();
+          var data = new FormData(target);
+          xhr.open('POST',target.action);
+          xhr.send(data);
+
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                reload();
+            }
+          }
+          return false; 
+        };
+
+        function openVideoChat (event) {
+          if (!$("#jitsi-popup").length) {
+          $("#topbar").after(
+            '<div id="jitsi-popup">' +
+            '<img src="{% static "img/videochat.svg" %}" class="jitsi-popup-icon">' + 
+            '<img src="{% static "img/popup-link-icon.svg" %}" id="snapout-popup-button" class="jitsi-popup-snapout-icon">' +
+            '<img src="{% static "img/close-icon.svg" %}" id="close-popup-button" class="jitsi-popup-close-icon">' +
+            '<iframe src="{% url 'puzzles.views.puzzle_jitsi_page' id %}?start_muted=1" style="position:relative; top:-50%; left:-50%; width:200%; height:200%; border: none; transform: scale(0.5);"></iframe>' +
+            '</div>'
+          );
+          $("#jitsi-popup").resizable({
+              minWidth: 100,
+              minHeight: 100,
+              maxWidth: 600,
+              maxHeight: 600
+            }).draggable({
+              containment: "window"
+            });
+            
+            $("#close-popup-button").click(function() {
+              $("#jitsi-popup").remove();
+            });
+
+            $("#snapout-popup-button").click(function() {
+              window.open("{% url 'puzzles.views.puzzle_jitsi_page' id %}", "_new"); 
+              $("#jitsi-popup").remove();
+            });
+
+          }
+        };
+
+        function closeVideoChat (event) {
+          $("#jitsi-popup").remove();
+        }
+      </script>
+      {% endif %}
+    </head>
 <title>{{ title }}</title>
 <link rel="icon" href="{% static "img/favicon.ico" %}" />
 </head>
-<frameset rows="150px,*" title="{{ title }}">
-  <frame src="{% url 'puzzles.views.puzzle_info' id %}" />
-  <frameset cols="*,390px">
-    <frame src="{% url 'puzzles.views.puzzle_spreadsheet' id %}" />
-    <frame src="{% url 'puzzles.views.puzzle_chat' id %}" />
-  </frameset>
-</frameset>
+<body style="width:100%; height:100%;position:relative;"">
+  <div id="topbar" style="height: 65px;">
+     {% include "puzzles/puzzle-info.html" %}
+  </div>
+  <iframe src="{% url 'puzzles.views.puzzle_bottom' id %}" style="width:100%; height:calc(100% - 65px); border: 0;"></iframe>
+</body>
 </html>
