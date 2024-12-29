@@ -10,6 +10,7 @@ from collections import defaultdict
 import re
 import hashlib
 import time
+from datetime import timedelta
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 from puzzles.zulip import zulip_send, zulip_create_user
@@ -173,14 +174,12 @@ class Puzzle(OrderedModel):
     def all_distinct_logs(self):
         return AccessLog.objects.filter(puzzle__exact=self).distinct()
     def recent_logs(self):
-        return self.all_distinct_logs().filter(intStamp__gte=quantizedTime()-1)
+        return self.all_distinct_logs().filter(lastUpdate__gte = now()-timedelta(seconds=120))
     def recent_count(self):
         return self.recent_logs().order_by("user").values("user").distinct().count()
-    def all_count(self):
-        return self.all_distinct_logs().count()
-    def unopened(self):
-        return self.status == defaultStatus() and self.all_count() <= 0
-
+    def unopened(self,user):
+        a = self.all_distinct_logs().filter(user__exact=user)
+        return not (a and a.get().linkedOut)
 
     def recent_solvers(self):
         logs=self.recent_logs()
@@ -297,10 +296,14 @@ def make_superuser(**kwargs):
 
 pre_save.connect(make_superuser, sender=User)
 
-class AccessLog(OrderedModel):
+class AccessLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
-    intStamp = models.IntegerField(default=0)
+    linkedOut = models.BooleanField(default=False)
+    accumulatedMinutes = models.IntegerField(default=0)
+    lastUpdate = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.puzzle.title + " / " + self.user.email
 
 class JitsiRooms(OrderedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -310,7 +313,7 @@ class JitsiRooms(OrderedModel):
 class PuzzleFolder(OrderedModel):
     name = models.CharField(max_length=200,unique=True)
     fid = models.CharField(max_length=200,blank=True)
-    shareOnly = models.ForeignKey(User,null=True, blank=True, on_delete=models.CASCADE,
+    shareOnly = models.ForeignKey(User,null=True, blank=True, on_delete=models.SET_NULL,
                                   help_text="User to share this folder with.  Leave null (default) to share with all users")
     def save(self, *args, **kwargs):
 

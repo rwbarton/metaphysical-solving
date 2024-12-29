@@ -58,8 +58,8 @@
 	{% if puzzle.puzzle.id in assigned_puzzles %}
 	{% else %}
 	  <tr class="priority-{{puzzle.puzzle.priority.css_name}} status-{{ puzzle.puzzle.status.css_name }} puzzle-list-regular">
-	    <td class="puzzle-list-puzzle">
-	      <a target="_blank" href="{{ puzzle.puzzle.url }}"><img src="{% static "img/external.png" %}" title="See {{puzzle.puzzle.title}} on hunt site"></a>
+	    <td  {% if puzzle.unopened %}class="puzzle-list-unopened"{% else %}class="puzzle-list-puzzle" {% endif %}>
+	      <a target="_blank" href="{% url 'puzzles.views.puzzle_linkout' puzzle.puzzle.id %}"><img src="{% static "img/external.png" %}" title="See {{puzzle.puzzle.title}} on hunt site"></a>
 	    </td>
 	    <td class="puzzle-list-title">
 	      <a href="{% url 'puzzles.views.puzzle' puzzle.puzzle.id %}">{{ puzzle.puzzle.title }}</a>
@@ -72,9 +72,6 @@
 	      <span class="puzzle-answer">{{ puzzle.puzzle.answer_or_status.answer }}</span>
 	      {% else %}
 	      {{ puzzle.puzzle.answer_or_status.status.text }}
-          {% if puzzle.puzzle.unopened %}
-          <span class="unopened"></span>
-          {% endif %}
 	      {% endif %}
 	    </td>
 	    <td> <a href="{% url 'puzzles.views.puzzle_view_history' puzzle.puzzle.id %}">{{puzzle.solvers}}</a></td>

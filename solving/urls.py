@@ -30,7 +30,8 @@ urlpatterns = [
     re_path(r'^puzzle/history/(\d+)/$',  views.puzzle_view_history, name='puzzles.views.puzzle_view_history'),
     re_path(r'^puzzle/jitsi/(\d+)/$',  views.puzzle_jitsi_page, name='puzzles.views.puzzle_jitsi_page'),
     re_path(r'^notapuzzle/jitsi/(\w+)/$',  views.jitsi_page, name='puzzles.views.jitsi_page'),
-
+    re_path(r'^puzzle/linkout/(\d+)/$',  views.puzzle_linkout, name='puzzles.views.puzzle_linkout'),
+    
     re_path(r'^iworkallnightandiaccept8x8jaaswebhooksallday',views.jaas_webhook),
 
     re_path(r'^puzzle/user_location/$',  views.user_location, name='puzzles.views.user_location'),
