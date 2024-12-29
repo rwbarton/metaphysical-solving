@@ -61,6 +61,23 @@ class Priority(OrderedModel):
 
     def __str__(self):
         return self.text
+    
+
+# A single puzzle round, has a name, a description, and a reference to the parent round (parent_round),
+# which can be empty. If a round is a parent to multiple rounds, then `child_rounds` field will retrieve
+# them all.
+class Round(OrderedModel):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    parent_round = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name='child_rounds',
+        blank=True,
+        null=True
+    )
+    def __str__(self):
+        return self.name
 
 class Tag(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
@@ -139,6 +156,8 @@ class Puzzle(OrderedModel):
     status = models.ForeignKey('Status', default=defaultStatus, on_delete=models.CASCADE)
     priority = models.ForeignKey('Priority', default=defaultPriority, on_delete=models.CASCADE)
     tags = models.ManyToManyField('Tag', default=defaultTags)
+
+    round = models.ForeignKey('Round', null=True, blank=True, on_delete=models.SET_NULL, help_text="The round a given puzzle belongs to.")
 
     solvers = models.ManyToManyField(User, blank=True)
 
