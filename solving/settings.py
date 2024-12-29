@@ -20,7 +20,8 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages'
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ]
         },
     },
@@ -157,3 +158,6 @@ INSTALLED_APPS = (
     'ordered_model',
     'puzzles'
 )
+
+# Needed to avoid warnings for Django 3.2+
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
