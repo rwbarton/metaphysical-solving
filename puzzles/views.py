@@ -77,15 +77,16 @@ def puzzle_context(request, d):
         d1['body_only'] = True
     return d1
 
-def log_a_view(puzzle,user):
+def deprecated_log_a_view(puzzle,user):
     previous = AccessLog.objects.filter(puzzle__exact=puzzle,user__exact=user)
     if (previous):
         a = previous.get()
         if (now()-a.lastUpdate)>timedelta(seconds=55):
             a.accumulatedMinutes = a.accumulatedMinutes+1
+            a.lastUpdate = now()
             a.save()
     else:
-        AccessLog.objects.create(puzzle=puzzle,user=user)
+        AccessLog.objects.create(puzzle=puzzle,user=user,lastUpdate=now())
 
 @login_required
 def overview_by(request, taglist_id):
@@ -139,7 +140,7 @@ def puzzle(request, puzzle_id):
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
     if (settings.ENABLE_ACCESS_LOG):
-        log_a_view(puzzle=puzzle,user=request.user)
+        puzzle.log_a_view(user=request.user)
     solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')    
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
@@ -172,7 +173,7 @@ def puzzle_info(request, puzzle_id):
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
     if (settings.ENABLE_ACCESS_LOG):
-        log_a_view(puzzle=puzzle,user=request.user)
+        puzzle.log_a_view(user=request.user)
     solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
@@ -209,12 +210,9 @@ def puzzle_spreadsheet(request, puzzle_id):
 @login_required
 def puzzle_linkout(request,puzzle_id):
     puzzle = Puzzle.objects.get(id=puzzle_id) 
-
-    log_a_view(puzzle=puzzle,user=request.user)
-    a = puzzle.all_distinct_logs().filter(user__exact=request.user).get()
-    a.linkedOut = True
-    a.save()
-    
+    userLog = AccessLog.objects.get_or_create(puzzle=puzzle,user=request.user)[0]
+    userLog.linkedOut = True
+    userLog.save()
     return redirect(puzzle.url)
 
 @login_required

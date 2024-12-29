@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="puzzle-blurb status-{{ puzzle.status.css_name }}">
-    <a class="puzzle-title" target="_blank" href="{{ puzzle.url }}" title="Go to {{puzzle.title}} on hunt site">
+    <a class="puzzle-title" target="_blank" href="{% url 'puzzles.views.puzzle_linkout' puzzle.id %}" title="Go to {{puzzle.title}} on hunt site">
            <img src="{% static "img/puzzlelinkbw.svg" %}" class="puzzleicon"> 
            {{ puzzle.title }}
     </a>
