@@ -185,9 +185,17 @@ class Puzzle(OrderedModel):
     def recent_count(self):
         return self.recent_logs().order_by("user").values("user").distinct().count()
     
-    def unopened(self,user):
+    def unopened_theirs(self,user):
         a = self.all_distinct_logs().filter(user__exact=user)
         return not (a and a.get().linkedOut)
+        
+    #if called without a user, has *anyone* opened this page on our server
+    def unopened_ours(self,user=None):
+        if user:
+            a = self.all_distinct_logs().filter(user__exact=user)
+            return not (a and a.get().accumulatedMinutes>0)
+        else:
+            return self.all_distinct_logs().filter(accumulatedMinutes__gte=1).count()<=0
 
     def recent_solvers(self):
         logs=self.recent_logs()

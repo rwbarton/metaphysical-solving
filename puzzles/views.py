@@ -111,7 +111,7 @@ def overview_by(request, taglist_id):
                     'name': tag.name,
                     'puzzles': ({'puzzle':puzz,
                                  'solvers':puzz.recent_count(),
-                                 'unopened':puzz.unopened(request.user)}
+                                 'unopened':puzz.unopened_theirs(request.user)}
                                 for puzz in Tag.objects.get(id=tag.id).puzzle_set.select_related().all())
                     }
                      for tag in tags),
