@@ -336,7 +336,7 @@ class AccessLog(models.Model):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     linkedOut = models.BooleanField(default=False)
     accumulatedMinutes = models.IntegerField(default=0)
-    lastUpdate = models.DateTimeField(default=now())
+    lastUpdate = models.DateTimeField(default=now)
     def __str__(self):
         return self.puzzle.title + " / " + self.user.email
 
