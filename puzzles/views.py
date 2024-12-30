@@ -8,6 +8,8 @@ import time
 import hmac
 import base64
 
+from datetime import timedelta
+
 from collections import defaultdict, Counter
 
 from django.http import HttpResponse
@@ -23,6 +25,7 @@ from django.db.transaction import atomic, non_atomic_requests
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.utils.timezone import now
 
 from puzzles.models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
     PuzzleWrongAnswer, Puzzle, User, TagList, UploadedFile, Location, Config, AccessLog, quantizedTime, JitsiRooms
@@ -59,7 +62,6 @@ def get_jitsi_data():
     return user_list
 
 
-
 def puzzle_context(request, d):
     d1 = dict(d)
     d1['teamname'] = settings.TEAMNAME
@@ -74,6 +76,17 @@ def puzzle_context(request, d):
     if 'body' in request.GET:
         d1['body_only'] = True
     return d1
+
+def deprecated_log_a_view(puzzle,user):
+    previous = AccessLog.objects.filter(puzzle__exact=puzzle,user__exact=user)
+    if (previous):
+        a = previous.get()
+        if (now()-a.lastUpdate)>timedelta(seconds=55):
+            a.accumulatedMinutes = a.accumulatedMinutes+1
+            a.lastUpdate = now()
+            a.save()
+    else:
+        AccessLog.objects.create(puzzle=puzzle,user=user,lastUpdate=now())
 
 @login_required
 def overview_by(request, taglist_id):
@@ -96,7 +109,10 @@ def overview_by(request, taglist_id):
             'active_taglist_id': taglist_id,
             'tags': ({
                     'name': tag.name,
-                    'puzzles': ({'puzzle':puzz,'solvers':puzz.recent_count()} for puzz in Tag.objects.get(id=tag.id).puzzle_set.select_related().all())
+                    'puzzles': ({'puzzle':puzz,
+                                 'solvers':puzz.recent_count(),
+                                 'unopened':puzz.unopened_theirs(request.user)}
+                                for puzz in Tag.objects.get(id=tag.id).puzzle_set.select_related().all())
                     }
                      for tag in tags),
             'assigned_puzzles': assigned_puzzles,
@@ -123,6 +139,8 @@ def puzzle(request, puzzle_id):
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
+    if (settings.ENABLE_ACCESS_LOG):
+        puzzle.log_a_view(user=request.user)
     solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')    
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
@@ -155,7 +173,7 @@ def puzzle_info(request, puzzle_id):
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
     if (settings.ENABLE_ACCESS_LOG):
-        AccessLog.objects.create(user=request.user,puzzle=puzzle,intStamp = quantizedTime())
+        puzzle.log_a_view(user=request.user)
     solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
@@ -188,6 +206,14 @@ def puzzle_spreadsheet(request, puzzle_id):
     if spreadsheet:
         return redirect(spreadsheet)
     return HttpResponse("Oops, the spreadsheet isn't ready quite yet. Please wait a moment and then <a href=\"\">refresh</a> this pane.")
+
+@login_required
+def puzzle_linkout(request,puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id) 
+    userLog = AccessLog.objects.get_or_create(puzzle=puzzle,user=request.user)[0]
+    userLog.linkedOut = True
+    userLog.save()
+    return redirect(puzzle.url)
 
 @login_required
 def puzzle_chat(request, puzzle_id):
@@ -349,9 +375,9 @@ def welcome(request):
 @login_required
 def puzzle_view_history(request, puzzle_id):
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
-    dedupedLogs = puzzle.all_distinct_logs().values_list("user","intStamp").order_by("user","intStamp").distinct()
-    countTuples = Counter(dedupedLogs.values_list("user")).most_common()
-    displayTuples = [(User.objects.get(id=c[0][0]),c[1]/30) for c in countTuples]
+    dedupedLogs = puzzle.all_distinct_logs()
+    countTuples = dedupedLogs.values_list("user","accumulatedMinutes")
+    displayTuples = [(User.objects.get(id=c[0]),c[1]/60.) for c in countTuples]
     return render(request, "puzzles/view_history.html", context=puzzle_context(request, {
         'puzzle': puzzle,
         'current_solvers': puzzle.recent_solvers(),

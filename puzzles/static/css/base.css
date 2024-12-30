@@ -527,6 +527,11 @@ td.puzzle-list-puzzle {
     border-right: none;
 }
 
+td.puzzle-list-unopened {
+    border-right: none;
+    background-color: #c02040;
+}
+
 td.puzzle-list-title {
     width: 60%;
 }
@@ -542,8 +547,8 @@ span.puzzle-priority {
 span.unopened {
     height: 15px;
     width: 15px;
-    background-color: #bad209;
-    border-radius: 50%;
+    background-color: #c02040;
+    border-radius: 33%;
     display: inline-block;
     transform: translate(5px,3px);
 }
