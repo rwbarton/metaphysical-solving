@@ -412,7 +412,7 @@ def puzzle_jitsi_page(request, puzzle_id):
 
 @login_required
 def who_what(request):
-    all_recent = AccessLog.objects.filter(intStamp__gte=quantizedTime()-1).distinct()
+    all_recent = AccessLog.objects.filter(lastUpdate__gte=now()-timedelta(seconds=120)).distinct()
     jitsi_rooms = JitsiRooms.objects.all()
     rdict = defaultdict(lambda: {"puzzles": set(), "rooms": set()})
     for el in all_recent:
@@ -421,7 +421,7 @@ def who_what(request):
         if room.puzzle:
             rdict[room.user]["rooms"].add(room.puzzle)
     people = list(rdict.items())
-    print(people)
+#    print(people)
     return render(request, "puzzles/whowhat.html", context = puzzle_context(request,{
         'people':people}))
 
