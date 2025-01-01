@@ -11,6 +11,7 @@ urlpatterns = [
     re_path(r'^$', views.welcome),
 
     re_path(r'^overview/$', views.overview, name='puzzles.views.overview'),
+    re_path(r'^profile_photo', views.profile_photo, name='puzzles.views.profile_photo'),
     re_path(r'^overview/(\d+)/$',  views.overview_by, name='puzzles.views.overview_by'),
     re_path(r'^whowhat/$', views.who_what, name='puzzles.views.who_what'),
 

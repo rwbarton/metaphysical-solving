@@ -291,6 +291,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     location = models.ForeignKey('Location', on_delete=models.CASCADE)
+    picture = models.TextField(null=True, blank=True)
 
 class UserZulipStatus(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

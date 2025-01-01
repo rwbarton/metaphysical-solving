@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static "css/base.css" %}?1" />
-    <link rel="stylesheet" href="{% static "css/status.css" %}" />
-    <link rel="stylesheet" href="{% static "css/priority.css" %}" />
     <link rel="icon" href="{% static "img/favicon.ico" %}" />
     <title>{% block title %}{% endblock %}</title>
     {% if refresh %}
@@ -23,61 +23,7 @@
   </head>
 {% endif %}
   <body>
-    <div id="overviewtopbar">
-    <div id="infoheader">
-       <a target="_top" href="/overview/" style="color:#ffffff"><div id="teamlogo"><img class="logo" src="{% static "img/mplogo.svg" %}"/></div>
-       <div id="teamname">{{ teamname|safe }}</div></a>
-       <nav id="navmenu" role="navigation">
-        <ul class="menu" id="navlist">
-            <li class="topmenuitem"><a href="#" class="topmenulink menulink"><span class="menuicon">☰</span> Menu</a>
-              <ul class="dropdown">
-                  <li class="menuitem"><a class="menulink" target="_top" href="/overview/">Overview</a></li>
-                  <li class="menuitem"><a class="menulink" target="_blank" href="http://www.thewordsword.com/">Allen's wordsearch</a></li>
-                  <li class="menuitem"><a class="menulink" target="_blank" href="{{zulip_url}}">Zulip</a></li>
-		  <li class="menuitem"><a class="menulink" href="/whowhat">Who's on What</a></li>
-                  <li class="menuitem"><a class="menulink" target="_blank" href="{% url 'puzzles.views.jitsi_page' 'quartermaster' %}">Quartermaster <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
-                  <li class="menuitem"><a class="menulink" target="_blank" href="{% url 'puzzles.views.jitsi_page' 'teammeetingroom' %}">Team Meeting Room <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
-                  <li class="menuitem"><a class="menulink" target="_blank" href="{% url 'puzzles.views.jitsi_page' 'socialspace' %}">Social Space <img src="{% static "img/videocamera_white.png" %}" width=10/></a></li>
-		                    <li class="menuitem"><a class="menulink" target="_blank" href="/generalhelp/">General Help</a></li>
-                  <li class="menuitem"><a class="menulink" target="_blank" href="/help/">Server Help</a></li>
-                  <li class="menuitem"><a class="menulink" target="_blank" href="/privacy/">Privacy</a></li>
-                  {% if admin_link %}<li class="menuitem"><a class="menulink" target="_blank" href="/admin/">Admin Interface</a></li> {% endif %}
-              </ul>
-            </li>
-        </ul>
-        </nav>
-       <div id="motdbanner">
-            <img class="iconimage" src="{% static "img/infoicon.svg" %}"/>
-            {{ motd|safe }}
-       </div>
-       <div id="hqcontact">
-          <img class="iconimage" src="{% static "img/phone.svg" %}"/>
-          <div class="contactinfo">
-             {{ hqcontact|safe }}
-          </div>
-       </div>
-       <div id="rightheader">
-              <div class="usermenutop">
-                 <img class="iconimage" src="{% static "img/person.svg" %}"/>
-                 {{ user.first_name }} @ {{ user.userprofile.location }}
-              </div>
-              <div class="usermenucontent">
-                  <div id="userinfo">{{ user.first_name }} {{ user.last_name }}</div>
-                  <div class="switchuser"><a target="_top" href="{% url 'puzzles.views.logout_user' %}">switch user</a></div>
-                  <div id="locationinfo">      
-                    <form id="user_location" action="{% url 'puzzles.views.user_location' %}" method="post">{% csrf_token %}
-                        <input type="hidden" name="continue" value="{{ path }}" />
-                        <select onchange="document.forms.user_location.submit()" name="location" class="dropdownselector">
-                           {% for location in locations %}
-                               <option{% if location == user.userprofile.location %} selected="true"{% endif %}>{{ location.name }}</option>
-                           {% endfor %}
-                        </select>
-                    </form>
-                  </div>
-              </div>
-       </div>
-    </div>
-  </div>
+    {% include "puzzles/infoheader.html" %}
     <div id="content">{% block content %}{% endblock %}</div>
   </body>
 {% if not body_only %}

@@ -7,12 +7,13 @@ import re
 import time
 import hmac
 import base64
+import requests
 
 from datetime import timedelta
 
 from collections import defaultdict, Counter
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.utils.http import urlencode
@@ -28,7 +29,8 @@ from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 
 from puzzles.models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
-    PuzzleWrongAnswer, Puzzle, User, TagList, UploadedFile, Location, Config, AccessLog, quantizedTime, JitsiRooms
+    PuzzleWrongAnswer, Puzzle, User, UserProfile, TagList, UploadedFile, Location, \
+    Config, AccessLog, quantizedTime, JitsiRooms
 from puzzles.forms import UploadForm, AnswerForm
 from puzzles.submit import submit_answer
 from puzzles.zulip import zulip_send
@@ -42,6 +44,15 @@ jaas_private_key = open('/etc/puzzle/id_rsa_jaas').read()
 jaas_webhook_secret = open('/etc/puzzle/jaas_webhook_secret').read().strip()
 #webhooklog = open("/home/puzzle/webhooklog","a")
 
+def update_user_social_data(strategy, *args, **kwargs):
+  response = kwargs['response']
+  backend = kwargs['backend']
+  user = kwargs['user']
+  if response['picture']:
+    url = response['picture']
+    user_profile, created = UserProfile.objects.get_or_create(user=user)
+    user_profile.picture = url
+    user_profile.save()
 
 def get_motd():
     try:
@@ -66,7 +77,8 @@ def puzzle_context(request, d):
     d1 = dict(d)
     d1['teamname'] = settings.TEAMNAME
     d1['motd'] = get_motd()
-    d1['hqcontact'] = settings.HQCONTACT
+    d1['hqphone'] = settings.HQPHONE
+    d1['hqemail'] = settings.HQEMAIL
     d1['locations'] = Location.objects.all()
     d1['my_puzzles'] = request.user.puzzle_set.order_by('id')
     d1['path'] = request.path
@@ -349,10 +361,16 @@ def puzzle_call_in_answer(request, puzzle_id):
 
 @login_required
 def user_location(request):
-    location = Location.objects.get(name=request.POST['location'])
-    request.user.userprofile.location = location
-    request.user.userprofile.save()
-    return redirect(request.POST['continue'])
+    if request.method == "POST":
+        location = Location.objects.get(name=request.POST['location'])
+        request.user.userprofile.location = location
+        request.user.userprofile.save()
+
+        # Re-retrieve the location from the database
+        updated_location = request.user.userprofile.location
+        return JsonResponse({"location": updated_location.name})
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
 
 @login_required
 def go_to_sleep(request):
@@ -424,6 +442,18 @@ def who_what(request):
 #    print(people)
     return render(request, "puzzles/whowhat.html", context = puzzle_context(request,{
         'people':people}))
+    
+@login_required
+def profile_photo(request):
+    user_profile = request.user.userprofile
+    if user_profile.picture:
+        response = requests.get(user_profile.picture, stream=True)
+        if response.status_code == 200:
+            return HttpResponse(
+                response.content,
+                content_type=response.headers['Content-Type']
+            )
+    return HttpResponse(status=response.status_code)
 
 @csrf_exempt
 @require_POST
