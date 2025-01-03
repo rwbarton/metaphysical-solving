@@ -1,0 +1,233 @@
+{% load static %}
+<script>
+    // TODO
+    // Dynamically update MOTD
+    //
+
+    // This toggles the sidebar menu to appear and disappear, along
+    // with the overlay that prevents the page from scrolling when the
+    // menu is open.
+    function toggleMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+
+      sidebar.classList.toggle('active');
+      const isMenuOpen = sidebar.classList.contains('active');
+      
+      if (isMenuOpen) {
+        overlay.classList.add('active');
+        document.body.classList.add('menu-open');
+      } else {
+        overlay.classList.remove('active');
+        document.body.classList.remove('menu-open');
+      }
+    }
+
+    // This toggles the user info popup to appear and disappear.
+    function toggleUserPopup() {
+      const userpopup = document.getElementById('userpopup');
+      userpopup.classList.toggle('active');
+    }
+
+    // This closes the user info popup when elsewhere on the page is clicked.
+    document.addEventListener('click', (event) => {
+      const userpopup = document.getElementById('userpopup');
+      const openPopupButton = document.getElementById('user-header');
+      if (!userpopup.contains(event.target) && !openPopupButton.contains(event.target)) {
+        userpopup.classList.remove('active');
+      }
+    });
+
+    // This called the API endpoint to change the user's location, and updates
+    // it in the header.
+    function changeUserLocation () {
+            const location_select = document.getElementById('location-select');
+
+            const formData = new FormData();
+            formData.append('location', location_select.value);
+
+            fetch("{% url 'puzzles.views.user_location' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: formData,
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.location) {
+                        document.getElementById('user-location').textContent = data.location;
+                    } else {
+                        console.error("Error in response:", data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Fetch error:", error);
+                });
+    }
+</script>
+
+<!-- The page header, containing the menu button, the team logo and name,
+     the optional team announcement, as well as the user information -->
+<header class="header">
+    <div class="header-content">
+    <button class="menu-button" onclick="toggleMenu()" title="Menu">
+        <i class="ti ti-menu-2"></i>
+    </button>
+    <a class="logo" target="_top" href="/overview/">
+        <img class="logo-image" src="{% static 'img/team_logo.svg' %}"/>
+        <span class="teamname-text">{{ teamname|safe }}</span>
+    </a>
+    </div>
+    {% if motd %}
+    <div class="top-page-announcement">
+         <i class="ti ti-info-circle"></i>
+         {{ motd|safe }}
+    </div>
+    {% endif %}
+    <div id="user-header" class="user-header" onclick="toggleUserPopup()">
+      <div class="user-info">
+        <span class="username">{{ user.first_name }}</span>
+        <span class="location" id="user-location">{{ user.userprofile.location }}</span>
+      </div>
+      {% if user.userprofile.picture %}
+        <img class="user-avatar" src="/profile_photo" />
+      {% else %}
+        <i class="ti ti-user user-avatar-icon"></i>
+      {% endif %}
+    </div>
+</header>
+
+<!-- The popup that appears when the user info is clicked -->
+<div class="userpopup" id="userpopup">
+  {% if user.userprofile.picture %}
+    <img class="user-avatar big" src="/profile_photo" />
+  {% else %}
+    <i class="ti ti-user user-avatar-icon big"></i>
+  {% endif %}
+  <div class="user-popup-header">
+    Hi, {{ user.first_name }}.
+  </div>
+  <div class="user-popup-greeting">
+    You are looking dashing today.
+  </div>
+  <div class="user-popup-tools">
+    <div class="user-popup-logout">
+      Not {{ user.first_name }}? <a target="_top" href="{% url 'puzzles.views.logout_user' %}">Log out.</a>
+    </div>
+    <div id="locationinfo">
+      <div class="user-popup-location-header">Change location:</div>
+        <div class="selectwrap">
+        <select onchange="changeUserLocation()" id="location-select" name="location">
+             {% for location in locations %}
+                 <option{% if location == user.userprofile.location %} selected="true"{% endif %}>{{ location.name }}</option>
+             {% endfor %}
+        </select>
+        <i class="ti ti-chevron-down select-icon"></i>
+        </div>
+    </div>
+  </div>
+</div>
+
+<!-- The menu sidebar that appears when the menu button is clicked.
+     The menu includes HQ contacts -->
+<nav class="sidebar" id="sidebar">
+  <button class="close-menu-button" onclick="toggleMenu()" title="Close Menu">
+      <i class="ti ti-x"></i>
+  </button>
+  <ul class="sidebar-list">
+      <h4 class="sidebar-section-header">Contact HQ</h4>
+      <li class="sidebar-item">
+        <a href="tel:{{hqphone|safe}}" class="sidebar-link">
+          <i class="ti ti-device-mobile"></i> {{hqphone|safe}}
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="mailto:{{hqemail|safe}}" class="sidebar-link">
+          <i class="ti ti-mail"></i> {{hqemail|safe}}
+          <button class="sidebar-copy-button" title="Copy HQ Email" onclick="navigator.clipboard.writeText('{{hqemail|safe}}')">
+            <i class="ti ti-copy"></i>
+          </button>
+        </a>
+      </li>
+    <hr class="menu-divider"/>
+    <li class="sidebar-item">
+      <a href="/overview/" class="sidebar-link">
+        <i class="ti ti-home"></i>
+        Overview
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="http://www.thewordsword.com/" target="_blank" class="sidebar-link">
+        <i class="ti ti-search"></i>
+        Allen's wordsearch
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{{zulip_url}}" target="_blank" class="sidebar-link">
+        <i class="ti ti-messages"></i>
+        Zulip
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="/whowhat" class="sidebar-link">
+        <i class="ti ti-users"></i>
+        Who's on What
+      </a>
+    </li>
+    <hr class="menu-divider"/>
+    <li class="sidebar-item">
+      <a href="{% url 'puzzles.views.jitsi_page' 'quartermaster' %}" target="_blank" class="sidebar-link">
+        <i class="ti ti-video"></i>
+        Quartermaster
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'puzzles.views.jitsi_page' 'teammeetingroom' %}" target="_blank" class="sidebar-link">
+        <i class="ti ti-video"></i>
+        Team Meeting Room
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'puzzles.views.jitsi_page' 'socialspace' %}" target="_blank" class="sidebar-link">
+        <i class="ti ti-video"></i>
+        Social Space
+      </a>
+    </li>
+    <hr class="menu-divider"/>
+    <li class="sidebar-item">
+      <a href="/generalhelp/" target="_blank" class="sidebar-link">
+        <i class="ti ti-help"></i>
+        General Help
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="/help/" target="_blank" class="sidebar-link">
+        <i class="ti ti-server"></i>
+        Server Help
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="/privacy/" target="_blank" class="sidebar-link">
+        <i class="ti ti-shield-lock"></i>
+        Privacy
+      </a>
+    </li>
+    {% if admin_link %}
+    <hr class="menu-divider"/>
+    <li class="sidebar-item">
+      <a href="/admin/" target="_blank" class="sidebar-link">
+        <i class="ti ti-settings"></i>
+        Admin Interface
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+<!-- Shaded overlay under the menu -->
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
