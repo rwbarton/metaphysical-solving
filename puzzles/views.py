@@ -22,15 +22,17 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db import IntegrityError
 from django import forms
+from django.db.models import Prefetch
 from django.db.transaction import atomic, non_atomic_requests
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 
-from puzzles.models import Status, Priority, Tag, QueuedAnswer, SubmittedAnswer, \
-    PuzzleWrongAnswer, Puzzle, User, UserProfile, TagList, UploadedFile, Location, \
-    Config, AccessLog, quantizedTime, JitsiRooms
+from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, \
+    PuzzleWrongAnswer, QueuedAnswer, Round, Status, SubmittedAnswer, Tag, TagList, \
+    UploadedFile, User, UserProfile, quantizedTime
+
 from puzzles.forms import UploadForm, AnswerForm
 from puzzles.submit import submit_answer
 from puzzles.zulip import zulip_send
@@ -99,6 +101,58 @@ def deprecated_log_a_view(puzzle,user):
             a.save()
     else:
         AccessLog.objects.create(puzzle=puzzle,user=user,lastUpdate=now())
+
+@login_required
+def api_overview(request):
+    
+    overview_dict = {}
+    overview_dict["default_priority"] = str(Config.objects.get().default_priority)
+    
+    rounds = Round.objects.prefetch_related(
+     Prefetch('puzzle_set', queryset=Puzzle.objects.all(), to_attr='puzzles')
+    )
+
+    def quick_puzzle_info(puzzle):
+        p_info = {
+            "title": puzzle.title,
+            "url": puzzle.url,
+            "id": puzzle.id,
+            "solver_count": puzzle.recent_count(),
+            "unopened": puzzle.unopened_theirs(request.user),
+            "tags": puzzle.tag_list(),
+            "description": puzzle.description,
+        }
+        if puzzle.answer:
+            p_info["answer"] = puzzle.answer
+        else:
+            p_info["status"] = str(puzzle.status)
+        return (p_info)
+
+    rounds_output = []
+    for round in rounds:
+        round_dict = {}
+        round_dict["round"] = round.name
+        round_dict["description"] = round.description if round.description else ""
+        if round.parent_round:
+            round_dict["parent_round"] = round.parent_round.name
+        if round.puzzles:
+            round_dict["puzzles"] = []
+            for puzzle in round.puzzles:
+                round_dict["puzzles"].append(quick_puzzle_info(puzzle))
+        rounds_output.append(round_dict)
+    
+    puzzles_without_round = Puzzle.objects.filter(round__isnull=True)
+    if puzzles_without_round:
+        rounds_output.append(
+            {
+                "round": "Unassigned",
+                "puzzles": [quick_puzzle_info(puzzle) for puzzle in puzzles_without_round]
+            }
+        )
+    
+    overview_dict["rounds"] = rounds_output
+
+    return JsonResponse(overview_dict)
 
 @login_required
 def overview_by(request, taglist_id):

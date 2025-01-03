@@ -5,21 +5,117 @@
 {% block title %}Overview{% endblock %}
 
 {% block content %}
-<div id="overview">
 
-    <div id="tagcontrol">
-    View puzzles by:
-    {% for taglist in taglists %}
-      {% if taglist.id == active_taglist_id %}
-	<span class="active-taglist">{{taglist.name}}</span>
-      {% else %}
-	<a class="taglink" href="{% url 'puzzles.views.overview_by' taglist.id %}"><span class="taglist">{{ taglist.name }}</span></a>
-      {% endif %}
-    {% endfor %}
-   </div>
+<div class="rounds-container" id="roundsContainer"></div>
+<div id="last-updated"></div>
 
-  <div id="puzzlesbytag">
+<script>
+    // TODO
+    // - Show Active Jitsi Rooms
+    // - View options
+    // - Filtering options
+    // - Saving the above settings locally
+    // - Who's on the puzzle and link to relevant page
+    
+    // Template function for a puzzle
+    function renderPuzzle(puzzle) {
+        console.log(puzzle);
+        return `
+            <div class="puzzle ${puzzle.unopened ? 'unopened' : ''}">
+                <div class="puzzle-top">
+                <div class="puzzle-header">
+                    <a href="/puzzle/${puzzle.id}" target="mp_${puzzle.id}"><span class="puzzle-title">${puzzle.title}</span></a>
+                    <a href="/puzzle/linkout/${puzzle.id}" target="main_${puzzle.id}" class="puzzle-link" target="_blank">
+                        <i class="ti ti-external-link"></i>
+                    </a>
+                </div>
+                ${puzzle.status ? `
+                    <div class="status-badge">${puzzle.status}</div> `
+                    : `<div class="answer-badge"><i class="ti ti-circle-check answer-check"></i>${puzzle.answer}</div>`}
+                </div>
+                ${puzzle.description ? `<div class="puzzle-description">${puzzle.description}</div>` : ''}
+                <div class="puzzle-meta">
+                    ${puzzle.solver_count > 0 ? `
+                        <span class="solver-count">
+                            <i class="ti ti-users"></i>
+                            ${puzzle.solver_count}
+                        </span>
+                    ` : ''}
+                    ${puzzle.tags && puzzle.tags.length > 0 ? `
+                        <div class="puzzle-tags">
+                            ${puzzle.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+            </div>
+        `;
+    }
 
+    // Template function for a round
+    function renderRound(round, parentRound = null) {
+        const roundTitle = parentRound ? `${parentRound}<i class="ti ti-chevron-right round-chevron"></i>${round.round}` : round.round;
+        return `
+            <div class="round">
+                <div class="round-header">
+                    <div class="round-title">${roundTitle}</div>
+                    ${round.description ? `<div class="round-description">${round.description}</div>` : ''}
+                </div>
+                ${round.puzzles ? `
+                    <div class="puzzle-list">
+                        ${round.puzzles.map(puzzle => renderPuzzle(puzzle)).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    // Function to render the dashboard
+    function renderDashboard(data) {
+        const container = document.getElementById('roundsContainer');
+        let html = '';
+
+        // Process rounds without parents first
+        data.rounds.forEach(round => {
+            if (!round.parent_round && round.puzzles) {
+                html += renderRound(round);
+            }
+        });
+
+        // Process parent-child relationships
+        data.rounds.forEach(round => {
+            if (round.parent_round) {
+                html += renderRound(round, round.parent_round);
+            }
+        });
+        
+        container.innerHTML = html;
+        document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+    }
+
+      // Function to fetch and update data
+      async function fetchAndUpdate() {
+          try {
+              const response = await fetch("{% url 'puzzles.views.api_overview' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                }});
+              const data = await response.json();
+              renderDashboard(data);
+          } catch (error) {
+              console.error('Error fetching puzzle data:', error);
+          }
+      }
+
+      // Initial load
+      fetchAndUpdate();
+
+      // Update every 60 seconds
+      setInterval(fetchAndUpdate, 60000);
+  </script>
+
+<!--
   {% if jitsi_data %}
   <div class="onetag">
      <table class="puzzle-list">
@@ -45,43 +141,5 @@
     </table>
   </div>
   {% endif %}
-  {% for tag in tags %}
-   <div class="onetag">
-   <table class="puzzle-list">
-      <tbody>
-	<tr class="puzzle-list-header">
-	  <th colspan=4>
-	    {% if unassigned_only %}Unassigned puzzles{% else %}Puzzles{% endif %} with tag <span class="tag">{{ tag.name }}</span>
-	  </th>
-	</tr>
-	{% for puzzle in tag.puzzles %}
-	{% if puzzle.puzzle.id in assigned_puzzles %}
-	{% else %}
-	  <tr class="priority-{{puzzle.puzzle.priority.css_name}} status-{{ puzzle.puzzle.status.css_name }} puzzle-list-regular">
-	    <td  {% if puzzle.unopened %}class="puzzle-list-unopened"{% else %}class="puzzle-list-puzzle" {% endif %}>
-	      <a target="_blank" href="{% url 'puzzles.views.puzzle_linkout' puzzle.puzzle.id %}"><img src="{% static "img/external.png" %}" title="See {{puzzle.puzzle.title}} on hunt site"></a>
-	    </td>
-	    <td class="puzzle-list-title">
-	      <a href="{% url 'puzzles.views.puzzle' puzzle.puzzle.id %}">{{ puzzle.puzzle.title }}</a>
-	      {% if puzzle.puzzle.priority != default_priority %}
-	      <span class="puzzle-priority priority-{{ puzzle.puzzle.priority.css_name }}">{{ puzzle.puzzle.priority.text }}</span>
-	      {% endif %}
-	    </td>
-	    <td class="puzzle-list-status answercolumn-{{puzzle.puzzle.status.css_name}}">
-	      {% if puzzle.puzzle.answer_or_status.answer %}
-	      <span class="puzzle-answer">{{ puzzle.puzzle.answer_or_status.answer }}</span>
-	      {% else %}
-	      {{ puzzle.puzzle.answer_or_status.status.text }}
-	      {% endif %}
-	    </td>
-	    <td> <a href="{% url 'puzzles.views.puzzle_view_history' puzzle.puzzle.id %}">{{puzzle.solvers}}</a></td>
-	  </tr>
-        {% endif %}
-	{% endfor %}
-      </tbody>
-    </table>
-    </div>
-  {% endfor %}
-  </div>
-</div>
+-->
 {% endblock %}

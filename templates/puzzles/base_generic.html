@@ -5,21 +5,9 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static "css/base.css" %}?1" />
+    <link rel="stylesheet" href="{% static "css/new-base.css" %}?1" />
     <link rel="icon" href="{% static "img/favicon.ico" %}" />
     <title>{% block title %}{% endblock %}</title>
-    {% if refresh %}
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
-    <script type="text/javascript">
-      function reload() {
-        $.ajax({
-          url: "?body",
-          success: function (data, textStatus, jqXHR) { document.body.innerHTML = data; },
-        });
-      };
-      $(document).ready(function () { setInterval(reload, {{ refresh }} * 1000); });
-    </script>
-    {% endif %}
   </head>
 {% endif %}
   <body>

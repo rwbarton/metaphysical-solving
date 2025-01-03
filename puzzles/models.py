@@ -158,6 +158,8 @@ class Puzzle(OrderedModel):
     priority = models.ForeignKey('Priority', default=defaultPriority, on_delete=models.CASCADE)
     tags = models.ManyToManyField('Tag', default=defaultTags)
 
+    description = models.CharField(max_length=280, blank=True, help_text="Short description of the given puzzle")
+
     round = models.ForeignKey('Round', null=True, blank=True, on_delete=models.SET_NULL, help_text="The round a given puzzle belongs to.")
 
     solvers = models.ManyToManyField(User, blank=True)
@@ -172,6 +174,9 @@ class Puzzle(OrderedModel):
 
     def __str__(self):
         return self.title
+    
+    def tag_list(self):
+        return [tag.name for tag in self.tags.all()]
 
     def answer_or_status(self):
         if self.answer:
