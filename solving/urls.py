@@ -29,6 +29,7 @@ urlpatterns = [
     re_path(r'^puzzle/add_solver/(\d+)/$',  views.puzzle_add_solver, name='puzzles.views.puzzle_add_solver'),
     re_path(r'^puzzle/upload/(\d+)/$',  views.puzzle_upload, name='puzzles.views.puzzle_upload'),
     re_path(r'^puzzle/call_in_answer/(\d+)/$',  views.puzzle_call_in_answer, name='puzzles.views.puzzle_call_in_answer'),
+    re_path(r'^puzzle/request_hint/(\d+)/$',  views.puzzle_request_hint, name='puzzles.views.puzzle_request_hint'),
     re_path(r'^puzzle/history/(\d+)/$',  views.puzzle_view_history, name='puzzles.views.puzzle_view_history'),
     re_path(r'^puzzle/jitsi/(\d+)/$',  views.puzzle_jitsi_page, name='puzzles.views.puzzle_jitsi_page'),
     re_path(r'^notapuzzle/jitsi/(\w+)/$',  views.jitsi_page, name='puzzles.views.jitsi_page'),

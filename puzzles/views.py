@@ -29,11 +29,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 
-from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, \
-    PuzzleWrongAnswer, QueuedAnswer, Round, Status, SubmittedAnswer, Tag, TagList, \
-    UploadedFile, User, UserProfile, quantizedTime
+from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, PuzzleWrongAnswer, QueuedAnswer, Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime
+from puzzles.forms import UploadForm, AnswerForm, HintForm
 
-from puzzles.forms import UploadForm, AnswerForm
 from puzzles.submit import submit_answer
 from puzzles.zulip import zulip_send
 from puzzles.jaas_jwt import JaaSJwtBuilder
@@ -409,6 +407,26 @@ def puzzle_call_in_answer(request, puzzle_id):
         if callback_phone:
             form.fields['phone'].initial = callback_phone
     return render(request, 'puzzles/puzzle-call-in-answer.html', context=puzzle_context(request, {
+                'form': form,
+                'puzzle': puzzle
+                }))
+
+
+@login_required
+def handle_puzzle_hint(request, puzzle, user, details, urgent):
+    print (puzzle,user,details,urgent)
+
+@login_required
+def puzzle_request_hint(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    if request.method == 'POST':
+        form = HintForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_puzzle_hint(request,puzzle=puzzle, user=request.user, details=form.cleaned_data['details'], urgent = form.cleaned_data['urgent'])
+            return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
+    else:
+        form = HintForm(initial={'urgent': False})
+    return render(request, 'puzzles/puzzle-request-hint.html', context=puzzle_context(request, {
                 'form': form,
                 'puzzle': puzzle
                 }))

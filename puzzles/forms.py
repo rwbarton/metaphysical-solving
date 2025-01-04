@@ -13,3 +13,13 @@ class AnswerForm(forms.Form):
     backsolved = forms.BooleanField(label="Backsolved?", required=False)
 
     phone = forms.CharField(max_length=30)
+
+class HintForm(forms.Form):
+    details = forms.CharField(max_length=200)
+
+    # request = forms.BooleanField(label="Request?", required=False)
+
+    # The default required=True means you have to check the box...
+    urgent = forms.BooleanField(label="Urgent?", required=False)
+
+
