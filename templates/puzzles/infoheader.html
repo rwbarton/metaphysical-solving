@@ -1,8 +1,5 @@
 {% load static %}
 <script>
-    // TODO
-    // Dynamically update MOTD
-    //
 
     // This toggles the sidebar menu to appear and disappear, along
     // with the overlay that prevents the page from scrolling when the
@@ -38,7 +35,7 @@
       }
     });
 
-    // This called the API endpoint to change the user's location, and updates
+    // This calls the API endpoint to change the user's location, and updates
     // it in the header.
     function changeUserLocation () {
             const location_select = document.getElementById('location-select');
@@ -70,6 +67,69 @@
                     console.error("Fetch error:", error);
                 });
     }
+
+    // Function to check and request notification permission
+    function requestNotificationPermission() {
+      if (!("Notification" in window)) {
+        console.error("This browser does not support notifications.");
+        return;
+      }
+    
+      // Check the current permission state
+      if (Notification.permission === "default") {
+        // Permission not yet requested
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            console.log("Notification permission granted.");
+          } else if (permission === "denied") {
+            console.log("Notification permission denied.");
+          }
+        });
+      }
+    }
+
+    // Function to fetch and update MOTD, and notify if necessary.
+    async function fetchMotdAndUpdate(nonInitialMotdLoad = true) {
+        try {
+            const response = await fetch("{% url 'puzzles.views.api_motd' %}", {
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}",
+              }});
+            const data = await response.json();
+            if (data["motd"] != "") {
+              oldMotd = document.getElementById("motd").innerHTML;
+              if (oldMotd != data["motd"]) {
+                document.getElementById("motd").innerHTML = data["motd"];
+                document.getElementById("top-page-announcement").classList.remove("hidden");
+                console.log(Notification.permission);
+                console.log(nonInitialMotdLoad);
+                if (Notification.permission === "granted" && nonInitialMotdLoad) {
+                    console.log("We are here, why is there no notification?");
+                    const notification = new Notification("New message from QM", {
+                    body: document.getElementById("motd").textContent,
+                    icon: "{% static 'img/team_logo.svg' %}"
+                    });
+                }
+              }
+            }
+            else {
+              document.getElementById("top-page-announcement").classList.add("hidden");
+              document.getElementById("motd").innerHTML = "";
+            }
+        } catch (error) {
+            console.error('Error fetching motd data:', error);
+        }
+    }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      // Check and request notification permission when the page loads
+      requestNotificationPermission();
+      // Initial Motd fetch
+      fetchMotdAndUpdate(false);
+      // Update MOTD every 60 seconds
+      setInterval(fetchMotdAndUpdate, 60000);
+    });
 </script>
 
 <!-- The page header, containing the menu button, the team logo and name,
@@ -84,12 +144,10 @@
         <span class="teamname-text">{{ teamname|safe }}</span>
     </a>
     </div>
-    {% if motd %}
-    <div class="top-page-announcement">
+    <div class="top-page-announcement hidden" id="top-page-announcement">
          <i class="ti ti-info-circle"></i>
-         {{ motd|safe }}
+         <span id="motd"></span>
     </div>
-    {% endif %}
     <div id="user-header" class="user-header" onclick="toggleUserPopup()">
       <div class="user-info">
         <span class="username">{{ user.first_name }}</span>
