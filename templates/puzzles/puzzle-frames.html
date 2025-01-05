@@ -3,6 +3,7 @@
     <head>
       <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
       <link rel="stylesheet" href="{% static "css/base.css" %}?1" />
+      <link rel="stylesheet" href="{% static "css/new-base.css" %}?1" />
       <link rel="icon" href="{% static "img/favicon.ico" %}" />
       <title>{% block title %}{{puzzle.title}}{% endblock %}</title>
       {% if refresh %}
@@ -79,9 +80,9 @@
 <link rel="icon" href="{% static "img/favicon.ico" %}" />
 </head>
 <body style="width:100%; height:100%;position:relative;"">
-  <div id="topbar" style="height: 65px;">
+  <div id="topbar" style="height: 85px;">
      {% include "puzzles/puzzle-info.html" %}
   </div>
-  <iframe src="{% url 'puzzles.views.puzzle_bottom' id %}" style="width:100%; height:calc(100% - 65px); border: 0;"></iframe>
+  <iframe src="{% url 'puzzles.views.puzzle_bottom' id %}" style="width:100%; height:calc(100% - 85px); border: 0;"></iframe>
 </body>
 </html>
