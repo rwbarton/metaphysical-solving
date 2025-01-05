@@ -29,7 +29,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 
-from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, PuzzleWrongAnswer, QueuedAnswer, Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime
+from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, PuzzleWrongAnswer, QueuedAnswer, \
+    Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime, QueuedHint
 from puzzles.forms import UploadForm, AnswerForm, HintForm
 
 from puzzles.submit import submit_answer
@@ -421,7 +422,8 @@ def puzzle_call_in_answer(request, puzzle_id):
 
 @login_required
 def handle_puzzle_hint(request, puzzle, user, details, urgent):
-    print (puzzle,user,details,urgent)
+    q=QueuedHint(puzzle=puzzle, user=user, details=details, urgent=urgent, resolved=False)
+    q.save()
 
 @login_required
 def puzzle_request_hint(request, puzzle_id):
@@ -429,7 +431,9 @@ def puzzle_request_hint(request, puzzle_id):
     if request.method == 'POST':
         form = HintForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_puzzle_hint(request,puzzle=puzzle, user=request.user, details=form.cleaned_data['details'], urgent = form.cleaned_data['urgent'])
+            handle_puzzle_hint(request,puzzle=puzzle, user=request.user,
+                               details=form.cleaned_data['details'],
+                               urgent = form.cleaned_data['urgent'])
             return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
     else:
         form = HintForm(initial={'urgent': False})
@@ -437,6 +441,23 @@ def puzzle_request_hint(request, puzzle_id):
                 'form': form,
                 'puzzle': puzzle
                 }))
+
+@login_required
+def hint_queue(request):
+    queued_hints = QueuedHint.objects.all()
+    return render(request, 'puzzles/hint-queue.html', context={
+                'queued_hints': queued_hints.filter(resolved=False),
+                'resolved_hints': queued_hints.filter(resolved=True),
+                'refresh': 5
+                })
+
+@login_required
+def hint_resolve(request,id):
+    q = QueuedHint.objects.get(id=id)
+    q.resolved = not q.resolved
+    q.save()
+    return redirect(reverse('puzzles.views.hint_queue'))
+
 
 @login_required
 def user_location(request):

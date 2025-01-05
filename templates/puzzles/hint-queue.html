@@ -1,0 +1,71 @@
+{% extends "puzzles/base_generic.html" %}
+
+{% load static %}
+
+{% block title %}Hint Queue{% endblock %}
+
+{% block content %}
+<div id="overview"> <!-- XXX The css is all wrong here. -->
+  <h1>Unresolved Hints</h1>
+  {% if queued_hints %}
+  <table class="puzzle-list">
+    <tbody>
+      <tr class="puzzle-list-header">
+          <td>Urgent?</td>
+	<td>Puzzle</td>
+	<td>Requestor</td>
+	<td>Details</td>
+      </tr>
+      {% for queued_hint in queued_hints %}
+      <tr class="puzzle-list-regular">
+          <td>{% if queued_hint.urgent %} <b>!</b> {% else %} - {% endif %}</td>
+	<td class="puzzle-list-puzzle">
+	  <a href="{{ queued_hint.puzzle.url }}">{{ queued_hint.puzzle.title }}</a>
+    </td>
+      	<td>
+	  {{ queued_hint.user.first_name }} {{ queued_hint.user.last_name }}
+	</td>
+          <td><a href="{% url 'puzzles.views.hint_resolve' queued_hint.id %}"> Resolve </a> </td>
+	<td>
+	  {{ queued_hint.details }}
+	</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  The queue is empty.
+  {% endif %}
+
+  <h1>Resolved Hints</h1>
+  {% if resolved_hints %}
+  <table class="puzzle-list">
+    <tbody>
+      <tr class="puzzle-list-header">
+          <td>Urgent?</td>
+	<td>Puzzle</td>
+	<td>Requestor</td>
+	<td>Details</td>
+      </tr>
+      {% for queued_hint in resolved_hints %}
+      <tr class="puzzle-list-regular">
+          <td>{% if queued_hint.urgent %} <b>!</b> {% else %} - {% endif %}</td>
+	<td class="puzzle-list-puzzle">
+	  <a href="{{ queued_hint.puzzle.url }}">{{ queued_hint.puzzle.title }}</a>
+    </td>
+      	<td>
+	  {{ queued_hint.user.first_name }} {{ queued_hint.user.last_name }}
+	</td>
+          <td><a href="{% url 'puzzles.views.hint_resolve' queued_hint.id %}"> Reopen </a> </td>
+	<td>
+	  {{ queued_hint.details }}
+	</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  No resolved hints.
+  {% endif %}
+</div>
+{% endblock %}
