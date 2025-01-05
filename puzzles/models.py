@@ -104,6 +104,17 @@ class QueuedAnswer(models.Model):
     def __str__(self):
         return 'answer "%s" for puzzle "%s"' % (self.answer, self.puzzle.title)
 
+class QueuedHint(OrderedModel):
+    puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    urgent = models.BooleanField(default=False)
+    details = models.TextField(blank=True, null=True)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s on "%s"' % (self.user, self.puzzle.title)
+
+
 class SubmittedAnswer(models.Model):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

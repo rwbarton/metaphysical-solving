@@ -42,6 +42,8 @@ urlpatterns = [
 
     re_path(r'^answers/$',  views.answer_queue, name='puzzles.views.answer_queue'),
     re_path(r'^answer/(\d+)/([a-z]+)/$',  views.answer_submit_result, name='puzzles.views.answer_submit_result'),
+    re_path(r'^hints/$',  views.hint_queue, name='puzzles.views.hint_queue'),
+    re_path(r'^hint/(\d+)/$',  views.hint_resolve, name='puzzles.views.hint_resolve'),
 
     re_path(r'^logout/$',  views.logout_user, name='puzzles.views.logout_user'),
     re_path(r'^logout_return/$',  views.logout_return, name='puzzles.views.logout_return'),

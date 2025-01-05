@@ -1,6 +1,8 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
-from puzzles.models import Round, Status, Priority, Tag, AutoTag, TagList, Location, Puzzle, SubmittedAnswer, PuzzleWrongAnswer, Config, AccessLog, JitsiRooms, PuzzleFolder, PuzzleTemplate
+from puzzles.models import Round, Status, Priority, Tag, AutoTag, TagList, Location, Puzzle, SubmittedAnswer, \
+    PuzzleWrongAnswer, Config, AccessLog, JitsiRooms, PuzzleFolder, PuzzleTemplate, QueuedHint
+
 
 class SlugAdmin(OrderedModelAdmin):
     list_display = ('text', 'move_up_down_links')
@@ -50,3 +52,5 @@ class DriveAdmin(OrderedModelAdmin):
     list_display = ('name','fid')
 admin.site.register(PuzzleFolder,DriveAdmin)
 admin.site.register(PuzzleTemplate,DriveAdmin)
+
+admin.site.register(QueuedHint,OrderedModelAdmin)
