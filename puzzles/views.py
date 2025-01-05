@@ -101,6 +101,13 @@ def deprecated_log_a_view(puzzle,user):
         AccessLog.objects.create(puzzle=puzzle,user=user,lastUpdate=now())
 
 @login_required
+def api_motd(request):
+    try:
+        return JsonResponse({"motd": Config.objects.get().motd})
+    except (Config.DoesNotExist, Config.MultipleObjectsReturned):
+        return JsonResponse({"motd": ""})
+
+@login_required
 def api_overview(request):
     
     overview_dict = {}
