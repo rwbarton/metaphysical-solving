@@ -110,6 +110,8 @@ class QueuedHint(OrderedModel):
     urgent = models.BooleanField(default=False)
     details = models.TextField(blank=True, null=True)
     resolved = models.BooleanField(default=False)
+    createdTime = models.DateTimeField(auto_now_add=True)
+    modifiedTime = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return '%s on "%s"' % (self.user, self.puzzle.title)

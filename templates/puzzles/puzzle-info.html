@@ -97,8 +97,15 @@
           {% endfor %}
         {% endif %}
       </div>
-
     </div>
+<div id="files" class="blurbblock">Hints
+          <div id="puzzlefiles" class="selector">
+              {% for hint in queued_hints %}
+              <div> {{ hint.user }} at {{hint.createdTime|date:'H:i D'}} {% if hint.resolved %} <img src="{% static "img/greencheck.svg" %}" class="iconimage"/> {% endif %}</div>
+              {% endfor %}
+              <a id="callinanswer" href="{% url 'puzzles.views.puzzle_request_hint' puzzle.id %}">Request a Hint</a>
+          </div>
+</div>
 
     <div id="puzzlestatus" class="blurbblock">
     <img src="{% static "img/progress.svg" %}" class="iconimage gray" title = "Puzzle status"/>
