@@ -221,6 +221,7 @@ def puzzle(request, puzzle_id):
                    if other_user not in solvers
                    and other_user != request.user]
     queued_answers = puzzle.queuedanswer_set.order_by('-id')
+    queued_hints = puzzle.queuedhint_set.order_by('-id')
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     uploaded_files = puzzle.uploadedfile_set.order_by('id')
     return render(request, "puzzles/puzzle-frames.html", context=puzzle_context(request, {
@@ -232,6 +233,7 @@ def puzzle(request, puzzle_id):
                 'other_solvers': other_solvers,
                 'other_users': other_users,
                 'queued_answers': queued_answers,
+                'queued_hints': queued_hints,
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
                 'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
@@ -254,6 +256,7 @@ def puzzle_info(request, puzzle_id):
                    if other_user not in solvers
                    and other_user != request.user]
     queued_answers = puzzle.queuedanswer_set.order_by('-id')
+    queued_hints = puzzle.queuedhint_set.order_by('-id')
     wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
     uploaded_files = puzzle.uploadedfile_set.order_by('id')
 
@@ -265,6 +268,7 @@ def puzzle_info(request, puzzle_id):
                 'other_solvers': other_solvers,
                 'other_users': other_users,
                 'queued_answers': queued_answers,
+                'queued_hints': queued_hints,
                 'wrong_answers': wrong_answers,
                 'uploaded_files': uploaded_files,
                 'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,

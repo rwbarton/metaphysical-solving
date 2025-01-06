@@ -11,22 +11,25 @@
   <table class="puzzle-list">
     <tbody>
       <tr class="puzzle-list-header">
-          <td>Urgent?</td>
-	<td>Puzzle</td>
-	<td>Requestor</td>
-	<td>Details</td>
+          <td style="padding-left:10px;padding-right:10px"></td>
+	<th style="padding-left:10px;padding-right:10px">Puzzle</th>
+	<th style="padding-left:10px;padding-right:10px">Requestor</th>
+          <th style="padding-left:10px;padding-right:10px">Created</th>
+          <th style="padding-left:10px;padding-right:10px"></th>
+	<th style="padding-left:10px;padding-right:10px">Details</th>
       </tr>
       {% for queued_hint in queued_hints %}
       <tr class="puzzle-list-regular">
-          <td>{% if queued_hint.urgent %} <b>!</b> {% else %} - {% endif %}</td>
+          <td style="color:red;padding-left:10px;padding-right:10px">{% if queued_hint.urgent %} <b>!</b> {% endif %}</td>
 	<td class="puzzle-list-puzzle">
 	  <a href="{{ queued_hint.puzzle.url }}">{{ queued_hint.puzzle.title }}</a>
     </td>
-      	<td>
+      	<td style="padding-left:10px;padding-right:10px">
 	  {{ queued_hint.user.first_name }} {{ queued_hint.user.last_name }}
 	</td>
-          <td><a href="{% url 'puzzles.views.hint_resolve' queued_hint.id %}"> Resolve </a> </td>
-	<td>
+      <td style="padding-left:10px;padding-right:10px">{{ queued_hint.createdTime|date:'H:i D' }}</td>
+          <td style="padding-left:10px;padding-right:10px"><a href="{% url 'puzzles.views.hint_resolve' queued_hint.id %}"> Close </a> </td>
+	<td style="padding-left:10px;padding-right:10px">
 	  {{ queued_hint.details }}
 	</td>
       </tr>
@@ -39,25 +42,28 @@
 
   <h1>Resolved Hints</h1>
   {% if resolved_hints %}
-  <table class="puzzle-list">
+      <table class="puzzle-list">
     <tbody>
-      <tr class="puzzle-list-header">
-          <td>Urgent?</td>
-	<td>Puzzle</td>
-	<td>Requestor</td>
-	<td>Details</td>
+   <tr class="puzzle-list-header">
+       <th style="padding-left:10px;padding-right:10px"></th>
+	<th style="padding-left:10px;padding-right:10px">Puzzle</th>
+	<th style="padding-left:10px;padding-right:10px">Requestor</th>
+          <th style="padding-left:10px;padding-right:10px">Modified</th>
+          <th style="padding-left:10px;padding-right:10px"></th>
+	<th style="padding-left:10px;padding-right:10px">Details</th>
       </tr>
       {% for queued_hint in resolved_hints %}
-      <tr class="puzzle-list-regular">
-          <td>{% if queued_hint.urgent %} <b>!</b> {% else %} - {% endif %}</td>
+       <tr class="puzzle-list-regular">
+          <td style="padding-left:10px;padding-right:10px">{% if queued_hint.urgent %} <b>!</b> {% endif %}</td>
 	<td class="puzzle-list-puzzle">
 	  <a href="{{ queued_hint.puzzle.url }}">{{ queued_hint.puzzle.title }}</a>
     </td>
-      	<td>
+      	<td style="padding-left:10px;padding-right:10px">
 	  {{ queued_hint.user.first_name }} {{ queued_hint.user.last_name }}
 	</td>
-          <td><a href="{% url 'puzzles.views.hint_resolve' queued_hint.id %}"> Reopen </a> </td>
-	<td>
+      <td style="padding-left:10px;padding-right:10px">{{ queued_hint.modifiedTime|date:'H:i D' }}</td>
+          <td style="padding-left:10px;padding-right:10px"><a href="{% url 'puzzles.views.hint_resolve' queued_hint.id %}"> Reopen </a> </td>
+	<td style="padding-left:10px;padding-right:10px">
 	  {{ queued_hint.details }}
 	</td>
       </tr>
