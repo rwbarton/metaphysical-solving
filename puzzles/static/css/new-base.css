@@ -196,7 +196,7 @@ select {
 .userpopup {
     position: fixed;
     top: 55px;
-    right: -300px;
+    right: -305px;
     width: 300px;
     min-height: 250px;
     background: white;
@@ -209,6 +209,7 @@ select {
     padding: 20px 10px;
     text-align: center;
     z-index: 50;
+    transition: right 0.3s ease;
 }
 
 .userpopup.active {
@@ -235,7 +236,7 @@ select {
 
 /* Sidebar menu */
 
-.menu-open {
+.overlay-open {
     overflow: hidden;
 }
 
@@ -395,8 +396,10 @@ select {
     color: var(--gray-800);
     font-weight: 400;
     padding: 6px 15px 4px 15px;
-    position: relative;
-    top: -8px;
+    position: fixed;
+    left: 50vw;
+    transform: translateX(-50%);
+    top: 0px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
 }
 
@@ -411,6 +414,41 @@ select {
 }
 
 /* Filter box */
+
+#filter-popup {
+        display: none;
+        position: fixed;
+        left: 50vw;
+        transform: translateX(-50%);
+        top: 80px;
+        width: calc(100vw - 50px);
+        max-width: 500px;
+        min-height: 400px;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: var(--gray-500) 0px 0px 2px;
+        align-items: start;
+        justify-content: flex-start;
+        padding: 15px;
+        z-index: 150;
+        transition: opacity 0.3s ease;
+        opacity: 0;
+        font-size: 14px;
+}
+
+#filter-popup.active {
+        display: flex;
+        opacity: 1;
+}
+
+.filter-popup-header {
+    font-weight: 500;
+}
+
+.filter-popup-header i {
+    margin-right: 5px;
+    margin-top: 1px;
+}
 
 .filters {
     background: white;
@@ -442,6 +480,25 @@ select {
 }
 
 /* Rounds overview */
+
+@keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+.loading-indicator {
+    position: absolute;
+    left: calc(50vw - 10px);
+    top: calc(50vh + 10px);
+    font-size: 35px;
+    animation: rotate 2s linear infinite;
+}
+
+
 
 .rounds-container {
     column-count: 3;
@@ -626,11 +683,31 @@ select {
 #last-updated {
     position: fixed;
     bottom: 16px;
-    right: 16px;
-    background: white;
+    right: 60px;
+    background: rgba(255,255,255,0.5);
     padding: 8px 12px;
     border-radius: 6px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--gray-700);
+}
+
+#filter-buttons {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: rgba(255,255,255,0.5);
+    padding: 0;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    & button {
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-size: 22px;
+        color: var(--gray-700);
+        line-height: 0;
+        padding: 7.5px;
+    }
 }

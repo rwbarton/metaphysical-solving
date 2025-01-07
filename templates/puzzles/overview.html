@@ -6,20 +6,41 @@
 
 {% block content %}
 
-<div class="rounds-container" id="roundsContainer"></div>
+<div class="rounds-container" id="roundsContainer">
+    <div class="loading-indicator">
+        <i class="ti ti-loader-2 loader-icon"></i>
+    </div>
+</div>
 <div id="last-updated"></div>
-
+<div id="filter-buttons">
+    <button onClick="toggleFilterPopup()">
+        <i class="ti ti-adjustments-horizontal"></i>
+    </button>
+</div>
+<div id="filter-overlay" class="overlay" onClick="toggleFilterPopup()"></div>
+<div id="filter-popup">
+    <div class="filter-popup-header"><i class="ti ti-adjustments-horizontal"></i>View Settings</div>
+</div>
 <script>
     // TODO
-    // - Show Active Jitsi Rooms
     // - View options
     // - Filtering options
     // - Saving the above settings locally
     // - Who's on the puzzle and link to relevant page
+
+    function toggleFilterPopup() {
+      const filterPopup = document.getElementById('filter-popup');
+      const overlay = document.getElementById('filter-overlay');
+
+      document.body.classList.toggle('overlay-open');
+      overlay.classList.toggle('active');
+      filterPopup.classList.toggle('active');
+      
+      const isFilterPopupOpen = filterPopup.classList.contains('active');
+    }
     
     // Template function for a puzzle
     function renderPuzzle(puzzle) {
-        console.log(puzzle);
         return `
             <div class="puzzle ${puzzle.unopened ? 'unopened' : ''}">
                 <div class="puzzle-top">
@@ -75,17 +96,13 @@
         const container = document.getElementById('roundsContainer');
         let html = '';
 
-        // Process rounds without parents first
-        data.rounds.forEach(round => {
-            if (!round.parent_round && round.puzzles) {
-                html += renderRound(round);
-            }
-        });
-
         // Process parent-child relationships
         data.rounds.forEach(round => {
-            if (round.parent_round) {
+            if (round.parent_round && round.puzzles) {
                 html += renderRound(round, round.parent_round);
+            }
+            else if (round.puzzles) {
+                html += renderRound (round);
             }
         });
         
@@ -114,32 +131,4 @@
       // Update every 60 seconds
       setInterval(fetchAndUpdate, 60000);
   </script>
-
-<!--
-  {% if jitsi_data %}
-  <div class="onetag">
-     <table class="puzzle-list">
-       <tbody>
-       <tr class="solver-list-header">
-       <th colspan=2>
-         Solvers + Their Active Jitsi Rooms (refresh for latest)
-       </th>
-       </tr>
-       {% for solver in jitsi_data %}
-       <tr class="solver-list-regular">
-           <td class="puzzle-list-status"> {{ solver.0 }} </td>
-           <td class="puzzle-list-title">
-<ul style="list-style-type:none; margin:0;padding:0;">
-	     {% for room in solver.1 %}
-             <li><a href="{{jitsi_base_url}}/{{ room.0 }}" target="_{{room.0}}"><img src="{% static "img/videocamera.png" %}" width=11></a> {% if room.2 %}<a href={%url 'puzzles.views.puzzle' room.2 %}>{% endif %}{{ room.1 }}{% if room.2 %}</a>{% endif %}</li>
-             {% endfor %}
-	     </ul>
-           </td>
-       </tr>
-       {% endfor %}
-       </tbody>
-    </table>
-  </div>
-  {% endif %}
--->
 {% endblock %}

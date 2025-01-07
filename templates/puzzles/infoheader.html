@@ -13,10 +13,10 @@
       
       if (isMenuOpen) {
         overlay.classList.add('active');
-        document.body.classList.add('menu-open');
+        document.body.classList.add('overlay-open');
       } else {
         overlay.classList.remove('active');
-        document.body.classList.remove('menu-open');
+        document.body.classList.remove('overlay-open');
       }
     }
 
@@ -99,6 +99,8 @@
             const data = await response.json();
             if (data["motd"] != "") {
               oldMotd = document.getElementById("motd").innerHTML;
+              console.log(oldMotd);
+              console.log(data["motd"]);
               if (oldMotd != data["motd"]) {
                 document.getElementById("motd").innerHTML = data["motd"];
                 document.getElementById("top-page-announcement").classList.remove("hidden");
@@ -128,7 +130,7 @@
       // Initial Motd fetch
       fetchMotdAndUpdate(false);
       // Update MOTD every 60 seconds
-      setInterval(fetchMotdAndUpdate, 60000);
+      setInterval(fetchMotdAndUpdate, 20000);
     });
 </script>
 
