@@ -29,6 +29,7 @@ urlpatterns = [
     re_path(r'^puzzle/add_solver/(\d+)/$',  views.puzzle_add_solver, name='puzzles.views.puzzle_add_solver'),
     re_path(r'^puzzle/upload/(\d+)/$',  views.puzzle_upload, name='puzzles.views.puzzle_upload'),
     re_path(r'^puzzle/call_in_answer/(\d+)/$',  views.puzzle_call_in_answer, name='puzzles.views.puzzle_call_in_answer'),
+    re_path(r'^puzzle/request_hint/(\d+)/$',  views.puzzle_request_hint, name='puzzles.views.puzzle_request_hint'),
     re_path(r'^puzzle/history/(\d+)/$',  views.puzzle_view_history, name='puzzles.views.puzzle_view_history'),
     re_path(r'^puzzle/jitsi/(\d+)/$',  views.puzzle_jitsi_page, name='puzzles.views.puzzle_jitsi_page'),
     re_path(r'^notapuzzle/jitsi/(\w+)/$',  views.jitsi_page, name='puzzles.views.jitsi_page'),
@@ -41,6 +42,8 @@ urlpatterns = [
 
     re_path(r'^answers/$',  views.answer_queue, name='puzzles.views.answer_queue'),
     re_path(r'^answer/(\d+)/([a-z]+)/$',  views.answer_submit_result, name='puzzles.views.answer_submit_result'),
+    re_path(r'^hints/$',  views.hint_queue, name='puzzles.views.hint_queue'),
+    re_path(r'^hint/(\d+)/$',  views.hint_resolve, name='puzzles.views.hint_resolve'),
 
     re_path(r'^logout/$',  views.logout_user, name='puzzles.views.logout_user'),
     re_path(r'^logout_return/$',  views.logout_return, name='puzzles.views.logout_return'),
