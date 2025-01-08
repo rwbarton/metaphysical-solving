@@ -13,10 +13,10 @@
       
       if (isMenuOpen) {
         overlay.classList.add('active');
-        document.body.classList.add('menu-open');
+        document.body.classList.add('overlay-open');
       } else {
         overlay.classList.remove('active');
-        document.body.classList.remove('menu-open');
+        document.body.classList.remove('overlay-open');
       }
     }
 
@@ -102,10 +102,7 @@
               if (oldMotd != data["motd"]) {
                 document.getElementById("motd").innerHTML = data["motd"];
                 document.getElementById("top-page-announcement").classList.remove("hidden");
-                console.log(Notification.permission);
-                console.log(nonInitialMotdLoad);
                 if (Notification.permission === "granted" && nonInitialMotdLoad) {
-                    console.log("We are here, why is there no notification?");
                     const notification = new Notification("New message from QM", {
                     body: document.getElementById("motd").textContent,
                     icon: "{% static 'img/team_logo.svg' %}"
@@ -128,7 +125,7 @@
       // Initial Motd fetch
       fetchMotdAndUpdate(false);
       // Update MOTD every 60 seconds
-      setInterval(fetchMotdAndUpdate, 60000);
+      setInterval(fetchMotdAndUpdate, 20000);
     });
 </script>
 
@@ -145,8 +142,10 @@
     </a>
     </div>
     <div class="top-page-announcement hidden" id="top-page-announcement">
+      <div class="motd-content">
          <i class="ti ti-info-circle"></i>
          <span id="motd"></span>
+      </div>
     </div>
     <div id="user-header" class="user-header" onclick="toggleUserPopup()">
       <div class="user-info">

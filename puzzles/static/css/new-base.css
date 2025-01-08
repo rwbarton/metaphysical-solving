@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 /* Icons (Tabler) */
-@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css');
+@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
 
 /* Base colors */
 :root {
@@ -16,7 +16,7 @@
     --gray-700: #334155;
     --gray-800: #1e293b;
     --dark: #040f11;
-    --success: #a7f3a2;
+    --success: #599e54;
     --warning: #eab308;
     --highlight: #ede87f;
     --status-not-started: #e2e8f0;
@@ -27,6 +27,10 @@
     --header-background: #D8BDDB;
     /* #dce9dc */
     --tag-background: #c7dfff;
+    --low-priority: #dae0e9;
+    --normal-priority: #ffffff;
+    --high-priority: #f1c285;
+    --asap-priority: #ff5b00;
 }
 
 /* Reset margins, padding, and sizing on everything */
@@ -121,7 +125,7 @@ select {
     margin-left: 10px;
 }
 
-@media (max-width: 620px) {
+@media (max-width: 900px) {
     .teamname-text {
         display: none;
     }
@@ -196,7 +200,7 @@ select {
 .userpopup {
     position: fixed;
     top: 55px;
-    right: -300px;
+    right: -305px;
     width: 300px;
     min-height: 250px;
     background: white;
@@ -209,6 +213,7 @@ select {
     padding: 20px 10px;
     text-align: center;
     z-index: 50;
+    transition: right 0.3s ease;
 }
 
 .userpopup.active {
@@ -235,7 +240,7 @@ select {
 
 /* Sidebar menu */
 
-.menu-open {
+.overlay-open {
     overflow: hidden;
 }
 
@@ -395,53 +400,343 @@ select {
     color: var(--gray-800);
     font-weight: 400;
     padding: 6px 15px 4px 15px;
-    position: relative;
-    top: -8px;
+    position: fixed;
+    left: 50vw;
+    transform: translateX(-50%);
+    top: 0px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+    white-space: nowrap;
+    overflow-x: auto;
+    text-align: center;
+    max-width: 60vw;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    & .motd-content {
+        display: inline-block;
+        white-space: nowrap;
+    }
+}
+
+.top-page-announcement::-webkit-scrollbar {
+    height: 8px;
+    /* for horizontal scrollbar */
+    background: transparent;
+}
+
+.top-page-announcement::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Initially hide the thumb */
+.top-page-announcement::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+}
+
+/* Show thumb on hover */
+.top-page-announcement:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Thumb hover state */
+.top-page-announcement:hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* For Firefox */
+@supports (scrollbar-width: thin) {
+    .top-page-announcement:hover {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    }
 }
 
 .top-page-announcement.hidden {
     display: none;
 }
 
+.top-page-announcement:hover::-webkit-scrollbar {
+    display: block;
+    /* Show the scrollbar on hover for Chrome, Safari, and Edge */
+    height: 5px;
+    /* Optional: control the scrollbar size */
+}
+
 @media (max-width: 900px) {
-    .top-page-announcement {
+    .user-info {
         display: none;
     }
 }
 
 /* Filter box */
 
-.filters {
+#filter-popup {
+    display: none;
+    position: fixed;
+    left: 50vw;
+    transform: translateX(-50%);
+    top: 20px;
+    bottom: -1px;
+    width: calc(100vw - 50px);
+    max-width: 500px;
     background: white;
-    border: 1px solid var(--gray-200);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    box-shadow: var(--gray-500) 0px 0px 2px;
+    align-items: start;
+    justify-content: flex-start;
+    padding: 15px;
+    z-index: 150;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    font-size: 14px;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
-.filter-group {
+#filter-popup.active {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    opacity: 1;
+}
+
+.filter-popup-header {
+    font-weight: 500;
+}
+
+.filter-popup-header i {
+    margin-right: 5px;
+    position: relative;
+    top: 1px;
+}
+
+.reset-filters-link {
+    border-bottom:1px solid var(--gray-300);
+    cursor: pointer;
+}
+
+.filters-popup-close-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    padding: 3px;
+    cursor: pointer;
+}
+
+.view-filters {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+/* Hide the default checkbox */
+.view-checkbox {
+    display: none;
+    pointer-events: none;
+}
+
+/* Style the label as a flex container */
+.view-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    /* Space between the checkbox and text */
+    cursor: pointer;
+    font-size: 14px;
+    color: #4b5563;
+    user-select: none;
+    /* Gray text */
+}
+
+/* Style the custom checkbox square */
+.view-checkbox-square {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    pointer-events: none;
+}
+
+/* Checked state styles */
+.view-checkbox:checked+.view-checkbox-square {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: white;
+    /* Icon color */
+}
+
+/* Add the Tabler check icon */
+.view-checkbox:checked+.view-checkbox-square .ti {
+    display: block;
+    position: absolute;
+    pointer-events: none;
+}
+
+/* Hide the icon when not checked */
+.view-checkbox-square .ti {
+    display: none;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+
+.filter-group {
+    margin-top: 1.5rem;
+    width: 100%;
 }
 
 .filter-label {
+    display: block;
     font-weight: 500;
-    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    color: #374151;
 }
 
-.filter-select {
-    padding: 0.5rem;
-    border: 1px solid var(--gray-300);
-    border-radius: 0.375rem;
-    font-family: inherit;
+.dropdown {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.dropdown-button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    color: #374151;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-button:after {
+    content: "\ea5f";
+    font-family: 'tabler-icons';
+    position: absolute;
+    right: 8px;
+    top: calc(50% - 6px);
+}
+
+.dropdown-button:hover {
+    border-color: #d1d5db;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 0.25rem;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.dropdown.active .dropdown-content {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #374151;
+    transition: background-color 0.15s ease;
+    user-select: none;
+}
+
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+}
+
+.dropdown-item input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    pointer-events: none;
+}
+
+.dropdown-item input[type="checkbox"]:checked+.checkbox-custom {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.checkbox-custom i {
+    color: white;
+    font-size: 14px;
+    display: none;
+    pointer-events: none;
+}
+
+.dropdown-item input[type="checkbox"]:checked+.checkbox-custom i {
+    display: block;
+}
+
+.selected-count {
+    background: #e5e7eb;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
+
+.select-all {
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 500;
 }
 
 /* Rounds overview */
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-indicator {
+    position: absolute;
+    left: calc(50vw - 10px);
+    top: calc(50vh + 10px);
+    font-size: 35px;
+    animation: rotate 2s linear infinite;
+}
+
+
 
 .rounds-container {
     column-count: 3;
@@ -529,6 +824,7 @@ select {
 
 .puzzle-header {
     display: inline;
+    margin-right: 5px;
 }
 
 .puzzle-title {
@@ -560,10 +856,63 @@ select {
     margin-top: 2px;
 }
 
+.puzzle-meta.hidden {
+    display: none;
+}
+
 .puzzle-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.badges {
+    display: flex;
+    flex-direction: row;
+    align-self: flex-start;
+    align-items: center;
+    position: relative;
+    top: 2px;
+}
+
+@keyframes pulsate {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+        /* Adjust to control how big the pulse is */
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.priority-badge {
+    margin-left: 4px;
+    position: relative;
+    top: 2px;
+
+    & .low {
+        color: var(--low-priority);
+    }
+
+    & .normal {
+        color: var(--normal-priority);
+    }
+
+    & .high {
+        color: var(--high-priority);
+    }
+
+    & .asap {
+        display: inline-block;
+        margin-top: 3px;
+        color: var(--asap-priority);
+        animation: pulsate 1.5s infinite;
+    }
 }
 
 .status-badge {
@@ -573,8 +922,59 @@ select {
     background: var(--status-not-started);
     white-space: nowrap;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    position: relative;
-    top: 2px;
+    align-self: start;
+    user-select: none;
+}
+
+.status-badge:hover:after {
+    font-size: 9px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 5px;
+    border-radius: 12px;
+    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.4);
+    position: absolute;
+    top: 12px;
+    right: -6px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-badge.low-priority {
+    background: var(--low-priority);
+    color: var(--gray-500);
+}
+
+.status-badge.low-priority:hover:after {
+    background: var(--low-priority);
+    content: "Low";
+}
+
+.status-badge.normal-priority {
+    background: var(--normal-priority);
+}
+
+.status-badge.normal-priority:hover:after {
+    content: "Normal";
+    background: var(--normal-priority);
+}
+
+.status-badge.high-priority {
+    background: var(--high-priority);
+}
+
+.status-badge.high-priority:hover:after {
+    content: "High";
+    background: var(--high-priority);
+}
+
+.status-badge.asap-priority {
+    background: var(--asap-priority);
+    animation: pulsate 1.5s infinite;
+}
+
+.status-badge.asap-priority:hover:after {
+    content: "Asap!";
+    background: var(--asap-priority);
 }
 
 .answer-badge {
@@ -586,8 +986,9 @@ select {
     background: var(--success);
     text-transform: uppercase;
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
-    position: relative;
-    top: 2px;
+    user-select: none;
+    color: white;
+
 
     & .answer-check {
         margin-right: 4px;
@@ -609,11 +1010,22 @@ select {
     font-size: 0.7rem;
 }
 
-.solver-count {
+.solver-count, solver-count:visited {
     display: flex;
     align-items: center;
     gap: 2px;
     white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-right: 5px;
+    user-select: none;
+    text-decoration: none;
+}
+
+.solver-count:hover {
+    color: var(--gray-800);
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .puzzle-description {
@@ -623,14 +1035,52 @@ select {
     top: -1px;
 }
 
+.puzzle-description.hidden {
+    display: none;
+}
+
 #last-updated {
     position: fixed;
     bottom: 16px;
-    right: 16px;
-    background: white;
+    right: 60px;
+    background: rgba(255, 255, 255, 0.7);
     padding: 8px 12px;
     border-radius: 6px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--gray-700);
+}
+
+.filtered-view-announcement {
+    font-size: 13px;
+    margin: 15px 0 15px 20px;
+    font-weight: 350;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+}
+
+.filtered-view-announcement.hidden {
+    display: none;
+}
+
+#filter-buttons {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 0;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    & button {
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-size: 22px;
+        color: var(--gray-700);
+        line-height: 0;
+        padding: 7.5px;
+    }
 }

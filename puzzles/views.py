@@ -127,6 +127,7 @@ def api_overview(request):
             "unopened": puzzle.unopened_theirs(request.user),
             "tags": puzzle.tag_list(),
             "description": puzzle.description,
+            "priority": str(puzzle.priority),
         }
         if puzzle.answer:
             p_info["answer"] = puzzle.answer
@@ -157,6 +158,8 @@ def api_overview(request):
         )
     
     overview_dict["rounds"] = rounds_output
+    overview_dict["statuses"] = [str(status) for status in Status.objects.all()]
+    overview_dict["priorities"] = [str(priority) for priority in Priority.objects.all()]
 
     return JsonResponse(overview_dict)
 

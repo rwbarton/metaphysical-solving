@@ -5,49 +5,401 @@
 {% block title %}Overview{% endblock %}
 
 {% block content %}
-
-<div class="rounds-container" id="roundsContainer"></div>
+<div class="filtered-view-announcement hidden">
+  <i class="ti ti-filter"></i>
+    Filtered View (<span class="reset-filters-link" onClick="resetFilters()">Reset</span>)
+</div>
+<div class="rounds-container" id="roundsContainer">
+    <div class="loading-indicator">
+        <i class="ti ti-loader-2 loader-icon"></i>
+    </div>
+</div>
 <div id="last-updated"></div>
-
+<div id="filter-buttons">
+    <button onClick="toggleFilterPopup()">
+        <i class="ti ti-adjustments-horizontal"></i>
+    </button>
+</div>
+<div id="filter-overlay" class="overlay" onClick="toggleFilterPopup()"></div>
+<div id="filter-popup">
+    <div class="filter-popup-header"><i class="ti ti-adjustments-horizontal"></i>View Filters (<span class="reset-filters-link" onClick="resetFilters()">Reset</span>)</span></div>
+      <div class="filters-popup-close-button" onClick="toggleFilterPopup()">
+        <i class="ti ti-x"></i>
+      </div>  
+      <div class="view-filters">
+          <div class="view-filter">
+            <label class="view-checkbox-label">
+              <input type="checkbox" class="view-checkbox" id="descriptions-on" onClick="handleCheckboxClick(event)">
+              <span class="view-checkbox-square">
+                <i class="ti ti-check"></i>
+              </span>
+              Show descriptions
+            </label>
+          </div>
+          <div class="view-filter">
+            <label class="view-checkbox-label">
+              <input type="checkbox" class="view-checkbox" id="tags-on" onClick="handleCheckboxClick(event)">
+              <span class="view-checkbox-square">
+                <i class="ti ti-check"></i>
+              </span>
+              Show tags
+            </label>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Status</div>
+          <div class="dropdown" id="statuses-dropdown">
+            <button class="dropdown-button">No statuses selected</button>
+            <div class="dropdown-content" id="status-content"></div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Priority</div>
+          <div class="dropdown" id="priorities-dropdown">
+            <button class="dropdown-button">No priorities selected</button>
+            <div class="dropdown-content" id="priority-content"></div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Round</div>
+          <div class="dropdown" id="rounds-dropdown">
+            <button class="dropdown-button">No rounds selected</button>
+            <div class="dropdown-content" id="round-content"></div>
+          </div>
+        </div>
+</div>
 <script>
     // TODO
-    // - Show Active Jitsi Rooms
     // - View options
     // - Filtering options
     // - Saving the above settings locally
     // - Who's on the puzzle and link to relevant page
+
+    let dataMap = {
+      statuses: [],
+      priorities: [],
+      rounds: []
+    };
+
+    // Initialize round and puzzle data store
+    let puzzleData = null;
+
+    // Initialize hidden item list
+    let hide_items = null;
+
+    // Initialize view element list
+    let view_items = null;
+
+    function resetFilters () {
+      hide_items = {
+                    statuses: [],
+                    priorities: [],
+                    rounds: []
+                };
+      view_items.descriptions = true;
+      view_items.tags = true;
+      saveToLocalStorage();
+      updateFilterData(puzzleData.statuses, puzzleData.priorities, puzzleData.rounds);
+      updateFilter();
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('filterSelections', JSON.stringify(hide_items));
+      localStorage.setItem('viewFilterSelections', JSON.stringify(view_items))
+    }
+
+    function updateCheckboxes () {
+      document.getElementById('descriptions-on').checked = view_items.descriptions;
+      document.getElementById('tags-on').checked = view_items.tags;
+    }
+
+    function updateDropdownButton(type) {
+      const dropdown = document.getElementById(`${type}-dropdown`);
+      if (!dropdown) return;
+      
+      const button = dropdown.querySelector('.dropdown-button');
+      if (!button) return;
+      
+      const unselectedItems = hide_items[type];
+      const totalItems = dataMap[type].length;
+      
+      if (unselectedItems.length === totalItems) {
+        // Nothing selected
+        button.textContent = `No ${type} selected`;
+      } else if (unselectedItems.length === 0) {
+        // All items selected
+        button.textContent = `Show all ${type}`;
+      } else {
+        // Show comma-separated list of selected items
+        let selectedItems = dataMap[type].filter(item => !unselectedItems.includes(item))
+        const displayText = "Show " + selectedItems.join(', ');
+        button.textContent = displayText;
+      }
+    }
+
+    function createDropdownItems(items, containerId, type) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      
+      // Add "Select All" option
+      const selectAllDiv = document.createElement('div');
+      selectAllDiv.className = 'dropdown-item select-all';
+      
+      const selectAllInput = document.createElement('input');
+      selectAllInput.type = 'checkbox';
+      selectAllInput.id = `${type}-select-all`;
+      selectAllInput.checked = hide_items[type].length === 0;
+      
+      const selectAllCustomCheckbox = document.createElement('label');
+      selectAllCustomCheckbox.className = 'checkbox-custom';
+      selectAllCustomCheckbox.htmlFor = `${type}-select-all`;
+      selectAllCustomCheckbox.innerHTML = '<i class="ti ti-check"></i>';
+      
+      const selectAllLabel = document.createElement('span');
+      selectAllLabel.textContent = 'Show All';
+      
+      selectAllDiv.appendChild(selectAllInput);
+      selectAllDiv.appendChild(selectAllCustomCheckbox);
+      selectAllDiv.appendChild(selectAllLabel);
+      
+      function handleSelectAll(e) {
+        e.stopPropagation();
+        const newState = !selectAllInput.checked;
+        selectAllInput.checked = newState;
+        hide_items[type] = newState ? [] : [...items];
+
+        container.querySelectorAll('input[type="checkbox"]:not([id$="select-all"])')
+          .forEach(checkbox => checkbox.checked = newState);
+        
+        updateDropdownButton(type);
+        updateFilter();
+        saveToLocalStorage();
+      }
+      
+      selectAllDiv.addEventListener('click', handleSelectAll);
+      container.appendChild(selectAllDiv);
+
+      // Add individual items
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'dropdown-item';
+        
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = `${type}-${item}`;
+        input.checked = !hide_items[type].includes(item);
+        
+        const customCheckbox = document.createElement('label');
+        customCheckbox.className = 'checkbox-custom';
+        customCheckbox.htmlFor = `${type}-${item}`;
+        customCheckbox.innerHTML = '<i class="ti ti-check"></i>';
+        
+        const label = document.createElement('span');
+        label.textContent = item;
+        
+        div.appendChild(input);
+        div.appendChild(customCheckbox);
+        div.appendChild(label);
+        
+        function handleItemClick(e) {
+          e.stopPropagation();
+          input.checked = !input.checked;
+          const array = hide_items[type];
+          
+          if (!input.checked && !array.includes(item)) {
+            array.push(item);
+          } else if (input.checked) {
+            const index = array.indexOf(item);
+            if (index > -1) array.splice(index, 1);
+          }
+          
+          const selectAllCheckbox = document.querySelector(`#${type}-select-all`);
+          selectAllCheckbox.checked = array.length === 0;
+          
+          updateDropdownButton(type);
+          updateFilter();
+          saveToLocalStorage();
+        }
+        
+        div.addEventListener('click', handleItemClick);
+        container.appendChild(div);
+      });
+    }
+
+    // Toggle dropdown
+    document.querySelectorAll('.dropdown').forEach(dropdown => {
+      const button = dropdown.querySelector('.dropdown-button');
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown').forEach(d => {
+          if (d !== dropdown) d.classList.remove('active');
+        });
+        const dropdown_top = dropdown.querySelector('.dropdown-content');
+        dropdown.classList.toggle('active');
+        dropdown_top.scrollTop = 0;
+      });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+      }
+    });
+
+    function verifyRoundNames(stored, current) {
+        return (current.every(v => stored.includes(v)));
+    }
+
+    function updateFilterData(statuses, priorities, rounds) {
+        let dropdownIsOpen = false;
+
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+          if (dropdown.classList.contains("active")) {
+            dropdownIsOpen = true;
+          }
+        });
+        let oldStatuses = dataMap["statuses"];
+        let oldPriorities = dataMap["priorities"];
+        let oldRounds = dataMap["oldRounds"];
+
+        if (oldStatuses !== statuses) {
+          dataMap["statuses"] = statuses;
+        }
+        if (oldPriorities !== priorities) {
+          dataMap["priorities"] = priorities;
+        }
+        let newRounds = rounds
+          .filter(item => item.hasOwnProperty("puzzles"))
+          .map(item => item.round);
+        if (oldRounds !== newRounds) {
+          dataMap["rounds"] = newRounds;
+        }
+
+        if (dropdownIsOpen) {
+          return;
+        }
+
+        if (!hide_items) {
+            stored_hide_items = JSON.parse(localStorage.getItem('filterSelections'));
+            if (stored_hide_items) {
+                hide_items = stored_hide_items;
+            } else {
+                hide_items = {
+                    statuses: [],
+                    priorities: [],
+                    rounds: []
+                }
+            }
+            hide_items.rounds.forEach((item) => {
+              if (!dataMap["rounds"].includes(item)) {
+                hide_items.rounds = [];
+              }
+            });
+        };
+        
+        // Recreate dropdown contents
+        if (oldStatuses !== statuses) {
+          createDropdownItems(dataMap["statuses"], 'status-content', 'statuses');
+        }
+        if (oldPriorities !== priorities) {
+          createDropdownItems(dataMap["priorities"], 'priority-content', 'priorities');
+        }
+        if (oldRounds !== newRounds) {
+          createDropdownItems(dataMap["rounds"], 'round-content', 'rounds');
+        }
+
+        // Update all dropdown buttons
+        Object.keys(dataMap).forEach(type => {
+            updateDropdownButton(type);
+        });
+
+        if (!view_items) {
+          stored_view_items = JSON.parse(localStorage.getItem('viewFilterSelections'));
+          if (stored_view_items) {
+                view_items = stored_view_items;
+            } else {
+                view_items = {"descriptions": true, "tags": true};
+            }
+        }
+
+        // Update checkboxes
+        updateCheckboxes();
+
+        //Apply view filters
+        applyViewFilters();
+    }
+
+    function handleCheckboxClick(e) {
+      e.stopPropagation();
+      if (e.target.id === "descriptions-on") {
+        view_items.descriptions = e.target.checked;
+      }
+      if (e.target.id === "tags-on") {
+        view_items.tags = e.target.checked;
+      }
+      saveToLocalStorage();
+      applyViewFilters();
+    }
+
+    function applyViewFilters() {
+      view_items.descriptions ? document.querySelectorAll(".puzzle-description")
+          .forEach(desc_div => desc_div.classList.remove("hidden")) : document.querySelectorAll(".puzzle-description")
+          .forEach(desc_div => desc_div.classList.add("hidden"));
+
+      view_items.tags ? document.querySelectorAll(".puzzle-meta")
+          .forEach(desc_div => desc_div.classList.remove("hidden")) : document.querySelectorAll(".puzzle-meta")
+          .forEach(desc_div => desc_div.classList.add("hidden"));
+    }
+
+    function updateFilter() {
+      renderDashboard(puzzleData);
+    }
+
+    function toggleFilterPopup() {
+      const filterPopup = document.getElementById('filter-popup');
+      const overlay = document.getElementById('filter-overlay');
+
+      document.body.classList.toggle('overlay-open');
+      overlay.classList.toggle('active');
+      filterPopup.classList.toggle('active');
+      
+      const isFilterPopupOpen = filterPopup.classList.contains('active');
+    }
     
     // Template function for a puzzle
     function renderPuzzle(puzzle) {
-        console.log(puzzle);
+        let puzzle_priority = puzzle.priority ? puzzle.priority.replace(/!/g, '') : "normal";
+      
         return `
             <div class="puzzle ${puzzle.unopened ? 'unopened' : ''}">
                 <div class="puzzle-top">
-                <div class="puzzle-header">
-                    <a href="/puzzle/${puzzle.id}" target="mp_${puzzle.id}"><span class="puzzle-title">${puzzle.title}</span></a>
-                    <a href="/puzzle/linkout/${puzzle.id}" target="main_${puzzle.id}" class="puzzle-link" target="_blank">
+                  <div class="puzzle-header">
+                    <a href="/puzzle/${puzzle.id}" target="_blank"><span class="puzzle-title">${puzzle.title}</span></a>
+                    <a href="/puzzle/linkout/${puzzle.id}" target="_blank" class="puzzle-link" target="_blank">
                         <i class="ti ti-external-link"></i>
                     </a>
-                </div>
-                ${puzzle.status ? `
-                    <div class="status-badge">${puzzle.status}</div> `
-                    : `<div class="answer-badge"><i class="ti ti-circle-check answer-check"></i>${puzzle.answer}</div>`}
-                </div>
-                ${puzzle.description ? `<div class="puzzle-description">${puzzle.description}</div>` : ''}
-                <div class="puzzle-meta">
-                    ${puzzle.solver_count > 0 ? `
-                        <span class="solver-count">
+                  </div>
+                  <div class="badges">
+                  ${puzzle.solver_count > 0 && puzzle.status ? `
+                        <a class="solver-count" href="/puzzle/history/${puzzle.id}" target="_blank">
                             <i class="ti ti-users"></i>
                             ${puzzle.solver_count}
-                        </span>
-                    ` : ''}
+                        </a>
+                  ` : ''}
+                  ${puzzle.status ? `
+                      <div class="status-badge ${puzzle_priority}-priority">${puzzle.status}</div> `
+                      : `<div class="answer-badge"><i class="ti ti-circle-check answer-check"></i>${puzzle.answer}</div>`}
+                  </div>
+                </div>
+                ${puzzle.description ? `<div class="puzzle-description ${view_items.descriptions ? "" : "hidden"}">${puzzle.description}</div>` : ''}
+                <div class="puzzle-meta ${view_items.tags ? "" : "hidden"}">
                     ${puzzle.tags && puzzle.tags.length > 0 ? `
                         <div class="puzzle-tags">
                             ${puzzle.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                         </div>
                     ` : ''}
                 </div>
-                
             </div>
         `;
     }
@@ -75,17 +427,29 @@
         const container = document.getElementById('roundsContainer');
         let html = '';
 
-        // Process rounds without parents first
-        data.rounds.forEach(round => {
-            if (!round.parent_round && round.puzzles) {
-                html += renderRound(round);
-            }
-        });
+        let filteredView = false;
+        for (let key in hide_items) {
+          hide_items[key].length !== 0 ? filteredView = true : null;
+        }
+
+        filteredView ? document.querySelector('.filtered-view-announcement').classList.remove("hidden") :
+                       document.querySelector('.filtered-view-announcement').classList.add("hidden");
 
         // Process parent-child relationships
         data.rounds.forEach(round => {
-            if (round.parent_round) {
-                html += renderRound(round, round.parent_round);
+            parent_round = round.parent_round ? round.parent_round : null;
+            if (round.puzzles && !hide_items["rounds"].includes(round.round)) {
+                let filtered_puzzles = round.puzzles.filter((puzzle) => {
+                  return (((puzzle.status && !hide_items.statuses.includes(puzzle.status)) ||
+                          (puzzle.answer && !hide_items.statuses.includes("solved!"))) &&
+                          (puzzle.priority && !hide_items.priorities.includes(puzzle.priority))
+                         )
+                });
+                if (filtered_puzzles.length > 0) {
+                  let round_copy = {...round};
+                  round_copy.puzzles = filtered_puzzles;
+                  html += renderRound(round_copy, parent_round);
+                }
             }
         });
         
@@ -102,6 +466,8 @@
                     "X-CSRFToken": "{{ csrf_token }}",
                 }});
               const data = await response.json();
+              updateFilterData(data.statuses, data.priorities, data.rounds);
+              puzzleData = data;
               renderDashboard(data);
           } catch (error) {
               console.error('Error fetching puzzle data:', error);
@@ -114,32 +480,4 @@
       // Update every 60 seconds
       setInterval(fetchAndUpdate, 60000);
   </script>
-
-<!--
-  {% if jitsi_data %}
-  <div class="onetag">
-     <table class="puzzle-list">
-       <tbody>
-       <tr class="solver-list-header">
-       <th colspan=2>
-         Solvers + Their Active Jitsi Rooms (refresh for latest)
-       </th>
-       </tr>
-       {% for solver in jitsi_data %}
-       <tr class="solver-list-regular">
-           <td class="puzzle-list-status"> {{ solver.0 }} </td>
-           <td class="puzzle-list-title">
-<ul style="list-style-type:none; margin:0;padding:0;">
-	     {% for room in solver.1 %}
-             <li><a href="{{jitsi_base_url}}/{{ room.0 }}" target="_{{room.0}}"><img src="{% static "img/videocamera.png" %}" width=11></a> {% if room.2 %}<a href={%url 'puzzles.views.puzzle' room.2 %}>{% endif %}{{ room.1 }}{% if room.2 %}</a>{% endif %}</li>
-             {% endfor %}
-	     </ul>
-           </td>
-       </tr>
-       {% endfor %}
-       </tbody>
-    </table>
-  </div>
-  {% endif %}
--->
 {% endblock %}
