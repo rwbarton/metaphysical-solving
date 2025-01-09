@@ -1,10 +1,11 @@
 import json
-from oauth2client.service_account import ServiceAccountCredentials
-import httplib2
 from googleapiclient import discovery
-from django.conf import settings
+import google.auth
+from google.auth import exceptions
+from puzzles.models import Config
 
 _google_config = None
+_adc_config = None
 
 def get_google_config():
     global _google_config
@@ -12,17 +13,24 @@ def get_google_config():
         _google_config = json.loads(open('/etc/puzzle/google.json').read())
     return _google_config
 
+def get_adc_config():
+    global _adc_config
+    if _adc_config is None:
+        _adc_config = json.loads(open('/etc/puzzle/adc.json').read())
+    return _adc_config
+
+def get_google_credentials():
+    if Config.objects.get().use_adc:
+        credentials, _ = google.auth.load_credentials_from_dict(get_adc_config())
+    else:
+        credentials, _ = google.auth.load_credentials_from_dict(get_google_config())
+    return credentials
 
 def create_google_spreadsheet(title,folder=None,puzzle_template=None):
-    google_config = get_google_config()
-    scopes = ['https://www.googleapis.com/auth/spreadsheets',
-              'https://www.googleapis.com/auth/drive.file']
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(google_config, scopes=scopes)
-    http = credentials.authorize(httplib2.Http())
     discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
-    service = discovery.build('sheets', 'v4', http=http,
+    service = discovery.build('sheets', 'v4', credentials=get_google_credentials(),
                               discoveryServiceUrl=discoveryUrl)
-    driveService = discovery.build('drive','v3',credentials=credentials)
+    driveService = discovery.build('drive','v3',credentials=get_google_credentials())
 
     if (puzzle_template):
         if (folder):
@@ -65,14 +73,9 @@ def create_google_spreadsheet(title,folder=None,puzzle_template=None):
 def grant_access(fid_list,user_list):
     if (not fid_list or not user_list):
         return
-    
-    google_config = get_google_config()
-    scopes = ['https://www.googleapis.com/auth/spreadsheets',
-              'https://www.googleapis.com/auth/drive.file']
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(google_config, scopes=scopes)
-    http = credentials.authorize(httplib2.Http())
+
     ids = []
-    service = discovery.build("drive", "v3", credentials=credentials)
+    service = discovery.build("drive", "v3", credentials=get_google_credentials())
 
     def callback(request_id, response, exception):
       if exception:
@@ -104,13 +107,7 @@ def grant_access(fid_list,user_list):
     
     
 def create_google_folder(name):
-    google_config = get_google_config()
-    scopes = ['https://www.googleapis.com/auth/spreadsheets',
-              'https://www.googleapis.com/auth/drive.file']
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(google_config, scopes=scopes)
-    http = credentials.authorize(httplib2.Http())
-    driveService = discovery.build('drive','v3',credentials=credentials)
-
+    driveService = discovery.build("drive", "v3", credentials=get_google_credentials())
     metadata = {
         "name": name,
         "mimeType": "application/vnd.google-apps.folder",

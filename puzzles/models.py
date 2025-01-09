@@ -12,8 +12,7 @@ import hashlib
 import time
 from datetime import timedelta
 
-from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
-from puzzles.zulip import zulip_send, zulip_create_user
+
 
 
 try:
@@ -40,9 +39,13 @@ class Config(models.Model):
     callback_phone = models.CharField(max_length=255, blank=True,
                                       help_text="""Phone number on which answer callbacks from Hunt HQ will be received.
 If empty, users will have to enter their own phone number when submitting an answer.""")
+    use_adc = models.BooleanField(default=False,help_text="Should puzzle Sheets be owned by a real user instead of a service account")
 
     motd = models.TextField(blank=True)
-        
+
+from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
+from puzzles.zulip import zulip_send, zulip_create_user
+
 class Status(OrderedModel):
     text = models.CharField(max_length=200)
     css_name = models.SlugField(max_length=200, unique=True)
