@@ -2,10 +2,11 @@ from django.db import models, IntegrityError
 from ordered_model.models import OrderedModel
 
 from django.contrib.auth.models import User
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, m2m_changed
 from django.urls import reverse
 from django.conf import settings
 from django.utils.timezone import now
+from django.utils.text import slugify
 from collections import defaultdict
 import re
 import hashlib
@@ -85,6 +86,9 @@ class Round(OrderedModel):
 
 class Tag(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
+
+    def stream(self):
+        return slugify('tag-%s' % self.name)
 
     def __str__(self):
         return self.name
@@ -288,7 +292,25 @@ def send_puzzle_zulip(**kwargs):
                    (puzzle.title, puzzle.url, puzzle.id,
                     settings.BASE_URL + reverse('puzzles.views.puzzle', args=[puzzle.id])))
 
+def notify_tag_on_add(**kwargs):
+    if kwargs['action'] == 'pre_add':
+        puzzle = kwargs['instance']
+        pks = kwargs['pk_set']
+        prev_tag_pks = [tag.id for tag in puzzle.tags.all()]
+        for pk in pks:
+            if pk not in prev_tag_pks:
+                tag = Tag.objects.get(id=pk)
+                print("Tag %d added to puzzle %s"%(pk, puzzle.title))
+                zulip_send(user='b+status',
+                           stream=tag.stream(),
+                           subject='newly tagged puzzle',
+                           message='Puzzle [%s](%s) ([p%d](%s)) tagged as %s' %
+                                   (puzzle.title, puzzle.url, puzzle.id,
+                                    settings.BASE_URL + reverse('puzzles.views.puzzle', args=[puzzle.id]),
+                                    tag))
+
 post_save.connect(send_puzzle_zulip, sender=Puzzle)
+m2m_changed.connect(notify_tag_on_add, sender = Puzzle.tags.through)
 
 class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
