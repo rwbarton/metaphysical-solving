@@ -292,6 +292,18 @@ def send_puzzle_zulip(**kwargs):
                    (puzzle.title, puzzle.url, puzzle.id,
                     settings.BASE_URL + reverse('puzzles.views.puzzle', args=[puzzle.id])))
 
+def notify_of_new_tag(**kwargs):
+    if kwargs['created']:
+        tag = kwargs['instance']
+        zulip_send(user='b+status',
+                   stream=tag.stream(),
+                   subject='new',
+                   message='New tag "%s"' % (tag))
+        zulip_send(user='b+status',
+                   stream='status',
+                   subject='new tag',
+                   message='New tag channel "#%s"'%tag.stream())
+
 def notify_tag_on_add(**kwargs):
     if kwargs['action'] == 'pre_add':
         puzzle = kwargs['instance']
@@ -310,6 +322,7 @@ def notify_tag_on_add(**kwargs):
                                     tag))
 
 post_save.connect(send_puzzle_zulip, sender=Puzzle)
+post_save.connect(notify_of_new_tag, sender=Tag)
 m2m_changed.connect(notify_tag_on_add, sender = Puzzle.tags.through)
 
 class TagList(OrderedModel):
