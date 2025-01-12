@@ -30,12 +30,13 @@ def quantizedTime():
 class Config(models.Model):
     default_status = models.ForeignKey('Status', on_delete=models.CASCADE)
     default_priority = models.ForeignKey('Priority', on_delete=models.CASCADE)
-    default_tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
-    default_taglist = models.ForeignKey('TagList', on_delete=models.CASCADE)
+    default_tag = models.ForeignKey('Tag', on_delete=models.SET_NULL,blank=True, null=True)
+    default_taglist = models.ForeignKey('TagList', on_delete=models.CASCADE,
+                                        help_text="This isn't actually used for anything (at the moment)")
 
-    default_template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,on_delete=models.CASCADE,
+    default_template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,on_delete=models.SET_NULL,
                                          help_text="Default spreadsheet to use to create new puzzles.  Leave null to create completely blank ones")
-    default_folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,on_delete=models.CASCADE,
+    default_folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,on_delete=models.SET_NULL,
                                        help_text="Default Folder to use to share new puzzles.  Leave null to share by making world-editable instead")
     callback_phone = models.CharField(max_length=255, blank=True,
                                       help_text="""Phone number on which answer callbacks from Hunt HQ will be received.
@@ -76,7 +77,7 @@ class Round(OrderedModel):
     description = models.TextField(blank=True, null=True)
     parent_round = models.ForeignKey(
         'self',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='child_rounds',
         blank=True,
         null=True
@@ -174,9 +175,9 @@ class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)
     url = models.URLField(unique=True)
 
-    status = models.ForeignKey('Status', default=defaultStatus, on_delete=models.CASCADE)
-    priority = models.ForeignKey('Priority', default=defaultPriority, on_delete=models.CASCADE)
-    tags = models.ManyToManyField('Tag', default=defaultTags)
+    status = models.ForeignKey('Status', default=defaultStatus, on_delete=models.SET_DEFAULT)
+    priority = models.ForeignKey('Priority', default=defaultPriority, on_delete=models.SET_DEFAULT)
+    tags = models.ManyToManyField('Tag', default=defaultTags, blank=True)
 
     description = models.CharField(max_length=280, blank=True, help_text="Short description of the given puzzle")
 
@@ -187,9 +188,9 @@ class Puzzle(OrderedModel):
     spreadsheet = models.URLField(blank=True)
     answer = models.CharField(max_length=200, blank=True)
     checkAnswerLink = models.URLField(blank=True)
-    template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,default=defaultTemplate, on_delete=models.CASCADE,
+    template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,default=defaultTemplate, on_delete=models.SET_NULL,
                                  help_text="Template to copy when first making this puzzle.  Leave null to create from scratch.")
-    folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,default=defaultFolder, on_delete=models.CASCADE,
+    folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,default=defaultFolder, on_delete=models.SET_NULL,
                                help_text="Google Drive folder to use to share this puzzle spreadsheet when first making it.  Leave null to share by making world-editable instead.")
 
     def __str__(self):
@@ -429,7 +430,7 @@ class PuzzleFolder(OrderedModel):
 
 class PuzzleTemplate(OrderedModel):
     name = models.CharField(max_length=200,unique=True)
-    folder = models.ForeignKey('PuzzleFolder',on_delete = models.CASCADE,null=True)
+    folder = models.ForeignKey('PuzzleFolder',on_delete = models.SET_NULL,null=True)
     fid = models.CharField(max_length=200,blank=True)
     def save(self, *args, **kwargs):
 
