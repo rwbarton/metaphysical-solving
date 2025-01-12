@@ -792,8 +792,6 @@ select {
     animation: rotate 2s linear infinite;
 }
 
-
-
 .rounds-container {
     column-count: 3;
     margin: 20px;
@@ -1148,6 +1146,48 @@ select {
     z-index: 102;
     display: none;
 
+    & #dialog-window-content {
+        max-height: calc(80vh - 30px);
+        overflow-y: auto;
+
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        -ms-overflow-style: none;
+
+        scrollbar-gutter: stable both-edges;
+
+        &::-webkit-scrollbar {
+        width: 4px;
+        background: transparent;
+        }
+
+        &::-webkit-scrollbar-track {
+        background: transparent;
+        }
+
+        /* Show thumb on hover */
+        &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        }
+
+        /* Thumb hover state */
+        &:hover::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+        }
+
+        @supports (scrollbar-width: thin) {
+        &:hover {
+            scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
+        }
+        }
+
+        &:hover::-webkit-scrollbar {
+        display: block;
+        width: 4px;
+        }
+    }
+
     & #dialog-window-close-button {
         position: absolute;
         right: 10px;
@@ -1167,6 +1207,84 @@ select {
         align-items: center;
         margin-top: 25px;
     }
+
+    & .loading-placeholder {
+        width: 250px;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    & .dialog-loading {
+        animation: rotate 2s linear infinite;
+        display: block;
+        width: 20px;
+    }
+
+    & .dialog-row {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        min-width: 200px;
+
+        &:first-of-type {
+            margin-top: 15px;
+        }
+
+        & .dialog-section-header {
+            text-align: left;
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+
+            & i {
+                font-size: 16px;
+            }
+        }
+    }
+
+}
+
+.viewer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.dialog-row .viewer:last-of-type {
+    border-bottom: none;
+}
+
+.viewer-pic {
+    display: flex;
+}
+
+.viewer-pic-image {
+    width: 30px;
+    border-radius: 30px;
+    border: 1px solid var(--gray-300);
+}
+
+.viewer-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.viewer-name {
+    font-size: 12px;
+    text-align: left;
+    line-height: 13px;
+}
+
+.viewer-location {
+    font-size: 10px;
+    color: var(--gray-500);
+    text-align: left;
+    line-height: 11px;
 }
 
 .puzzle-info-bar {
@@ -1230,6 +1348,10 @@ select {
         background: rgba(255, 255, 255, 0.9);
         border-radius: 3px;
         line-height: 18px;
+    }
+
+    & .infobar-badge.viewable:hover:after {
+        content: "\ea9a";
     }
 
     & .infobar-answer {

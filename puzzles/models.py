@@ -215,6 +215,7 @@ class Puzzle(OrderedModel):
 
     def jitsi_room_url(self):
         return reverse("puzzles.views.puzzle_jitsi_page",args=[self.id])
+        
     def log_a_view(self,user):
         userLog = AccessLog.objects.get_or_create(puzzle=self,user=user)[0]
         if (now()-userLog.lastUpdate)>timedelta(seconds=55):
