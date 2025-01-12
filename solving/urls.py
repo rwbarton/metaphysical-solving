@@ -10,12 +10,14 @@ admin.autodiscover()
 urlpatterns = [
     re_path(r'^$', views.welcome),
 
+    re_path(r'^profile_photo/(\d+)$', views.profile_photo, name='puzzles.views.profile_photo_with_id'),
     re_path(r'^profile_photo', views.profile_photo, name='puzzles.views.profile_photo'),
 
     re_path(r'^api_overview', views.api_overview, name="puzzles.views.api_overview"),
     re_path(r'^api_log_a_view/(\d+)$', views.api_log_a_view, name="puzzles.views.api_log_a_view"),
     re_path(r'^api_motd', views.api_motd, name="puzzles.views.api_motd"),
     re_path(r'^api_puzzle/(\d+)$', views.api_puzzle, name='puzzles.views.api_puzzle'),
+    re_path(r'^api_puzzle_history/(\d+)$', views.api_puzzle_history, name='puzzles.views.api_puzzle_history'),
     re_path(r'^api_update_puzzle/(\d+)$', views.api_update_puzzle, name='puzzles.views.api_update_puzzle'),
 
     re_path(r'^overview/$', views.overview, name='puzzles.views.overview'),

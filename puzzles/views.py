@@ -110,6 +110,31 @@ def api_motd(request):
         return JsonResponse({"motd": ""})
 
 @login_required
+def api_puzzle_history(request, puzzle_id):
+    puzzle = Puzzle.objects.prefetch_related('accesslog_set').get(id=puzzle_id)
+    dedupedLogs = puzzle.all_distinct_logs()
+    countTuples = dedupedLogs.values_list("user","accumulatedMinutes")
+    displayTuples = [(User.objects.get(id=c[0]),c[1]/60.) for c in countTuples]
+    prior_viewers = [{
+        "id": item[0].id, 
+        "first_name": item[0].first_name,
+        "last_name": item[0].last_name,
+        "location": item[0].userprofile.location.name,
+        "hours": round(item[1], 2)
+        } for item in displayTuples]
+    current_viewers = puzzle.recent_solvers().order_by('first_name', 'last_name')
+    current_viewers = [{
+        "id": item.id,
+        "first_name": item.first_name,
+        "last_name": item.last_name,
+        "location": item.userprofile.location.name,
+    } for item in current_viewers]
+    return JsonResponse({
+        "current_viewers": current_viewers,
+        "prior_viewers": prior_viewers,
+    }) 
+
+@login_required
 def api_overview(request):
     
     overview_dict = {}
@@ -593,6 +618,8 @@ def puzzle_view_history(request, puzzle_id):
     dedupedLogs = puzzle.all_distinct_logs()
     countTuples = dedupedLogs.values_list("user","accumulatedMinutes")
     displayTuples = [(User.objects.get(id=c[0]),c[1]/60.) for c in countTuples]
+    print(puzzle.recent_solvers())
+    print(displayTuples)
     return render(request, "puzzles/view_history.html", context=puzzle_context(request, {
         'puzzle': puzzle,
         'current_solvers': puzzle.recent_solvers(),
@@ -641,8 +668,18 @@ def who_what(request):
         'people':people}))
     
 @login_required
-def profile_photo(request):
-    user_profile = request.user.userprofile
+def profile_photo(request, id = None):
+    if not id:
+        print("Are we here somehow?")
+        print(id)
+        user_profile = request.user.userprofile
+    else:
+        print("What are we getting here")
+        print(id)
+        try:
+            user_profile = User.objects.get(id=id).userprofile
+        except:
+            return HttpResponse(status=404)
     if user_profile.picture:
         response = requests.get(user_profile.picture, stream=True)
         if response.status_code == 200:
@@ -650,7 +687,7 @@ def profile_photo(request):
                 response.content,
                 content_type=response.headers['Content-Type']
             )
-    return HttpResponse(status=response.status_code)
+    return HttpResponse(status=404)
 
 @csrf_exempt
 @require_POST
