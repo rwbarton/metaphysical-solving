@@ -164,16 +164,13 @@ def api_overview(request):
 
     return JsonResponse(overview_dict)
 
-@login_required
-def api_puzzle(request, puzzle_id):
+def build_puzzle_dict(user, puzzle_id):
     puzzle_dict = {}
     puzzle_dict["tags"] = [str(tag) for tag in Tag.objects.all()]
     puzzle_dict["statuses"] = [str(status) for status in Status.objects.all()]
     puzzle_dict["priorities"] = [str(priority) for priority in Priority.objects.all()]
     
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
-
-    # puzzle.log_a_view(user=request.user)
 
     p_info = {
         "title": puzzle.title,
@@ -219,44 +216,32 @@ def api_puzzle(request, puzzle_id):
     
     puzzle_dict["puzzle"] = p_info
 
-    print(puzzle_dict)
+    return(puzzle_dict)
+
+
+@login_required
+def api_puzzle(request, puzzle_id):
+
+    puzzle_dict = build_puzzle_dict(request.user, puzzle_id)
 
     return JsonResponse(puzzle_dict)
 
-    #if (settings.ENABLE_ACCESS_LOG):
-    #    puzzle.log_a_view(user=request.user)
-    
-    '''
-    solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')    
-    you_solving = request.user in solvers
-    other_solvers = [solver for solver in solvers if solver != request.user]
-    
-    other_users = [other_user
-                   for other_user in User.objects.order_by('first_name', 'last_name')
-                   if other_user not in solvers
-                   and other_user != request.user]
-    
-    queued_answers = 
-    queued_hints = 
-    wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
-    uploaded_files = puzzle.uploadedfile_set.order_by('id')
-    return render(request, "puzzles/puzzle-frames.html", context=puzzle_context(request, {
-                'id': puzzle_id,
-                'puzzle': puzzle,
-                'statuses': statuses,
-                'priorities': priorities,
-                'you_solving': you_solving,
-                'other_solvers': other_solvers,
-                'other_users': other_users,
-                'queued_answers': queued_answers,
-                'queued_hints': queued_hints,
-                'wrong_answers': wrong_answers,
-                'uploaded_files': uploaded_files,
-                'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
-                'jitsi_room_id': puzzle.jitsi_room_id(),
-                'refresh': 60
-                }))
-    '''
+def api_update_puzzle (request, puzzle_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse JSON body
+            puzzle = Puzzle.objects.get(id=puzzle_id)
+            for key in data:
+                if key == "priority":                  
+                    priority = Priority.objects.get(text=data["priority"])
+                    puzzle.priority = priority
+                if key == "status":
+                    status = Status.objects.get(text=data["status"])
+                    puzzle.status = status
+            puzzle.save()
+            return JsonResponse(build_puzzle_dict(request.user, puzzle_id))
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
 def api_log_a_view(request, puzzle_id):

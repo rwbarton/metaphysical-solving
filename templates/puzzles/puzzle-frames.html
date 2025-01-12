@@ -50,6 +50,8 @@
 </div>
 <script>
 
+  let puzzle_data = {};
+
   // Show dialog overlay
   function showDialogOverlay(html) {
     document.getElementById("dialog-overlay").style.display = 'block';
@@ -63,10 +65,77 @@
     document.getElementById("dialog-window").style.display = 'none';
   }
 
+  async function updatePuzzle(update_fields) {
+    try {
+        const response = await fetch("{% url 'puzzles.views.api_update_puzzle' id %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(update_fields),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            puzzle_data = data;
+            renderPuzzleInfoBar(data);
+        } else {
+            const errorData = await response.json();
+            console.error('Error:', errorData.error);
+        }
+    } catch (error) {
+        console.error('Fetch Error:', error);
+    }
+  }
+
+  function startPuzzle() {
+    updatePuzzle({
+      "status": "being worked on"
+    });
+  }
+
+  function setPriority() {
+    let select_element = document.getElementById("priority-select");
+    updatePuzzle({
+      "priority": select_element.options[select_element.selectedIndex].text
+    });
+  }
+
+  function setStatus() {
+    let select_element = document.getElementById("status-select");
+    updatePuzzle({
+      "status": select_element.options[select_element.selectedIndex].text
+    });
+  }
+
   // Show puzzle state (priority and status) edit dialog
   function editPuzzleState() {
-    showDialogOverlay();
-    
+    let puzzleStateHTML = `
+      <div class="dialog-section">
+        <header class="dialog-section-header">
+          <i class="ti ti-flag"></i> Puzzle priority
+        </header>
+        <div class="selectwrap">
+        <select onchange="setPriority()" id="priority-select" name="priority">
+             ${puzzle_data.priorities.map(priority => `<option class="priority" ${puzzle_data.puzzle.priority == priority ? `selected="true"` : ''}>${priority}</option>`).join('')}
+        </select>
+        <i class="ti ti-chevron-down select-icon"></i>
+        </div>
+      </div>
+      <div class="dialog-section">
+        <header class="dialog-section-header">
+          <i class="ti ti-activity"></i> Puzzle status
+        </header>
+        <div class="selectwrap">
+        <select onchange="setStatus()" id="status-select" name="status">
+             ${puzzle_data.statuses.map(status => `<option class="status" ${puzzle_data.puzzle.status == status ? `selected="true"` : ''}>${status}</option>`).join('')}
+        </select>
+        <i class="ti ti-chevron-down select-icon"></i>
+        </div>
+      </div>
+    `;
+    showDialogOverlay(puzzleStateHTML);
   }
 
   // Open video in new tab
@@ -205,7 +274,7 @@
                       <div class="infobar-badge infobar-status editable" onClick = "editPuzzleState()"">
                         <i class="ti ti-activity"></i>
                         ${data.puzzle.status}
-                        ${data.puzzle.status === "not started" ? `(<a class="infobar-action-link infobar-start" href="#">start</a>)` : ''}</div> `
+                        </div>${data.puzzle.status === "not started" ? `<div class="infobar-action-link" onClick="startPuzzle()">start</div>` : ''}`
                       : `<div class="infobar-badge infobar-answer"><i class="ti ti-circle-check answer-check"></i>${data.puzzle.answer}</div>`}
        </span>
        
@@ -248,8 +317,8 @@
           <div class="infobar-badge">
             <i class="ti ti-progress-help"></i>
             ${data.puzzle.hints.length} ${data.puzzle.hints.length == 1? "hint" : "hints"}
-            ${data.puzzle.hints.length == 0 ? `(<a class="infobar-action-link" href="#">request</a>)` : ''}
           </div>
+          ${data.puzzle.hints.length == 0 ? `<div class="infobar-action-link">request</div>` : ''}
         </span>
       `;
 
@@ -265,6 +334,7 @@
                 "X-CSRFToken": "{{ csrf_token }}",
             }});
           const data = await response.json();
+          puzzle_data = data;
           renderPuzzleInfoBar(data);
       } catch (error) {
           console.error('Error fetching puzzle data:', error);
