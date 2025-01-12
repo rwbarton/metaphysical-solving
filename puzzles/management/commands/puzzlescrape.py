@@ -60,6 +60,7 @@ class Command(BaseCommand):
     help = "Visit Hunt Overview and create new puzzles"
     def add_arguments(self, parser):
         parser.add_argument('--file',type=str)
+        parser.add_argument('--dry-run',action='store_true')
     def handle(self, *args, **kwargs):
         overview_url = 'https://puzzlefactory.place/api/puzzle_list'
 
@@ -70,20 +71,25 @@ class Command(BaseCommand):
         else:
             text = puzzlelogin.fetch_with_single_login(overview_url)
             puzzle_list = json.loads(text.decode('utf-8'))
-        print(puzzle_list)
+
 
         for puz in puzzle_list:
             puz_round = puz['round']
             puz_url = puz['url']
             puz_is_meta = puz['isMeta']
 
-            #puz_round_tag = puz_round.lower()
-            round_obj, created = Round.objects.get_or_create(name=puz_round)
-            #if created:
-            #    add_tag_to_taglist(tag_obj, 'Unsolved Rounds')
-            #    add_tag_to_taglist(tag_obj, 'All Rounds')
-
-            create_puzzle(puz['name'], puz_url, round_obj,
+            if kwargs['dry_run']:
+                #if not Round.objects.filter(round=puz_round).exists():
+                #    print("Would create new round %s"%(puz_round))
+                #puz_round_tag = puz_round.lower()
+                if not Puzzle.objects.filter(url=puz_url).exists():
+                    print("create_puzzle(name=%s, url=%s, round_obj=Round.objects.get_or_create(name=%s), is_meta=%s)"%(puz['name'], puz_url, puz_round, puz_is_meta))
+            else:
+                round_obj, created = Round.objects.get_or_create(name=puz_round)
+                #if created:
+                #    add_tag_to_taglist(tag_obj, 'Unsolved Rounds')
+                #    add_tag_to_taglist(tag_obj, 'All Rounds')
+                create_puzzle(puz['name'], puz_url, round_obj,
                           is_meta=puz_is_meta)
 
         print("Finished puzzlescrape run")
