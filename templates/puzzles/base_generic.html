@@ -7,12 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static "css/new-base.css" %}?1" />
     <link rel="icon" href="{% static "img/team_logo.svg" %}" />
+    {% block externaljs %}{% endblock %}
     <title>{% block title %}{% endblock %}</title>
   </head>
 {% endif %}
   <body>
-    {% include "puzzles/infoheader.html" %}
-    <div id="content">{% block content %}{% endblock %}</div>
+    {% block header %}
+      {% include "puzzles/infoheader.html" %}
+    {% endblock %}
+   {% block content %}{% endblock %}
   </body>
 {% if not body_only %}
 </html>
