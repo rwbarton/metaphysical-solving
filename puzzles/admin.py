@@ -1,7 +1,7 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
-from puzzles.models import Round, Status, Priority, Tag, AutoTag, TagList, Location, Puzzle, SubmittedAnswer, \
-    PuzzleWrongAnswer, Config, AccessLog, JitsiRooms, PuzzleFolder, PuzzleTemplate, QueuedHint
+from puzzles.models import Round, Status, Priority, Tag, AutoTag, TagList, UploadedFile, Location, Puzzle, SubmittedAnswer, \
+    PuzzleWrongAnswer, Config, AccessLog, JitsiRooms, PuzzleFolder, PuzzleTemplate, QueuedAnswer, QueuedHint
 
 
 class SlugAdmin(OrderedModelAdmin):
@@ -53,4 +53,6 @@ class DriveAdmin(OrderedModelAdmin):
 admin.site.register(PuzzleFolder,DriveAdmin)
 admin.site.register(PuzzleTemplate,DriveAdmin)
 
+admin.site.register(UploadedFile,admin.ModelAdmin)
+admin.site.register(QueuedAnswer,OrderedModelAdmin)
 admin.site.register(QueuedHint,OrderedModelAdmin)

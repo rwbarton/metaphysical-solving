@@ -1,88 +1,367 @@
+{% extends "puzzles/base_generic.html" %}
+
 {% load static %}
-<html style="width:100%; height:100%;">
-    <head>
-      <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
-      <link rel="stylesheet" href="{% static "css/base.css" %}?1" />
-      <link rel="stylesheet" href="{% static "css/new-base.css" %}?1" />
-      <link rel="icon" href="{% static "img/favicon.ico" %}" />
-      <title>{% block title %}{{puzzle.title}}{% endblock %}</title>
-      {% if refresh %}
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-      <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
-      <script type="text/javascript">
-        function reload() {
-          $.ajax({
-            url: "{% url 'puzzles.views.puzzle_info' id %}",
-            success: function (data, textStatus, jqXHR) { document.getElementById("topbar").innerHTML = data; console.log("Refreshed puzzle info");},
-          });
-        };
-        $(document).ready(
-          function () {
-            $("#open-video-chat-button").click(openVideoChat);
-            setInterval(reload, {{ refresh }} * 1000);
-          });
 
-        function submitform (event) {
-          event.preventDefault();
-          const target = event.currentTarget;
-          console.log(target.action);
-          var xhr = new XMLHttpRequest();
-          var data = new FormData(target);
-          xhr.open('POST',target.action);
-          xhr.send(data);
+{% block header %}{% include "puzzles/infoheader.html" with compact_header="compact-header" %}{% endblock %}
 
-          xhr.onreadystatechange = function() {
-            if (xhr.readyState == XMLHttpRequest.DONE) {
-                reload();
-            }
-          }
-          return false; 
-        };
+{% block title %} {{ puzzle.title }} {% endblock %}
+{% block externaljs %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+{% endblock %}
 
-        function openVideoChat (event) {
-          if (!$("#jitsi-popup").length) {
-          $("#topbar").after(
-            '<div id="jitsi-popup">' +
-            '<img src="{% static "img/videochat.svg" %}" class="jitsi-popup-icon">' + 
-            '<img src="{% static "img/popup-link-icon.svg" %}" id="snapout-popup-button" class="jitsi-popup-snapout-icon">' +
-            '<img src="{% static "img/close-icon.svg" %}" id="close-popup-button" class="jitsi-popup-close-icon">' +
-            '<iframe src="{% url 'puzzles.views.puzzle_jitsi_page' id %}?start_muted=1" style="position:relative; top:-50%; left:-50%; width:200%; height:200%; border: none; transform: scale(0.5);"></iframe>' +
-            '</div>'
-          );
-          $("#jitsi-popup").resizable({
-              minWidth: 100,
-              minHeight: 100,
-              maxWidth: 600,
-              maxHeight: 600
-            }).draggable({
-              containment: "window"
-            });
-            
-            $("#close-popup-button").click(function() {
-              $("#jitsi-popup").remove();
-            });
-
-            $("#snapout-popup-button").click(function() {
-              window.open("{% url 'puzzles.views.puzzle_jitsi_page' id %}", "_new"); 
-              $("#jitsi-popup").remove();
-            });
-
-          }
-        };
-
-        function closeVideoChat (event) {
-          $("#jitsi-popup").remove();
-        }
-      </script>
-      {% endif %}
-    </head>
-<title>{{ title }}</title>
-<link rel="icon" href="{% static "img/favicon.ico" %}" />
-</head>
-<body style="width:100%; height:100%;position:relative;"">
-  <div id="topbar" style="height: 85px;">
-     {% include "puzzles/puzzle-info.html" %}
+{% block content %}
+<div id="puzzle-info-bar" class="puzzle-info-bar">
+  <i class="ti ti-loader-2 loader-icon"></i>
+</div>
+<div id="content" class="split">
+  <div id="left" class="frame">
+    <iframe src="{% url 'puzzles.views.puzzle_spreadsheet' id %}"></iframe>
   </div>
-  <iframe src="{% url 'puzzles.views.puzzle_bottom' id %}" style="width:100%; height:calc(100% - 85px); border: 0;"></iframe>
-</body>
-</html>
+  <div id="right" class="frame">
+    <iframe src="{% url 'puzzles.views.puzzle_chat' id %}"></iframe>
+  </div>
+</div>
+<div id="video-resize-overlay">
+</div>
+<div id="dialog-window">
+  <div id="dialog-window-close-button" onClick="hideDialog()">
+    <i class="ti ti-x"></i>
+  </div>
+  <div id="dialog-window-content">
+  </div>
+</div>
+<div id="dialog-overlay" onClick = "hideDialog()">
+</div>
+</div>
+<div id="inline-video">
+  <div id="video-titlebar">
+    <div class="titlebar-button" title="Open video in new tab" onClick="popoutVideo()">
+      <i class="ti ti-external-link"></i>
+    </div>
+    <div class="video-title">Video chat</div>
+    <div class="titlebar-button" title="Close video" onClick="closeVideo()">
+      <i class="ti ti-x"></i>
+    </div>
+  </div>
+  <div id="internal-video-resize-overlay"></div>
+  <div id="video-content">
+  </div>
+</div>
+<script>
+
+  // Show dialog overlay
+  function showDialogOverlay(html) {
+    document.getElementById("dialog-overlay").style.display = 'block';
+    document.getElementById("dialog-window-content").innerHTML = html ? html : "Dialog window content";
+    document.getElementById("dialog-window").style.display = "block";
+  }
+
+  // Hide dialog overlay
+  function hideDialog() {
+    document.getElementById("dialog-overlay").style.display = 'none';
+    document.getElementById("dialog-window").style.display = 'none';
+  }
+
+  // Show puzzle state (priority and status) edit dialog
+  function editPuzzleState() {
+    showDialogOverlay();
+    
+  }
+
+  // Open video in new tab
+  function popoutVideo() {
+    window.open(document.getElementById("jitsi-video").src, '_blank').focus();
+    closeVideo();
+  }
+
+  // Show video
+  function showVideo(puzzle_id) {
+    document.getElementById("video-content").innerHTML = `
+      <iframe src="/puzzle/jitsi/${puzzle_id}?start_muted=1" id="jitsi-video" class="jitsi-video"></iframe>
+      <div class="loading-video"><i class="ti ti-loader-2"></i></div>
+    `
+    document.getElementById("inline-video").style.display = 'block';
+  }
+
+  // Hide video
+  function closeVideo() {
+    document.getElementById("inline-video").style.display = 'none';
+    document.getElementById("video-content").innerHTML = "";
+  }
+
+  // Show overlay
+  function showVideoOverlay() {
+    document.getElementById("video-resize-overlay").style.display = 'block';
+    document.getElementById("internal-video-resize-overlay").style.display = 'block';
+  }
+
+  // Hide overlay
+  function hideVideoOverlay() {
+    document.getElementById("video-resize-overlay").style.display = 'none';
+    document.getElementById("internal-video-resize-overlay").style.display = 'none';
+  }
+
+    // Make video draggable and resizable
+  interact('#inline-video')
+  .draggable({
+    allowFrom: '#video-titlebar', // Allow dragging only by the title bar
+    ignoreFrom: '.titlebar-button',
+    modifiers: [
+      interact.modifiers.restrictRect({
+        restriction: 'parent'
+      })
+    ],
+    listeners: {
+      start() {
+        showVideoOverlay(); // Show the overlay when dragging starts
+      },
+      move(event) {
+        const target = event.target;
+        const dataX = parseFloat(target.getAttribute('data-x')) || 0;
+        const dataY = parseFloat(target.getAttribute('data-y')) || 0;
+
+        const x = dataX + event.dx;
+        const y = dataY + event.dy;
+
+        target.style.transform = `translate(${x}px, ${y}px)`;
+
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
+      },
+      end() {
+        hideVideoOverlay(); // Hide the overlay when dragging ends
+      },
+    },
+  }).resizable({
+    edges: { top: true, left: true, bottom: true, right: true },
+    margin: 10,
+    modifiers: [
+      // keep the edges inside the parent
+      interact.modifiers.restrictEdges({
+        outer: 'parent'
+      }),
+    
+      // minimum size
+      interact.modifiers.restrictSize({
+        min: { width: 100, height: 50 }
+      })
+    ],
+    listeners: {
+      start() {
+        showVideoOverlay(); // Show the overlay when resizing starts
+      },
+      move(event) {
+         var target = event.target;
+         var x = (parseFloat(target.getAttribute('data-x')) || 0);
+         var y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+         // update the element's style
+         target.style.width = event.rect.width + 'px';
+         target.style.height = event.rect.height + 'px';
+
+         // translate when resizing from top or left edges
+         x += event.deltaRect.left;
+         y += event.deltaRect.top;
+
+         target.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+
+         target.setAttribute('data-x', x);
+         target.setAttribute('data-y', y);
+      },
+      end() {
+        hideVideoOverlay(); // Hide the overlay when resizing ends
+      },
+    },
+  });
+
+  // Render puzzle info bar
+  function renderPuzzleInfoBar(data) {
+    let puzzle_priority = data.puzzle.priority ? data.puzzle.priority.replace(/!/g, '') : "normal";
+    let html = `
+       <span class="puzzle-name">
+         <a class="puzzle-name-link infobar-link" href="/puzzle/linkout/${data.puzzle.id}" target="_blank">
+           <i class="ti ti-external-link"></i>
+           ${data.puzzle.round ? data.puzzle.round + `<i class="ti ti-chevron-right puzzle-chevron"></i>` : ""}${data.puzzle.title}
+         </a>
+       </span>
+       <span class="video-chat infobar-section">
+        <div class="video-chat-link infobar-link" onClick="showVideo('${data.puzzle.id}')" title="Open puzzle video chat" target="_blank">
+          <i class="ti ti-video"></i>
+        </div>
+       </span>
+       
+        ${data.puzzle.status ? `
+          <span class="infobar-section">
+          <div class="infobar-badge ${puzzle_priority}-priority editable" onClick = "editPuzzleState()">
+            <i class="ti ti-flag"></i>
+            ${data.puzzle.priority}
+          </div> 
+          </span>` : ''
+        }
+      
+       <span class="infobar-section">
+                         ${data.puzzle.status ? `
+                      <div class="infobar-badge infobar-status editable" onClick = "editPuzzleState()"">
+                        <i class="ti ti-activity"></i>
+                        ${data.puzzle.status}
+                        ${data.puzzle.status === "not started" ? `(<a class="infobar-action-link infobar-start" href="#">start</a>)` : ''}</div> `
+                      : `<div class="infobar-badge infobar-answer"><i class="ti ti-circle-check answer-check"></i>${data.puzzle.answer}</div>`}
+       </span>
+       
+        ${data.puzzle.solvers && data.puzzle.status ?
+          `<span class="infobar-section">
+            <div class="infobar-badge">
+            <i class="ti ti-users"></i>
+            ${data.puzzle.solvers.length} ${data.puzzle.solvers.length == 1 ? 'solver' : 'solvers'}
+            </div>
+           </span>` : '' 
+        }
+
+        ${data.puzzle.uploaded_files ?
+          `<span class="infobar-section">
+            <div class="infobar-badge">
+            <i class="ti ti-paperclip"></i>
+            ${data.puzzle.uploaded_files.length} ${data.puzzle.uploaded_files.length == 1 ? 'attachment' : 'attachments'}
+            </div>
+           </span>` : '' 
+        }
+
+        ${data.puzzle.prior_answers ? 
+           `<span class="infobar-section">
+            <div class="infobar-badge">
+              <i class="ti ti-clipboard-text"></i>
+              Answers:
+              ${data.puzzle.prior_answers.wrong ?
+                `${data.puzzle.prior_answers.wrong.length} wrong` : ''
+              }${data.puzzle.prior_answers.wrong && data.puzzle.prior_answers.queued ? ', ' : ''}
+              ${data.puzzle.prior_answers.queued ?
+                ` 
+                  ${data.puzzle.prior_answers.queued.length} in queue
+                ` : ''
+              }
+            </div>
+            </span>` : ''
+        }
+
+        <span class="infobar-section">
+          <div class="infobar-badge">
+            <i class="ti ti-progress-help"></i>
+            ${data.puzzle.hints.length} ${data.puzzle.hints.length == 1? "hint" : "hints"}
+            ${data.puzzle.hints.length == 0 ? `(<a class="infobar-action-link" href="#">request</a>)` : ''}
+          </div>
+        </span>
+      `;
+
+    document.getElementById("puzzle-info-bar").innerHTML = html;
+  }
+
+  // Update the puzzle info bar
+  async function fetchAndUpdateInfoBar() {
+      try {
+          const response = await fetch("{% url 'puzzles.views.api_puzzle' id %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            }});
+          const data = await response.json();
+          renderPuzzleInfoBar(data);
+      } catch (error) {
+          console.error('Error fetching puzzle data:', error);
+      }
+  }
+
+  // Update the puzzle info bar
+  async function logAView() {
+      if (document.visibilityState === "visible") {
+        try {
+            const response = await fetch("{% url 'puzzles.views.api_log_a_view' id %}", {
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}",
+              }});
+        } catch (error) {
+            console.error('Error logging the puzzle view:', error);
+        }
+      }
+  }
+
+  // Initial load
+  fetchAndUpdateInfoBar();
+  logAView();
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      logAView();
+    }
+  });
+
+  // Update every 60 seconds
+  setInterval(fetchAndUpdateInfoBar, 600000);
+  setInterval(logAView, 60000);
+
+  // Initialize Split.js
+  const split = Split(['#left', '#right'], {
+      sizes: [80, 20],
+      minSize: [200, 0],
+      gutterSize: 5,
+      snapOffset: 0,
+      onDrag: () => {
+          // Update arrow position when dragging
+          updateArrowVisibility();
+      }
+  });
+
+  toggleArrowHTML = `
+  <i class="ti ti-chevron-right toggle-arrow-icon"></i>
+  `
+
+  // Create and append the toggle arrow
+  const gutter = document.querySelector('.gutter');
+  const toggleArrow = document.createElement('div');
+  toggleArrow.id = "toggle-arrow";
+  toggleArrow.innerHTML = toggleArrowHTML;
+  gutter.appendChild(toggleArrow);
+
+  // Create and append the grip handle
+  const gripHandle = document.createElement('div');
+  gripHandle.id = "grip-handle"
+  gripHandle.innerHTML = `<i class="ti ti-grip-vertical"></i>`
+  gutter.appendChild(gripHandle);
+
+  // Handle collapse/expand functionality
+  let isCollapsed = false;
+  const rightPanel = document.getElementById('right');
+  let previousSize = 20;
+
+  toggleArrow.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent gutter drag when clicking arrow
+      
+      if (isCollapsed) {
+          split.setSizes([100 - previousSize, previousSize]);
+          rightPanel.style.display = 'block';
+      } else {
+          previousSize = split.getSizes()[1];
+          split.setSizes([100, 0]);
+          rightPanel.style.display = 'none';
+      }
+      
+      isCollapsed = !isCollapsed;
+      toggleArrow.classList.toggle('collapsed');
+  });
+
+  function updateArrowVisibility() {
+      const sizes = split.getSizes();
+      if (sizes[1] < 1) {
+          toggleArrow.classList.add('collapsed');
+          isCollapsed = true;
+          rightPanel.style.display = 'none';
+      } else if (isCollapsed) {
+          toggleArrow.classList.remove('collapsed');
+          isCollapsed = false;
+          rightPanel.style.display = 'block';
+      }
+  }
+</script>
+
+{% endblock %}

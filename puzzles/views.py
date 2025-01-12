@@ -24,6 +24,7 @@ from django.db import IntegrityError
 from django import forms
 from django.db.models import Prefetch
 from django.db.transaction import atomic, non_atomic_requests
+from django.forms.models import model_to_dict
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -164,6 +165,110 @@ def api_overview(request):
     return JsonResponse(overview_dict)
 
 @login_required
+def api_puzzle(request, puzzle_id):
+    puzzle_dict = {}
+    puzzle_dict["tags"] = [str(tag) for tag in Tag.objects.all()]
+    puzzle_dict["statuses"] = [str(status) for status in Status.objects.all()]
+    puzzle_dict["priorities"] = [str(priority) for priority in Priority.objects.all()]
+    
+    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
+
+    # puzzle.log_a_view(user=request.user)
+
+    p_info = {
+        "title": puzzle.title,
+        "url": puzzle.url,
+        "id": puzzle.id,
+        "hints": [{"user": hint.user.first_name + " " + hint.user.last_name,
+                          "details": hint.details} for hint in puzzle.queuedhint_set.order_by('-id')],
+        "tags": puzzle.tag_list(),
+        "description": puzzle.description,
+        "priority": str(puzzle.priority),
+        'jitsi_room_id': puzzle.jitsi_room_id(),
+    }
+
+    solvers = [{"name": (solver.first_name + " " + solver.last_name),
+                     "id": solver.id} for solver in puzzle.recent_solvers().order_by('first_name', 'last_name')]
+
+    puzzle_files = [{"filename": file.name, "url": str(file.url)} for file in puzzle.uploadedfile_set.order_by('id')]
+
+    queued_answers = [answer.answer for answer in puzzle.queuedanswer_set.order_by('-id')]
+
+    wrong_answers = [answer.answer for answer in puzzle.puzzlewronganswer_set.order_by('-id')]
+
+    if queued_answers or wrong_answers:
+        p_info["prior_answers"] = {}
+        if queued_answers:
+            p_info["prior_answers"]["queued"] = queued_answers
+        if wrong_answers:
+            p_info["prior_answers"]["wrong"] = wrong_answers
+
+    if solvers:
+        p_info["solvers"] = solvers
+
+    if puzzle_files:
+        p_info["uploaded_files"] = puzzle_files
+
+    if puzzle.round:
+        p_info["round"] = str(puzzle.round)
+
+    if puzzle.answer:
+        p_info["answer"] = puzzle.answer
+    else:
+        p_info["status"] = str(puzzle.status)
+    
+    puzzle_dict["puzzle"] = p_info
+
+    print(puzzle_dict)
+
+    return JsonResponse(puzzle_dict)
+
+    #if (settings.ENABLE_ACCESS_LOG):
+    #    puzzle.log_a_view(user=request.user)
+    
+    '''
+    solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')    
+    you_solving = request.user in solvers
+    other_solvers = [solver for solver in solvers if solver != request.user]
+    
+    other_users = [other_user
+                   for other_user in User.objects.order_by('first_name', 'last_name')
+                   if other_user not in solvers
+                   and other_user != request.user]
+    
+    queued_answers = 
+    queued_hints = 
+    wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
+    uploaded_files = puzzle.uploadedfile_set.order_by('id')
+    return render(request, "puzzles/puzzle-frames.html", context=puzzle_context(request, {
+                'id': puzzle_id,
+                'puzzle': puzzle,
+                'statuses': statuses,
+                'priorities': priorities,
+                'you_solving': you_solving,
+                'other_solvers': other_solvers,
+                'other_users': other_users,
+                'queued_answers': queued_answers,
+                'queued_hints': queued_hints,
+                'wrong_answers': wrong_answers,
+                'uploaded_files': uploaded_files,
+                'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
+                'jitsi_room_id': puzzle.jitsi_room_id(),
+                'refresh': 60
+                }))
+    '''
+
+@login_required
+def api_log_a_view(request, puzzle_id):
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    if puzzle:
+        puzzle.log_a_view(user=request.user)
+        return HttpResponse(status=204)
+    else:
+        return HttpResponse(status=418)
+
+
+@login_required
 def overview_by(request, taglist_id):
     taglist_id = int(taglist_id)
     taglists = TagList.objects.all()
@@ -214,8 +319,8 @@ def puzzle(request, puzzle_id):
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
-    if (settings.ENABLE_ACCESS_LOG):
-        puzzle.log_a_view(user=request.user)
+    #if (settings.ENABLE_ACCESS_LOG):
+    #    puzzle.log_a_view(user=request.user)
     solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')    
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
@@ -249,8 +354,8 @@ def puzzle_info(request, puzzle_id):
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
     statuses = Status.objects.all()
     priorities = Priority.objects.all()
-    if (settings.ENABLE_ACCESS_LOG):
-        puzzle.log_a_view(user=request.user)
+    #if (settings.ENABLE_ACCESS_LOG):
+    #    puzzle.log_a_view(user=request.user)
     solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')
     you_solving = request.user in solvers
     other_solvers = [solver for solver in solvers if solver != request.user]
