@@ -117,6 +117,7 @@ class QueuedHint(OrderedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     urgent = models.BooleanField(default=False)
     details = models.TextField(blank=True, null=True)
+    response = models.TextField(blank=True, null=True)
     resolved = models.BooleanField(default=False)
     createdTime = models.DateTimeField(auto_now_add=True)
     modifiedTime = models.DateTimeField(auto_now=True)
