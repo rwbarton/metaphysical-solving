@@ -4,7 +4,7 @@
 
 {% block header %}{% include "puzzles/infoheader.html" with compact_header="compact-header" %}{% endblock %}
 
-{% block title %} {{ puzzle.title }} {% endblock %}
+{% block title %} {{ title }} {% endblock %}
 {% block externaljs %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
@@ -173,6 +173,10 @@
             onSuccess: (result) => updateUploadedFiles(result.files),
             onError: (error) => console.error('Upload failed:', error)
         });
+  }
+
+  function showHints() {
+    console.log(puzzle_data.puzzle.hints);
   }
 
   function viewAnswers() {
@@ -509,11 +513,12 @@
         </span>
 
         <span class="infobar-section">
-          <div class="infobar-badge">
+          <div class="infobar-badge editable viewable" onClick="showHints()">
             <i class="ti ti-progress-help"></i>
+            ${data.puzzle.hints.length == 0 ? "Request a hint" : `
             ${data.puzzle.hints.length} ${data.puzzle.hints.length == 1? "hint" : "hints"}
+            `}
           </div>
-          ${data.puzzle.hints.length == 0 ? `<div class="infobar-action-link">request</div>` : ''}
         </span>
       `;
 
