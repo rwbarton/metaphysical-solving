@@ -10,43 +10,64 @@ admin.autodiscover()
 urlpatterns = [
     re_path(r'^$', views.welcome),
 
+    # Endpoints
+
+    # Endpoints for retrieving the user's own profile photo or by id
     re_path(r'^profile_photo/(\d+)$', views.profile_photo, name='puzzles.views.profile_photo_with_id'),
     re_path(r'^profile_photo', views.profile_photo, name='puzzles.views.profile_photo'),
 
+    # All puzzles overview data, in JSON format
     re_path(r'^api_overview', views.api_overview, name="puzzles.views.api_overview"),
+
+    # Endpoint for logging a view of a puzzle by a user
     re_path(r'^api_log_a_view/(\d+)$', views.api_log_a_view, name="puzzles.views.api_log_a_view"),
+
+    # Updates for top-of-page announcement, JSON format
     re_path(r'^api_motd', views.api_motd, name="puzzles.views.api_motd"),
+
+    # Single puzzle data, JSON format
     re_path(r'^api_puzzle/(\d+)$', views.api_puzzle, name='puzzles.views.api_puzzle'),
+
+    # Single puzzle solver history, JSON format
     re_path(r'^api_puzzle_history/(\d+)$', views.api_puzzle_history, name='puzzles.views.api_puzzle_history'),
+
+    # JSON-accepting endpoints for updating multiple puzzle fields, returns full updated puzzle data in JSON
     re_path(r'^api_update_puzzle/(\d+)$', views.api_update_puzzle, name='puzzles.views.api_update_puzzle'),
+
+    # Multiple file upload endpoint for puzzle, returns JSON of updated file list
     re_path(r'^api_upload_files/(\d+)$', views.api_upload_files, name='puzzles.views.api_upload_files'),
 
+    # Retrieves updated user location, JSON
+    re_path(r'^api_user_location/$',  views.api_user_location, name='puzzles.views.user_location'),
+
+
+    # Pages
+
+    # All puzzles overview page
     re_path(r'^overview/$', views.overview, name='puzzles.views.overview'),
-    re_path(r'^overview/(\d+)/$',  views.overview_by, name='puzzles.views.overview_by'),
+
+    # Who is on what puzzle page
     re_path(r'^whowhat/$', views.who_what, name='puzzles.views.who_what'),
+
+    # Single puzzle overview page
     re_path(r'^puzzle/(\d+)/$',  views.puzzle, name='puzzles.views.puzzle'),
-    #re_path(r'^puzzle_new/(\d+)/$',  views.puzzle_new, name='puzzles.views.puzzle_new'),
-    re_path(r'^puzzle_bottom/(\d+)/$',  views.puzzle_bottom, name='puzzles.views.puzzle_bottom'),
-    #re_path(r'^puzzle_new/info/(\d+)/$',  views.puzzle_new_info, name='puzzles.views.puzzle_new_info'),
-    re_path(r'^puzzle/info/(\d+)/$',  views.puzzle_info, name='puzzles.views.puzzle_info'),
+
+    # Redirects to the puzzle's associated spreadsheet
     re_path(r'^puzzle/spreadsheet/(\d+)/$',  views.puzzle_spreadsheet, name='puzzles.views.puzzle_spreadsheet'),
+
+    # Redirects to the puzzle's associated chat
     re_path(r'^puzzle/chat/(\d+)/$',  views.puzzle_chat, name='puzzles.views.puzzle_chat'),
-    re_path(r'^puzzle/set_status/(\d+)/$',  views.puzzle_set_status, name='puzzles.views.puzzle_set_status'),
-    re_path(r'^puzzle/set_priority/(\d+)/$',  views.puzzle_set_priority, name='puzzles.views.puzzle_set_priority'),
-    re_path(r'^puzzle/remove_solver/(\d+)/$',  views.puzzle_remove_solver, name='puzzles.views.puzzle_remove_solver'),
-    re_path(r'^puzzle/add_solver/(\d+)/$',  views.puzzle_add_solver, name='puzzles.views.puzzle_add_solver'),
-    re_path(r'^puzzle/upload/(\d+)/$',  views.puzzle_upload, name='puzzles.views.puzzle_upload'),
-    re_path(r'^puzzle/call_in_answer/(\d+)/$',  views.puzzle_call_in_answer, name='puzzles.views.puzzle_call_in_answer'),
+
     re_path(r'^puzzle/request_hint/(\d+)/$',  views.puzzle_request_hint, name='puzzles.views.puzzle_request_hint'),
     re_path(r'^puzzle/history/(\d+)/$',  views.puzzle_view_history, name='puzzles.views.puzzle_view_history'),
     re_path(r'^puzzle/jitsi/(\d+)/$',  views.puzzle_jitsi_page, name='puzzles.views.puzzle_jitsi_page'),
     re_path(r'^notapuzzle/jitsi/(\w+)/$',  views.jitsi_page, name='puzzles.views.jitsi_page'),
+
+    # Redirects to the puzzle's external page on writing team's site, and logs the view
+    # for the user.
     re_path(r'^puzzle/linkout/(\d+)/$',  views.puzzle_linkout, name='puzzles.views.puzzle_linkout'),
     
     re_path(r'^iworkallnightandiaccept8x8jaaswebhooksallday',views.jaas_webhook),
-
-    re_path(r'^puzzle/user_location/$',  views.user_location, name='puzzles.views.user_location'),
-    re_path(r'^puzzle/go_to_sleep/$',  views.go_to_sleep, name='puzzles.views.go_to_sleep'),
 
     re_path(r'^answers/$',  views.answer_queue, name='puzzles.views.answer_queue'),
     re_path(r'^answer/(\d+)/([a-z]+)/$',  views.answer_submit_result, name='puzzles.views.answer_submit_result'),

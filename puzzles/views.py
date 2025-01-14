@@ -46,6 +46,8 @@ jaas_private_key = open('/etc/puzzle/id_rsa_jaas').read()
 jaas_webhook_secret = open('/etc/puzzle/jaas_webhook_secret').read().strip()
 #webhooklog = open("/home/puzzle/webhooklog","a")
 
+# This function is called as part of the auth flow (defined in settings.py), and updates the URL
+# for the user's Google profile photo
 def update_user_social_data(strategy, *args, **kwargs):
   response = kwargs['response']
   backend = kwargs['backend']
@@ -56,12 +58,14 @@ def update_user_social_data(strategy, *args, **kwargs):
     user_profile.picture = url
     user_profile.save()
 
+# This is a helper function that retrieves the message of the day
 def get_motd():
     try:
         return Config.objects.get().motd
     except (Config.DoesNotExist, Config.MultipleObjectsReturned):
         return "Oops, someone broke this message. Please ask an admin to fix it."
 
+# This is a helper function that retrieves Jitsi data
 def get_jitsi_data():
     try:
         table = JitsiRooms.objects.all()
@@ -74,33 +78,31 @@ def get_jitsi_data():
         user_list = None
     return user_list
 
-def puzzle_context(request, d):
+# This provides base context for template views
+def base_context(d = {}):
     d1 = dict(d)
     d1['teamname'] = settings.TEAMNAME
-    d1['motd'] = get_motd()
     d1['hqphone'] = settings.HQPHONE
     d1['hqemail'] = settings.HQEMAIL
     d1['locations'] = Location.objects.all()
-    d1['my_puzzles'] = request.user.puzzle_set.order_by('id')
-    d1['path'] = request.path
-    d1['jitsi_base_url']=settings.JITSI_SERVER_URL
-    d1['zulip_url']=settings.ZULIP_SERVER_URL
     d1['admin_link']=settings.SHOW_ADMIN_LINK
-    if 'body' in request.GET:
-        d1['body_only'] = True
-    return d1
+    return(d1)
 
-def deprecated_log_a_view(puzzle,user):
-    previous = AccessLog.objects.filter(puzzle__exact=puzzle,user__exact=user)
-    if (previous):
-        a = previous.get()
-        if (now()-a.lastUpdate)>timedelta(seconds=55):
-            a.accumulatedMinutes = a.accumulatedMinutes+1
-            a.lastUpdate = now()
-            a.save()
-    else:
-        AccessLog.objects.create(puzzle=puzzle,user=user,lastUpdate=now())
+# An API endpoint for updating user location
+@login_required
+def api_user_location(request):
+    if request.method == "POST":
+        location = Location.objects.get(name=request.POST['location'])
+        request.user.userprofile.location = location
+        request.user.userprofile.save()
 
+        # Re-retrieve the location from the database
+        updated_location = request.user.userprofile.location
+        return JsonResponse({"location": updated_location.name})
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+# API endpoint for uploading multiple files for a puzzle
 @login_required
 def api_upload_files(request, puzzle_id):
     if request.method != "POST":
@@ -144,7 +146,7 @@ def api_upload_files(request, puzzle_id):
         print(e)
         return JsonResponse({'error': str(e)}, status=500)            
 
-
+# API endpoint for getting updates to the page-top message
 @login_required
 def api_motd(request):
     try:
@@ -152,6 +154,7 @@ def api_motd(request):
     except (Config.DoesNotExist, Config.MultipleObjectsReturned):
         return JsonResponse({"motd": ""})
 
+# API endpoint for getting puzzle's solver history
 @login_required
 def api_puzzle_history(request, puzzle_id):
     puzzle = Puzzle.objects.prefetch_related('accesslog_set').get(id=puzzle_id)
@@ -177,6 +180,7 @@ def api_puzzle_history(request, puzzle_id):
         "prior_viewers": prior_viewers,
     }) 
 
+# API endpoint for getting full overview data
 @login_required
 def api_overview(request):
     
@@ -232,6 +236,7 @@ def api_overview(request):
 
     return JsonResponse(overview_dict)
 
+# Helper function for building a full puzzle info dict
 def build_puzzle_dict(user, puzzle_id):
     puzzle_dict = {}
     puzzle_dict["tags"] = [str(tag) for tag in Tag.objects.all()]
@@ -286,7 +291,7 @@ def build_puzzle_dict(user, puzzle_id):
 
     return(puzzle_dict)
 
-
+# API endpoint for getting a single puzzle's data in JSON forat
 @login_required
 def api_puzzle(request, puzzle_id):
 
@@ -294,6 +299,8 @@ def api_puzzle(request, puzzle_id):
 
     return JsonResponse(puzzle_dict)
 
+# API endpoint for updating a puzzle's priority, status, description,
+# or tags
 @login_required
 def api_update_puzzle (request, puzzle_id):
     if request.method == 'POST':
@@ -308,7 +315,6 @@ def api_update_puzzle (request, puzzle_id):
                     status = Status.objects.get(text=data["status"])
                     puzzle.status = status
                 if key == "description":
-                    print(data["description"])
                     puzzle.description = data["description"]
                 if key == "tags":
                     with transaction.atomic():
@@ -319,6 +325,7 @@ def api_update_puzzle (request, puzzle_id):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
+# API endpoint for logging a user's view
 @login_required
 def api_log_a_view(request, puzzle_id):
     puzzle = Puzzle.objects.get(id=puzzle_id)
@@ -328,130 +335,22 @@ def api_log_a_view(request, puzzle_id):
     else:
         return HttpResponse(status=418)
 
-
-@login_required
-def overview_by(request, taglist_id):
-    taglist_id = int(taglist_id)
-    taglists = TagList.objects.all()
-
-    tags = TagList.objects.get(id=taglist_id).tags.all()
-
-    assigned_puzzles = {}
-    unassigned_only = TagList.objects.get(id=taglist_id).name == 'unassigned'
-    if unassigned_only:
-        assigned_tags = TagList.objects.get(name='assigned').tags.all()
-        for atag in assigned_tags:
-            puzzles = atag.puzzle_set.select_related().all()
-            for p in puzzles:
-                assigned_puzzles[p.id] = True
-
-    context = puzzle_context(request, {
-            'taglists': taglists,
-            'active_taglist_id': taglist_id,
-            'tags': ({
-                    'name': tag.name,
-                    'puzzles': ({'puzzle':puzz,
-                                 'solvers':puzz.recent_count(),
-                                 'unopened':puzz.unopened_theirs(request.user)}
-                                for puzz in Tag.objects.get(id=tag.id).puzzle_set.select_related().all())
-                    }
-                     for tag in tags),
-            'assigned_puzzles': assigned_puzzles,
-            # 'jitsi_data': get_jitsi_data(),
-            'unassigned_only': unassigned_only,
-            'default_priority': Config.objects.get().default_priority,
-            'refresh': 120
-            })
-    return render(request, "puzzles/overview.html", context=context)
-
+# Main overview page
 @login_required
 def overview(request):
-    return overview_by(request, Config.objects.get().default_taglist.id)
+    return render(request, "puzzles/overview.html", context=base_context())
 
-@login_required
-def puzzle_bottom(request, puzzle_id):
-    return render(request, "puzzles/puzzle-bottomframes.html", context={
-                'id': puzzle_id,
-                'title': Puzzle.objects.get(id=puzzle_id).title
-                })
-
+# Single puzzle page
 @login_required
 def puzzle(request, puzzle_id):
-    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
-    statuses = Status.objects.all()
-    priorities = Priority.objects.all()
-    #if (settings.ENABLE_ACCESS_LOG):
-    #    puzzle.log_a_view(user=request.user)
-    solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')    
-    you_solving = request.user in solvers
-    other_solvers = [solver for solver in solvers if solver != request.user]
-    other_users = [other_user
-                   for other_user in User.objects.order_by('first_name', 'last_name')
-                   if other_user not in solvers
-                   and other_user != request.user]
-    queued_answers = puzzle.queuedanswer_set.order_by('-id')
-    queued_hints = puzzle.queuedhint_set.order_by('-id')
-    wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
-    uploaded_files = puzzle.uploadedfile_set.order_by('id')
-    return render(request, "puzzles/puzzle-frames.html", context=puzzle_context(request, {
+    puzzle = Puzzle.objects.get(id=puzzle_id)
+    return render(request, "puzzles/puzzle.html", context = base_context({
                 'id': puzzle_id,
-                'puzzle': puzzle,
-                'statuses': statuses,
-                'priorities': priorities,
-                'you_solving': you_solving,
-                'other_solvers': other_solvers,
-                'other_users': other_users,
-                'queued_answers': queued_answers,
-                'queued_hints': queued_hints,
-                'wrong_answers': wrong_answers,
-                'uploaded_files': uploaded_files,
-                'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
-                'jitsi_room_id': puzzle.jitsi_room_id(),
+                'title': puzzle.title,
                 'refresh': 60
                 }))
 
-@login_required
-def puzzle_info(request, puzzle_id):
-    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
-    statuses = Status.objects.all()
-    priorities = Priority.objects.all()
-    #if (settings.ENABLE_ACCESS_LOG):
-    #    puzzle.log_a_view(user=request.user)
-    solvers = puzzle.recent_solvers().order_by('first_name', 'last_name')
-    you_solving = request.user in solvers
-    other_solvers = [solver for solver in solvers if solver != request.user]
-    other_users = [other_user
-                   for other_user in User.objects.order_by('first_name', 'last_name')
-                   if other_user not in solvers
-                   and other_user != request.user]
-    queued_answers = puzzle.queuedanswer_set.order_by('-id')
-    queued_hints = puzzle.queuedhint_set.order_by('-id')
-    wrong_answers = puzzle.puzzlewronganswer_set.order_by('-id')
-    uploaded_files = puzzle.uploadedfile_set.order_by('id')
-
-    return render(request, "puzzles/puzzle-info.html", context=puzzle_context(request, {
-                'puzzle': puzzle,
-                'statuses': statuses,
-                'priorities': priorities,
-                'you_solving': you_solving,
-                'other_solvers': other_solvers,
-                'other_users': other_users,
-                'queued_answers': queued_answers,
-                'queued_hints': queued_hints,
-                'wrong_answers': wrong_answers,
-                'uploaded_files': uploaded_files,
-                'answer_callin': settings.ANSWER_CALLIN_ENABLED, # and puzzle.checkAnswerLink,
-                'jitsi_room_id': puzzle.jitsi_room_id(),
-                'refresh': 60
-                }))
-
-@login_required
-def puzzle_spreadsheet(request, puzzle_id):
-    spreadsheet = Puzzle.objects.get(id=puzzle_id).spreadsheet
-    if spreadsheet:
-        return redirect(spreadsheet)
-    return HttpResponse("Oops, the spreadsheet isn't ready quite yet. Please wait a moment and then <a href=\"\">refresh</a> this pane.")
-
+# A redirector to puzzle's external page with view logging
 @login_required
 def puzzle_linkout(request,puzzle_id):
     puzzle = Puzzle.objects.get(id=puzzle_id) 
@@ -460,74 +359,20 @@ def puzzle_linkout(request,puzzle_id):
     userLog.save()
     return redirect(puzzle.url)
 
+# Redirector to the puzzle's Google Sheet
+@login_required
+def puzzle_spreadsheet(request, puzzle_id):
+    spreadsheet = Puzzle.objects.get(id=puzzle_id).spreadsheet
+    if spreadsheet:
+        return redirect(spreadsheet)
+    return HttpResponse("Oops, the spreadsheet isn't ready quite yet. Please wait a moment and then <a href=\"\">refresh</a> this pane.")
+
+# Redirector to the puzzle's Zulip chat
 @login_required
 def puzzle_chat(request, puzzle_id):
     return redirect("%s/#narrow/stream/p%d" % (settings.ZULIP_SERVER_URL,int(puzzle_id)))
 
-@login_required
-def puzzle_set_status(request, puzzle_id):
-    puzzle = Puzzle.objects.get(id=puzzle_id)
-    status = Status.objects.get(text=request.POST['status'])
-    puzzle.status = status
-    puzzle.save()
-    return redirect(request.POST['continue'])
-
-@login_required
-def puzzle_set_priority(request, puzzle_id):
-    puzzle = Puzzle.objects.get(id=puzzle_id)
-    priority = Priority.objects.get(text=request.POST['priority'])
-    puzzle.priority = priority
-    puzzle.save()
-    return redirect(request.POST['continue'])
-
-@login_required
-def puzzle_remove_solver(request, puzzle_id):
-    puzzle = Puzzle.objects.get(id=puzzle_id)
-    solver = User.objects.get(id=request.POST['solver'])
-    puzzle.solvers.remove(solver)
-    puzzle.save()
-    return redirect(request.POST['continue'])
-
-@login_required
-def puzzle_add_solver(request, puzzle_id):
-    puzzle = Puzzle.objects.get(id=puzzle_id)
-    solver = User.objects.get(id=request.POST['solver'])
-    if (settings.ENABLE_ACCESS_LOG):
-        a = AccessLog(user=solver,puzzle=puzzle)
-        a.save()
-    else:
-        puzzle.solvers.add(solver)
-        puzzle.save()
-    return redirect(request.POST['continue'])
-
-def handle_puzzle_upload(puzzle, name, file):
-    if file.name == '' or file.name[0] == '.' or '/' in file.name:
-        raise ValueError
-    upload = UploadedFile.objects.create(puzzle=puzzle, name=name)
-    directory = os.path.join('/var/www/uploads', str(puzzle.id), str(upload.id))
-    os.makedirs(directory)
-    outfile = open(os.path.join(directory, file.name), 'wb')
-    for chunk in file.chunks():
-        outfile.write(chunk)
-    outfile.close()
-    upload.url = '%s/uploads/%d/%d/%s' % (settings.BASE_URL, puzzle.id, upload.id, file.name)
-    upload.save()
-
-@login_required
-def puzzle_upload(request, puzzle_id):
-    puzzle = Puzzle.objects.get(id=puzzle_id)
-    if request.method == 'POST':
-        form = UploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            handle_puzzle_upload(puzzle, form.cleaned_data['name'], request.FILES['file'])
-            return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
-    else:
-        form = UploadForm()
-    return render(request, 'puzzles/puzzle-upload.html', context=puzzle_context(request, {
-                'form': form,
-                'puzzle': puzzle
-                }))
-
+# Used for the main answer queue page to manage answer queue manually
 def handle_puzzle_answer(puzzle, user, answer, backsolved, phone, request):
     QueuedAnswer.objects.get_or_create(puzzle=puzzle, answer=answer)
     submission = SubmittedAnswer.objects.create(
@@ -540,6 +385,7 @@ def handle_puzzle_answer(puzzle, user, answer, backsolved, phone, request):
                ':telephone: %s %s called in %s' %
                (user.first_name, user.last_name, answer))
 
+# Used for the main answer queue page to manage answer queue manually
 @login_required
 def answer_submit_result(request, answer_id, result):
     queued_answer = QueuedAnswer.objects.get(id=answer_id)
@@ -547,6 +393,7 @@ def answer_submit_result(request, answer_id, result):
     queued_answer.delete()
     return redirect(reverse('puzzles.views.answer_queue'))
 
+# Used for the main answer queue page to manage answer queue manually
 def handle_puzzle_answer_result(puzzle, answer, result):
     if result == 'correct' or result == 'presumed_correct':
         puzzle.answer = answer
@@ -559,6 +406,7 @@ def handle_puzzle_answer_result(puzzle, answer, result):
         except IntegrityError:
             pass
 
+# Manual answer queue page
 @login_required
 def answer_queue(request):
     qas = QueuedAnswer.objects.all()
@@ -573,25 +421,6 @@ def answer_queue(request):
                 'queued_answers': qas,
                 'refresh': 5
                 })
-
-@login_required
-def puzzle_call_in_answer(request, puzzle_id):
-    puzzle = Puzzle.objects.get(id=puzzle_id)
-    if request.method == 'POST':
-        form = AnswerForm(request.POST, request.FILES)
-        if form.is_valid():
-            handle_puzzle_answer(puzzle, request.user, form.cleaned_data['answer'], form.cleaned_data['backsolved'], form.cleaned_data['phone'], request=False)
-            return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
-    else:
-        callback_phone = Config.objects.get().callback_phone
-        form = AnswerForm(initial={'phone': callback_phone})
-        if callback_phone:
-            form.fields['phone'].initial = callback_phone
-    return render(request, 'puzzles/puzzle-call-in-answer.html', context=puzzle_context(request, {
-                'form': form,
-                'puzzle': puzzle
-                }))
-
 
 @login_required
 def handle_puzzle_hint(request, puzzle, user, details, urgent):
@@ -618,11 +447,11 @@ def puzzle_request_hint(request, puzzle_id):
 @login_required
 def hint_queue(request):
     queued_hints = QueuedHint.objects.all()
-    return render(request, 'puzzles/hint-queue.html', context={
+    return render(request, 'puzzles/hint-queue.html', context=base_context({
                 'queued_hints': queued_hints.filter(resolved=False),
                 'resolved_hints': queued_hints.filter(resolved=True),
                 'refresh': 5
-                })
+                }))
 
 @login_required
 def hint_resolve(request,id):
@@ -631,26 +460,7 @@ def hint_resolve(request,id):
     q.save()
     return redirect(reverse('puzzles.views.hint_queue'))
 
-
-@login_required
-def user_location(request):
-    if request.method == "POST":
-        location = Location.objects.get(name=request.POST['location'])
-        request.user.userprofile.location = location
-        request.user.userprofile.save()
-
-        # Re-retrieve the location from the database
-        updated_location = request.user.userprofile.location
-        return JsonResponse({"location": updated_location.name})
-
-    return JsonResponse({"error": "Invalid request method"}, status=400)
-
-@login_required
-def go_to_sleep(request):
-    for puzzle in request.user.puzzle_set.all():
-        puzzle.solvers.remove(request.user)
-        puzzle.save()
-    return redirect(request.POST['continue'])
+# Auth endpoints
 
 def logout_user(request):
     logout(request)
@@ -659,9 +469,11 @@ def logout_user(request):
 def logout_return(request):
     return render(request, 'puzzles/logout_return.html', )
 
+# Main welcome page
 @login_required
 def welcome(request):
     return redirect(reverse('puzzles.views.overview'))
+
 
 @login_required
 def puzzle_view_history(request, puzzle_id):
@@ -669,40 +481,40 @@ def puzzle_view_history(request, puzzle_id):
     dedupedLogs = puzzle.all_distinct_logs()
     countTuples = dedupedLogs.values_list("user","accumulatedMinutes")
     displayTuples = [(User.objects.get(id=c[0]),c[1]/60.) for c in countTuples]
-    print(puzzle.recent_solvers())
-    print(displayTuples)
-    return render(request, "puzzles/view_history.html", context=puzzle_context(request, {
+    return render(request, "puzzles/view_history.html", context=base_context({
         'puzzle': puzzle,
         'current_solvers': puzzle.recent_solvers(),
         'historical_solvers': displayTuples
                 }))
 
+# General Jitsi page
 @login_required
-def jitsi_page(request,room_id, start_muted=False):
+def jitsi_page(request, room_id, start_muted=False):
     token = JaaSJwtBuilder().withDefaults() \
         .withApiKey(jaas_api_key) \
             .withUserName(request.user.first_name+" "+request.user.last_name) \
                 .withUserEmail(request.user.email) \
                     .withModerator(False) \
                         .withAppID(jaas_app_id) \
-                            .withUserAvatar("https://asda.com/avatar") \
+                            .withUserAvatar(request.user.userprofile.picture) \
                                 .signWith(jaas_private_key)
     
     return render(request, "puzzles/jitsi_page.html",
-                  context=puzzle_context(request, {
-                      'puzzle':puzzle,
+                  context = {
                       'jaas_app_id':jaas_app_id,
                       'jitsi_room_id':jaas_app_id+"/"+room_id,
                       'jwt':token.decode(encoding='utf-8'),
                       'start_muted': start_muted,
-                  } ))
-    
+                  })
+
+# Puzzle-specific Jitsi page
 @login_required
 def puzzle_jitsi_page(request, puzzle_id):
     start_muted = bool(request.GET.get('start_muted'))
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
     return jitsi_page(request,puzzle.jitsi_room_id(), start_muted)
 
+# Who's on What page
 @login_required
 def who_what(request):
     all_recent = AccessLog.objects.filter(lastUpdate__gte=now()-timedelta(seconds=120)).distinct()
@@ -715,16 +527,16 @@ def who_what(request):
             rdict[room.user]["rooms"].add(room.puzzle)
     people = list(rdict.items())
 #    print(people)
-    return render(request, "puzzles/whowhat.html", context = puzzle_context(request,{
+    return render(request, "puzzles/whowhat.html", context = base_context(request,{
         'people':people}))
-    
+
+# Google profile photo retriever (direct embedding doesn't work because of
+# Google's restrictions)
 @login_required
 def profile_photo(request, id = None):
     if not id:
-        print(id)
         user_profile = request.user.userprofile
     else:
-        print(id)
         try:
             user_profile = User.objects.get(id=id).userprofile
         except:
