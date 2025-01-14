@@ -462,7 +462,7 @@ def puzzle_linkout(request,puzzle_id):
 
 @login_required
 def puzzle_chat(request, puzzle_id):
-    return redirect("%s/#narrow/stream/p%d" % (settings.ZULIP_SERVER_URL,int(puzzle_id)))
+    return redirect("%s/#narrow/stream/puzzles/topic/p%d" % (settings.ZULIP_SERVER_URL,int(puzzle_id)))
 
 @login_required
 def puzzle_set_status(request, puzzle_id):
