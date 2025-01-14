@@ -74,7 +74,6 @@ def get_jitsi_data():
         user_list = None
     return user_list
 
-
 def puzzle_context(request, d):
     d1 = dict(d)
     d1['teamname'] = settings.TEAMNAME
@@ -101,6 +100,50 @@ def deprecated_log_a_view(puzzle,user):
             a.save()
     else:
         AccessLog.objects.create(puzzle=puzzle,user=user,lastUpdate=now())
+
+@login_required
+def api_upload_files(request, puzzle_id):
+    if request.method != "POST":
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        puzzle = Puzzle.objects.get(id=puzzle_id)
+        files = request.FILES.getlist('files')
+        names = request.POST.getlist('names')
+    
+        if not files:
+            return JsonResponse({"error": "No files provided"}, status=400)
+
+        for file, name in zip(files, names):
+
+            upload = UploadedFile.objects.create(
+                puzzle=puzzle,
+                name=name
+            )
+
+            upload_dir = os.path.join('/var/www/uploads', str(puzzle.id), str(upload.id))
+            os.makedirs(upload_dir, exist_ok=True)
+
+            file_path = os.path.join(upload_dir, file.name)
+            with open(file_path, 'wb+') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+            
+            upload.url = f"{settings.BASE_URL}/uploads/{puzzle.id}/{upload.id}/{file.name}"
+            upload.save()
+        
+        puzzle_files = [{"filename": file.name, "url": str(file.url)} for file in puzzle.uploadedfile_set.order_by('id')]
+
+        return JsonResponse({
+            "files": puzzle_files
+        })
+
+    except Puzzle.DoesNotExist:
+        return JsonResponse({'error': 'Puzzle not found'}, status=404)
+    except Exception as e:
+        print(e)
+        return JsonResponse({'error': str(e)}, status=500)            
+
 
 @login_required
 def api_motd(request):

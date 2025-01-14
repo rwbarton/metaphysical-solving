@@ -1149,6 +1149,28 @@ select {
     z-index: 102;
     display: none;
 
+    & #dialog-window-save-progress {
+
+        & .loading-placeholder {
+            height: auto;
+        }
+        font-size: 13px;
+        font-weight: 600;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.9);
+        flex-direction: column;
+        justify-content: center;
+        border-radius: 10px;
+        gap: 8px;
+        display: none;
+    }
+
     & #dialog-window-content {
         max-height: calc(80vh - 30px);
         overflow-y: auto;
@@ -1189,6 +1211,78 @@ select {
         display: block;
         width: 4px;
         }
+    }
+
+    & #attached-file-list {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    & .attached-file {
+        text-align: left;
+        font-size: 12px;
+        padding: 2px 0;
+        max-width: 200px;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    & .file-list {
+        margin-top: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    & .file-item {
+        & .remove-file-button {
+            border: none;
+            background: none;
+            display: flex;
+            align-items: center;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        & .file-name {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow-x: hidden;
+            max-width: 200px;
+        }
+
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        font-size: 12px;
+        gap: 2px;
+        padding: 2px 0;
+    }
+
+    & .upload-zone {
+        & .ti {
+            font-size: 20px;
+        }
+
+        border: 1px solid var(--gray-300);
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 10px;
+        background: var(--gray-200);
+        cursor: pointer;
+
+        &.dragover {
+            background: var(--success);
+        }
+    }
+
+    & .upload-button {
+        margin-top: 10px;
+    }
+
+    & .upload-button:disabled {
+        background: var(--gray-300) !important;
     }
 
     & #dialog-window-close-button {
@@ -1470,6 +1564,10 @@ select {
 
     & .infobar-badge.viewable:hover:after {
         content: "\ea9a";
+    }
+
+    & .infobar-badge.attachable:hover:after {
+        content: "\eb02";
     }
 
     & .infobar-answer {
