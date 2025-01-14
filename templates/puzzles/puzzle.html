@@ -27,7 +27,7 @@
 <div id="dialog-window">
   <div id="dialog-window-save-progress">
     <div class="loading-placeholder"><i class="ti ti-loader-2 dialog-loading"></i></div>
-    Saving, please hold...
+    Sending, please hold...
   </div>
   <div id="dialog-window-close-button" onClick="hideDialog()">
     <i class="ti ti-x"></i>
@@ -176,7 +176,65 @@
   }
 
   function showHints() {
-    console.log(puzzle_data.puzzle.hints);
+    let html  = `
+      ${puzzle_data.puzzle.hints && puzzle_data.puzzle.hints.length > 0 ? 
+        `
+        <div class="dialog-row">
+          <header class="dialog-section-header">
+            <i class="ti ti-progress-help"></i> Prior hints
+          </header>
+          <div class="prior-hints">
+             ${puzzle_data.puzzle.hints.map(hint => `
+                <div class="prior-hint">
+                  <div class="byline">
+                    <span class="author"><img src="/profile_photo/${hint.user_id}">${hint.user}</span> | ${hint.submitted} | 
+                    ${hint.urgent ? `<i class="ti ti-flame"></i> urgent` : `<i class="ti ti-flame-off"></i> not urgent`} |
+                    ${hint.resolved ? `<i class="ti ti-circle-check"></i> resolved` : `<i class="ti ti-circle-dashed"></i> not resolved`}             
+                </div>
+                <div class="hint-request">
+                  ${hint.details}
+                </div>
+                ${hint.response ? `
+                  <div class="hint-response"><span class="response-header">Response: </span> ${hint.response}</div>
+                `: ''}
+               </div>`).join('')}
+          </div>
+        </div>
+        `
+      : ''
+      }
+      <div class="dialog-row">
+          <header class="dialog-section-header">
+            <i class="ti ti-zoom-question"></i> Request a hint
+          </header>
+          <textarea id="hint-input" class="hint-input puzzle-description-input" placeholder="Describe what you have tried and where you are stuck. Ask specific questions."></textarea>
+          <label class="urgent-hint-label">
+            <input type="checkbox" id="urgent-hint">
+            Urgent
+          </label>
+          <button id="submit-hint-button" class="dialog-button green" onClick="submitHintRequest()">Submit hint request</button>
+      </div>
+      `
+
+    showDialogOverlay(html);
+  }
+
+  async function submitHintRequest() {
+    document.getElementById("dialog-window-save-progress").style.display = "flex";
+    try {
+      await updatePuzzle({
+        hint: {
+          text: document.getElementById("hint-input").value,
+          urgent: document.getElementById("urgent-hint").checked
+        }
+      });
+      hideDialog();
+      document.getElementById("dialog-window-save-progress").style.display = "none";
+    } catch (error) {
+      console.error("Error saving tags or description", error);
+      document.getElementById("dialog-window-save-progress").style.display = "none";
+      document.getElementById("submit-hint-button").textContent = "Error. Try again.";
+    }    
   }
 
   function viewAnswers() {

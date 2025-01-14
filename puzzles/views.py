@@ -9,6 +9,8 @@ import hmac
 import base64
 import requests
 
+from ago import human
+
 from datetime import timedelta
 
 from collections import defaultdict, Counter
@@ -249,8 +251,17 @@ def build_puzzle_dict(user, puzzle_id):
         "title": puzzle.title,
         "url": puzzle.url,
         "id": puzzle.id,
-        "hints": [{"user": hint.user.first_name + " " + hint.user.last_name,
-                          "details": hint.details} for hint in puzzle.queuedhint_set.order_by('-id')],
+        "hints": [{"user": f"{hint.user.first_name} {hint.user.last_name}",
+                   "user_id": hint.user.id,
+                   "details": hint.details,
+                   "response": hint.response,
+                   "submitted": human(
+                    timedelta(
+                        seconds=round((now() - hint.createdTime).total_seconds() / 60) * 60)
+                    ),
+                   "urgent": hint.urgent,
+                   "resolved": hint.resolved
+                  } for hint in puzzle.queuedhint_set.order_by('-id')],
         "tags": puzzle.tag_list(),
         "description": puzzle.description,
         "priority": str(puzzle.priority),
@@ -320,6 +331,10 @@ def api_update_puzzle (request, puzzle_id):
                     with transaction.atomic():
                         tags = [Tag.objects.get_or_create(name=name)[0] for name in data["tags"]]
                         puzzle.tags.set(tags)
+                if key == "hint":
+                   q = QueuedHint(puzzle=puzzle, user=request.user, details=data["hint"]["text"], urgent=data["hint"]["urgent"], resolved=False)
+                   q.save()
+
             puzzle.save()
             return JsonResponse(build_puzzle_dict(request.user, puzzle_id))
         except Exception as e:
