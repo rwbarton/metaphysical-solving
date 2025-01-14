@@ -19,6 +19,7 @@ urlpatterns = [
     re_path(r'^api_puzzle/(\d+)$', views.api_puzzle, name='puzzles.views.api_puzzle'),
     re_path(r'^api_puzzle_history/(\d+)$', views.api_puzzle_history, name='puzzles.views.api_puzzle_history'),
     re_path(r'^api_update_puzzle/(\d+)$', views.api_update_puzzle, name='puzzles.views.api_update_puzzle'),
+    re_path(r'^api_upload_files/(\d+)$', views.api_upload_files, name='puzzles.views.api_upload_files'),
 
     re_path(r'^overview/$', views.overview, name='puzzles.views.overview'),
     re_path(r'^overview/(\d+)/$',  views.overview_by, name='puzzles.views.overview_by'),

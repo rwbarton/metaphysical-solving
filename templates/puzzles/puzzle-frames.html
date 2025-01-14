@@ -16,15 +16,19 @@
 </div>
 <div id="content" class="split">
   <div id="left" class="frame">
-    <iframe src="{% url 'puzzles.views.puzzle_spreadsheet' id %}"></iframe>
+    <iframe id="left-frame" src="{% url 'puzzles.views.puzzle_spreadsheet' id %}"></iframe>
   </div>
   <div id="right" class="frame">
-    <iframe src="{% url 'puzzles.views.puzzle_chat' id %}"></iframe>
+    <iframe id="right-frame" src="{% url 'puzzles.views.puzzle_chat' id %}"></iframe>
   </div>
 </div>
 <div id="video-resize-overlay">
 </div>
 <div id="dialog-window">
+  <div id="dialog-window-save-progress">
+    <div class="loading-placeholder"><i class="ti ti-loader-2 dialog-loading"></i></div>
+    Saving, please hold...
+  </div>
   <div id="dialog-window-close-button" onClick="hideDialog()">
     <i class="ti ti-x"></i>
   </div>
@@ -52,31 +56,39 @@
 
   let puzzle_data = {};
   let edited_tags = [];
+  let fileUploader = null;
 
   // Show dialog overlay
   function showDialogOverlay(html) {
     document.getElementById("dialog-overlay").style.display = 'block';
     document.getElementById("dialog-window-content").innerHTML = html ? html : "Dialog window content";
     document.getElementById("dialog-window").style.display = "block";
+    document.getElementById("left-frame").style.pointerEvents = "none";
+    document.getElementById("right-frame").style.pointerEvents = "none";
   }
 
   // Hide dialog overlay
   function hideDialog() {
     document.getElementById("dialog-overlay").style.display = 'none';
     document.getElementById("dialog-window").style.display = 'none';
+    document.getElementById("left-frame").style.pointerEvents = "auto";
+    document.getElementById("right-frame").style.pointerEvents = "auto";
   }
 
   async function saveTagsAndDescription() {
+    document.getElementById("dialog-window-save-progress").style.display = "flex";
     try {
       await updatePuzzle({
         description: document.getElementById("puzzle-description-input").value,
         tags: edited_tags
       });
       hideDialog();
+      document.getElementById("dialog-window-save-progress").style.display = "none";
     } catch (error) {
-      console.log("Error saving tags or description", error);
+      console.error("Error saving tags or description", error);
+      document.getElementById("dialog-window-save-progress").style.display = "none";
+      document.getElementById("save-tags-button").textContent = "Error. Try again.";
     }
-
   }
 
   function editTags() {
@@ -93,13 +105,13 @@
         </header>
           <div id="tagsInputWrapper">
              <div class="tags-input-container">
-               <input type="text" class="tags-input" placeholder="Type + ↩ to add tags...">
+               <input type="text" maxlength="100" class="tags-input" placeholder="Type + ↩ to add tags...">
              </div>
            <div class="suggestions" style="display: none;"></div>
          </div>
       </div>
       <div class="dialog-row horizontal">
-        <button class="dialog-button green" onClick="saveTagsAndDescription()">Save</button>
+        <button class="dialog-button green" id="save-tags-button" onClick="saveTagsAndDescription()">Save</button>
         <button class="dialog-button" onClick="hideDialog()">Cancel</button>
       </div>
     `;
@@ -112,6 +124,54 @@
             onTagsChange: (tags) => {
                 edited_tags = tags;
             }
+        });
+  }
+
+  function createFileList(files) {
+    let html = files ? `
+    <div class="dialog-row">
+        <header class="dialog-section-header">
+          <i class="ti ti-paperclip"></i> Attached files
+        </header>
+          <div id="attached-file-list">
+          ${files.map(file => `
+              <div class="attached-file"><a href="${file.url}" download><i class="ti ti-download"></i> <i class="ti ti-file"></i> ${file.filename}</a></div>
+          `).join('')}
+          </div>
+      </div>
+    `: '';
+
+    return(html);
+  }
+
+  function updateUploadedFiles(files) {
+    let html = createFileList(files);
+    
+    document.getElementById("file-space").innerHTML = html;
+
+    let badge_content = files.length == 1 ? `${files.length} file` : `${files.length} files`;
+    document.getElementById("att-file-count").innerHTML = badge_content;
+  }
+
+  function editAttachedFiles() {
+    let files = puzzle_data.puzzle.uploaded_files;
+    let html = `
+    <span id="file-space">
+    ${createFileList(files)}
+    </span>
+    <div class="dialog-row">
+      <header class="dialog-section-header">
+          <i class="ti ti-cloud-upload"></i> Add files
+      </header>
+      <div id="upload-component"></div>
+    </div>
+    `
+    showDialogOverlay(html);
+    fileUploader = new FileUploader('upload-component', {
+            puzzleId: puzzle_data.puzzle.id,
+            uploadUrl: '/api_upload_files',
+            onSuccess: (result) => updateUploadedFiles(result.files),
+            onError: (error) => console.error('Upload failed:', error)
         });
   }
 
@@ -412,14 +472,17 @@
            </span>` : '' 
         }
 
-        ${data.puzzle.uploaded_files ?
-          `<span class="infobar-section">
-            <div class="infobar-badge">
+        <span class="infobar-section">
+            <div class="infobar-badge editable attachable" onClick="editAttachedFiles()">
             <i class="ti ti-paperclip"></i>
-            ${data.puzzle.uploaded_files.length} ${data.puzzle.uploaded_files.length == 1 ? 'attachment' : 'attachments'}
+            <span id="att-file-count">
+              ${data.puzzle.uploaded_files ?
+                `${data.puzzle.uploaded_files.length} ${data.puzzle.uploaded_files.length == 1 ? 'file' : 'files'}` : 
+                "Attach files"
+              }
+            </span>
             </div>
-           </span>` : '' 
-        }
+           </span>
 
         ${data.puzzle.prior_answers ? 
            `<span class="infobar-section">
@@ -569,6 +632,180 @@
       }
   }
 
+  // File upload component
+  class FileUploader {
+            constructor(containerId, options = {}) {
+                this.container = document.getElementById(containerId);
+                this.selectedFiles = [];
+                this.options = {
+                    puzzleId: options.puzzleId,
+                    uploadUrl: options.uploadUrl,
+                    ...options
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.render();
+                this.setupElements();
+                this.attachEventListeners();
+            }
+
+            render() {
+                this.container.innerHTML = `
+                    <div class="upload-zone" id="uploadzone">
+                        <div class="file-drop-zone"><i class="ti ti-file-upload"></i><br/>Drop, paste, or browse for files</div>
+                        <input type="file" style="display: none" multiple>
+                    </div>
+                    <div class="file-list"></div>
+                    <button class="upload-button dialog-button green" disabled>Upload Files</button>
+                `;
+            }
+
+            setupElements() {
+                this.uploadZone = document.body;
+                this.highlightZone = this.container.querySelector('.upload-zone');
+                this.fileInput = this.container.querySelector('input[type="file"]');
+                this.fileList = this.container.querySelector('.file-list');
+                this.uploadButton = this.container.querySelector('.upload-button');
+            }
+
+            attachEventListeners() {
+                // Click to browse
+                this.highlightZone.onclick = () => this.fileInput.click();
+                this.fileInput.onchange = (e) => this.handleFiles(Array.from(e.target.files));
+
+                // Drag and drop
+                this.uploadZone.addEventListener('dragenter', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.highlightZone.classList.add('dragover');
+                });
+
+                this.uploadZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!this.highlightZone.classList.contains('dragover')) {
+                        this.highlightZone.classList.add('dragover');
+                    }
+                });
+
+                this.uploadZone.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Only remove the class if we're leaving the upload zone itself
+                    if (e.target === this.uploadZone) {
+                        this.highlightZone.classList.remove('dragover');
+                    }
+                });
+
+                this.uploadZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.highlightZone.classList.remove('dragover');
+                    this.handleFiles(Array.from(e.dataTransfer.files));
+                });
+
+                // Paste
+                document.onpaste = (e) => {
+                    const items = e.clipboardData.items;
+                    const files = [];
+                    for (let item of items) {
+                        if (item.kind === 'file') {
+                            files.push(item.getAsFile());
+                        }
+                    }
+                    if (files.length > 0) {
+                        this.handleFiles(files);
+                    }
+                };
+
+                // Upload button
+                this.uploadButton.onclick = () => this.uploadFiles();
+            }
+
+            handleFiles(files) {
+                this.selectedFiles = [...this.selectedFiles, ...files];
+                this.updateFileList();
+                this.updateUploadButton();
+            }
+
+            updateFileList() {
+                this.fileList.innerHTML = this.selectedFiles.map((file, index) => `
+                    <div class="file-item">
+                        <button class="remove-file-button" onclick="fileUploader.removeFile(${index})"><i class="ti ti-x"></i></button>
+                        <i class="ti ti-file"></i>
+                        <div class="file-name">${file.name}</div>
+                    </div>
+                `).join('');
+            }
+
+            removeFile(index) {
+                this.selectedFiles.splice(index, 1);
+                this.updateFileList();
+                this.updateUploadButton();
+            }
+
+            updateUploadButton() {
+                this.uploadButton.disabled = this.selectedFiles.length === 0;
+                this.uploadButton.innerText = "Upload Files";
+            }
+
+            async uploadFiles() {
+                if (this.selectedFiles.length === 0) return;
+
+                this.uploadButton.disabled = true;
+                this.uploadButton.innerHTML = `<i class="ti ti-loader-2 dialog-loading" style="display: inline-block;"></i> Uploading...`;
+                
+                try {
+                    const formData = new FormData();
+                    
+                    this.selectedFiles.forEach((file, index) => {
+                        formData.append('files', file);
+                        formData.append('names', file.name);
+                    });
+                    
+                    formData.append('puzzle_id', this.options.puzzleId);
+
+                    const response = await fetch(`${this.options.uploadUrl}/${this.options.puzzleId}`, {
+                        method: 'POST',
+                        headers: {
+                          "X-CSRFToken": "{{ csrf_token }}",
+                        },
+                        body: formData,
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Upload failed: ${response.statusText}`);
+                    }
+                    
+                    const result = await response.json();
+
+                    this.selectedFiles = [];
+                    this.updateFileList();
+                    
+
+                    // Trigger success callback if provided
+                    if (this.options.onSuccess) {
+                        this.options.onSuccess(result);
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('Error uploading files. Please try again.');
+                    
+                    // Trigger error callback if provided
+                    if (this.options.onError) {
+                        this.options.onError(error);
+                    }
+                } finally {
+                    this.updateUploadButton();
+                }
+            }
+        }
+
+
+  // Tag input component
   class TagsInput {
             constructor(wrapper, options = {}) {
                 this.wrapper = wrapper;
