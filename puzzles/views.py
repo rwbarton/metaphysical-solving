@@ -370,7 +370,7 @@ def puzzle_spreadsheet(request, puzzle_id):
 # Redirector to the puzzle's Zulip chat
 @login_required
 def puzzle_chat(request, puzzle_id):
-    return redirect("%s/#narrow/stream/p%d" % (settings.ZULIP_SERVER_URL,int(puzzle_id)))
+    return redirect("%s/#narrow/stream/puzzles/topic/p%d" % (settings.ZULIP_SERVER_URL,int(puzzle_id)))
 
 # Used for the main answer queue page to manage answer queue manually
 def handle_puzzle_answer(puzzle, user, answer, backsolved, phone, request):

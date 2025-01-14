@@ -88,8 +88,8 @@ class Round(OrderedModel):
 class Tag(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
 
-    def stream(self):
-        return slugify('tag-%s' % self.name)
+    def topic(self):
+        return '%s-%3d'%(slugify(self.name),hash(self.name)%1000)
 
     def __str__(self):
         return self.name
@@ -205,7 +205,7 @@ class Puzzle(OrderedModel):
         else:
             return {'status': self.status}
 
-    def zulip_stream(self):
+    def zulip_topic(self):
         return 'p%d' % (self.id,)
 
     def jitsi_room_id(self):
@@ -271,21 +271,21 @@ class Puzzle(OrderedModel):
 
         if self.answer != old_answer:
             zulip_send(user='b+status',
-                       stream=self.zulip_stream(),
-                       subject='solved!',
-                       message=':thumbs_up: **%s**' % self.answer)
+                       stream='puzzles',
+                       subject=self.zulip_topic(),
+                       message=':thumbs_up: **%s** is correct!' % self.answer)
 
             zulip_send(user='b+status',
                        stream='status',
                        subject='solved',
-                       message='Puzzle %s solved [%s]' % (self.title, ', '.join(str(tag) for tag in self.tags.all())))
+                       message='Puzzle %s solved [%s]' % (self.title, self.round))
 
 def send_puzzle_zulip(**kwargs):
     if kwargs['created']:
         puzzle = kwargs['instance']
         zulip_send(user='b+status',
-                   stream=puzzle.zulip_stream(),
-                   subject='new',
+                   stream='puzzles',
+                   subject=puzzle.zulip_topic(),
                    message='New puzzle "%s"' % (puzzle.title,))
         zulip_send(user='b+status',
                    stream='status',
@@ -298,13 +298,14 @@ def notify_of_new_tag(**kwargs):
     if kwargs['created']:
         tag = kwargs['instance']
         zulip_send(user='b+status',
-                   stream=tag.stream(),
-                   subject='new',
-                   message='New tag "%s"' % (tag))
+                   stream="tags",
+                   subject=tag.topic(),
+                   message='New tag %s (%s)' % (tag.name, tag.topic()))
         zulip_send(user='b+status',
                    stream='status',
                    subject='new tag',
-                   message='New tag channel "#%s"'%tag.stream())
+                   message='New tag created: "%s", follow at [#tags>%s](%s)'%(tag.name,tag.topic(),
+                                                                              "%s/#narrow/stream/tags/topic/%s" % (settings.ZULIP_SERVER_URL,tag.topic())))
 
 def notify_tag_on_add(**kwargs):
     if kwargs['action'] == 'pre_add':
@@ -316,8 +317,8 @@ def notify_tag_on_add(**kwargs):
                 tag = Tag.objects.get(id=pk)
                 print("Tag %d added to puzzle %s"%(pk, puzzle.title))
                 zulip_send(user='b+status',
-                           stream=tag.stream(),
-                           subject='newly tagged puzzle',
+                           stream="tags",
+                           subject=tag.topic(),
                            message='Puzzle [%s](%s) ([p%d](%s)) tagged as %s' %
                                    (puzzle.title, puzzle.url, puzzle.id,
                                     settings.BASE_URL + reverse('puzzles.views.puzzle', args=[puzzle.id]),
