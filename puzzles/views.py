@@ -20,7 +20,7 @@ from django.utils.http import urlencode
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django import forms
 from django.db.models import Prefetch
 from django.db.transaction import atomic, non_atomic_requests
@@ -251,6 +251,7 @@ def api_puzzle(request, puzzle_id):
 
     return JsonResponse(puzzle_dict)
 
+@login_required
 def api_update_puzzle (request, puzzle_id):
     if request.method == 'POST':
         try:
@@ -263,6 +264,13 @@ def api_update_puzzle (request, puzzle_id):
                 if key == "status":
                     status = Status.objects.get(text=data["status"])
                     puzzle.status = status
+                if key == "description":
+                    print(data["description"])
+                    puzzle.description = data["description"]
+                if key == "tags":
+                    with transaction.atomic():
+                        tags = [Tag.objects.get_or_create(name=name)[0] for name in data["tags"]]
+                        puzzle.tags.set(tags)
             puzzle.save()
             return JsonResponse(build_puzzle_dict(request.user, puzzle_id))
         except Exception as e:
@@ -670,11 +678,9 @@ def who_what(request):
 @login_required
 def profile_photo(request, id = None):
     if not id:
-        print("Are we here somehow?")
         print(id)
         user_profile = request.user.userprofile
     else:
-        print("What are we getting here")
         print(id)
         try:
             user_profile = User.objects.get(id=id).userprofile

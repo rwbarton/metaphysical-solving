@@ -51,6 +51,7 @@
 <script>
 
   let puzzle_data = {};
+  let edited_tags = [];
 
   // Show dialog overlay
   function showDialogOverlay(html) {
@@ -63,6 +64,84 @@
   function hideDialog() {
     document.getElementById("dialog-overlay").style.display = 'none';
     document.getElementById("dialog-window").style.display = 'none';
+  }
+
+  async function saveTagsAndDescription() {
+    try {
+      await updatePuzzle({
+        description: document.getElementById("puzzle-description-input").value,
+        tags: edited_tags
+      });
+      hideDialog();
+    } catch (error) {
+      console.log("Error saving tags or description", error);
+    }
+
+  }
+
+  function editTags() {
+    let html = `
+      <div class="dialog-row">
+        <header class="dialog-section-header">
+          <i class="ti ti-blockquote"></i> Short description
+        </header>
+          <textarea id="puzzle-description-input" class="puzzle-description-input" maxlength="280">${puzzle_data.puzzle.description}</textarea>
+      </div>
+      <div class="dialog-row">
+        <header class="dialog-section-header">
+          <i class="ti ti-tags"></i> Tags
+        </header>
+          <div id="tagsInputWrapper">
+             <div class="tags-input-container">
+               <input type="text" class="tags-input" placeholder="Type + ↩ to add tags...">
+             </div>
+           <div class="suggestions" style="display: none;"></div>
+         </div>
+      </div>
+      <div class="dialog-row horizontal">
+        <button class="dialog-button green" onClick="saveTagsAndDescription()">Save</button>
+        <button class="dialog-button" onClick="hideDialog()">Cancel</button>
+      </div>
+    `;
+
+    showDialogOverlay(html);
+
+    let tagsInput = new TagsInput(document.getElementById('tagsInputWrapper'), {
+            suggestions: puzzle_data.tags,
+            tags: puzzle_data.puzzle.tags,
+            onTagsChange: (tags) => {
+                edited_tags = tags;
+            }
+        });
+  }
+
+  function viewAnswers() {
+    prior_answers = puzzle_data.puzzle.prior_answers;
+    let html = `
+    ${prior_answers.queued ? 
+      `
+        <div class="dialog-row">
+          <header class="dialog-section-header">
+            <i class="ti ti-stack-2"></i> In queue
+          </header>
+             ${prior_answers.queued.map(answer => `
+                <div class="prior-answer">${answer}</div>
+               `).join('')}
+        </div>
+     ` : ''}
+    ${prior_answers.wrong ? 
+      `
+        <div class="dialog-row">
+          <header class="dialog-section-header">
+            <i class="ti ti-trash-x"></i> Wrong
+          </header>
+             ${prior_answers.wrong.map(answer => `
+                <div class="prior-answer"><i class="ti ti-circle-x"></i> ${answer}</div>
+               `).join('')}
+        </div>
+     ` : ''}
+    `;
+    showDialogOverlay(html);
   }
 
   async function viewSolvers() {
@@ -344,9 +423,9 @@
 
         ${data.puzzle.prior_answers ? 
            `<span class="infobar-section">
-            <div class="infobar-badge">
+            <div class="infobar-badge editable viewable" onClick="viewAnswers()">
               <i class="ti ti-clipboard-text"></i>
-              Answers:
+              ${data.puzzle.answer ? "Prior answers:" : "Answers:"}
               ${data.puzzle.prior_answers.wrong ?
                 `${data.puzzle.prior_answers.wrong.length} wrong` : ''
               }${data.puzzle.prior_answers.wrong && data.puzzle.prior_answers.queued ? ', ' : ''}
@@ -358,6 +437,13 @@
             </div>
             </span>` : ''
         }
+
+        <span class="infobar-section">
+          <div class="infobar-badge editable" onClick="editTags()">
+            <i class="ti ti-tags"></i>
+             Tags and description
+          </div>
+        </span>
 
         <span class="infobar-section">
           <div class="infobar-badge">
@@ -373,6 +459,7 @@
 
   // Update the puzzle info bar
   async function fetchAndUpdateInfoBar() {
+      // TODO Don't update unless document is visible
       try {
           const response = await fetch("{% url 'puzzles.views.api_puzzle' id %}", {
             method: "POST",
@@ -403,8 +490,8 @@
   }
 
   // Initial load
-  fetchAndUpdateInfoBar();
   logAView();
+  fetchAndUpdateInfoBar();
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
@@ -418,8 +505,10 @@
   setInterval(logAView, 60000);
 
   // Initialize Split.js
+  let rightPanelWidth = Math.round((335/window.innerWidth) * 100) + 1;
+
   const split = Split(['#left', '#right'], {
-      sizes: [80, 20],
+      sizes: [100 - rightPanelWidth, rightPanelWidth],
       minSize: [200, 0],
       gutterSize: 5,
       snapOffset: 0,
@@ -478,6 +567,180 @@
           isCollapsed = false;
           rightPanel.style.display = 'block';
       }
+  }
+
+  class TagsInput {
+            constructor(wrapper, options = {}) {
+                this.wrapper = wrapper;
+                this.container = wrapper.querySelector('.tags-input-container');
+                this.input = wrapper.querySelector('.tags-input');
+                this.suggestionsContainer = wrapper.querySelector('.suggestions');
+                this.tags = new Set();
+                this.suggestions = options.suggestions || [];
+                this.onTagsChange = options.onTagsChange || (() => {});
+                this.selectedSuggestionIndex = -1;
+                this.matchingSuggestions = [];
+                
+                this.setupEventListeners();
+
+                if (options.tags) {
+                    options.tags.forEach(tag => this.addTag(tag)); 
+                }
+
+                this.showSuggestions('');
+            }
+
+            setupEventListeners() {
+                this.input.addEventListener('input', () => this.handleInput());
+                this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
+                document.addEventListener('click', (e) => this.handleClickOutside(e));
+            }
+
+            handleInput() {
+                const value = this.input.value.trim();
+                if (value) {
+                    this.showSuggestions(value);
+                } else {
+                    this.hideSuggestions();
+                }
+            }
+
+            handleKeydown(e) {
+                const isSuggestionsVisible = this.suggestionsContainer.style.display !== 'none';
+
+                switch (e.key) {
+                    case 'ArrowDown':
+                        if (isSuggestionsVisible) {
+                            e.preventDefault();
+                            this.selectedSuggestionIndex = Math.min(
+                                this.selectedSuggestionIndex + 1,
+                                this.matchingSuggestions.length - 1
+                            );
+                            this.updateSelectedSuggestion();
+                        }
+                        break;
+
+                    case 'ArrowUp':
+                        if (isSuggestionsVisible) {
+                            e.preventDefault();
+                            this.selectedSuggestionIndex = Math.max(this.selectedSuggestionIndex - 1, -1);
+                            this.updateSelectedSuggestion();
+                        }
+                        break;
+
+                    case 'Enter':
+                        e.preventDefault();
+                        if (isSuggestionsVisible && this.selectedSuggestionIndex >= 0) {
+                            this.addTag(this.matchingSuggestions[this.selectedSuggestionIndex]);
+                        } else if (this.input.value.trim()) {
+                            this.addTag(this.input.value.trim());
+                        }
+                        this.hideSuggestions();
+                        break;
+
+                    case 'Backspace':
+                        if (!this.input.value) {
+                            this.removeLastTag();
+                        }
+                        break;
+
+                    case 'Escape':
+                        if (isSuggestionsVisible) {
+                            this.hideSuggestions();
+                        }
+                        break;
+                }
+            }
+
+            updateSelectedSuggestion() {
+                const items = this.suggestionsContainer.querySelectorAll('.suggestion-item');
+                items.forEach((item, index) => {
+                    if (index === this.selectedSuggestionIndex) {
+                        item.classList.add('selected');
+                        item.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            }
+
+            showSuggestions(query) {
+              if (query == '') {
+                this.matchingSuggestions = this.suggestions.filter(suggestion => !this.tags.has(suggestion));
+              } else {
+                this.matchingSuggestions = this.suggestions.filter(suggestion => 
+                    suggestion.toLowerCase().includes(query.toLowerCase()) &&
+                    !this.tags.has(suggestion)
+                );
+              }
+                    this.suggestionsContainer.innerHTML = this.matchingSuggestions
+                        .map(suggestion => `
+                            <div class="suggestion-item" data-value="${suggestion}">
+                                ${suggestion}
+                            </div>
+                        `).join('');
+
+                    this.suggestionsContainer.style.display = 'block';
+                    this.selectedSuggestionIndex = -1;
+
+                    this.suggestionsContainer.querySelectorAll('.suggestion-item')
+                        .forEach(item => {
+                            item.addEventListener('click', () => {
+                                this.addTag(item.dataset.value);
+                                this.hideSuggestions();
+                            });
+                        });
+            }
+
+            hideSuggestions() {
+                this.showSuggestions('');
+            }
+
+            handleClickOutside(e) {
+                if (!this.wrapper.contains(e.target)) {
+                    this.hideSuggestions();
+                }
+            }
+
+            addTag(text) {
+                if (text && !this.tags.has(text)) {
+                    const tag = document.createElement('div');
+                    tag.className = 'tag-input';
+                    tag.innerHTML = `
+                        <span class="tag-text">${text}</span>
+                        <span class="tag-close"><i class="ti ti-x"></i></span>
+                    `;
+
+                    tag.querySelector('.tag-close').addEventListener('click', () => {
+                        this.removeTag(text);
+                        tag.remove();
+                    });
+
+                    this.container.insertBefore(tag, this.input);
+                    this.tags.add(text);
+                    this.input.value = '';
+                    this.onTagsChange(Array.from(this.tags));
+                }
+            }
+
+            removeTag(text) {
+                this.tags.delete(text);
+                this.onTagsChange(Array.from(this.tags));
+            }
+
+            removeLastTag() {
+                const tags = this.container.querySelectorAll('.tag-input');
+                if (tags.length > 0) {
+                    const lastTag = tags[tags.length - 1];
+                    const lastTagText = lastTag.getElementsByClassName("tag-text")[0].textContent;
+                    this.removeTag(lastTagText);
+                    lastTag.remove();
+                }
+            }
+
+            getTags() {
+                return Array.from(this.tags);
+            }
   }
 </script>
 

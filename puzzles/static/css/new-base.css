@@ -140,6 +140,7 @@ select {
 .teamname-text {
     display: flex;
     margin-left: 10px;
+    user-select: none;
 
     .compact-header & {
         margin-left: 6px;
@@ -1118,6 +1119,8 @@ select {
 
 /* Puzzle page styles */
 
+/* Puzzle editing dialogs */
+
 #dialog-overlay {
     position: fixed;
     top: 0;
@@ -1222,6 +1225,27 @@ select {
         width: 20px;
     }
 
+    & .dialog-button {
+        width: auto;
+        padding: 5px 8px;
+        margin-right: 10px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+        box-shadow: 0 0 2px rgba(0,0,0,0.3);
+        cursor: pointer;
+        border: none;
+        user-select: none;
+
+        &:hover {
+            box-shadow: 0 0 2px rgba(0,0,0,0.7);
+        }
+    }
+
+    & .dialog-button.green {
+        background: var(--primary);
+        color: white;
+    }
+
     & .dialog-row {
         margin-top: 30px;
         display: flex;
@@ -1231,6 +1255,10 @@ select {
 
         &:first-of-type {
             margin-top: 15px;
+        }
+
+        &.horizontal {
+            flex-direction: row;
         }
 
         & .dialog-section-header {
@@ -1286,6 +1314,96 @@ select {
     text-align: left;
     line-height: 11px;
 }
+
+.prior-answer {
+    font-size: 13px;
+    padding: 3px;
+    border: 1px solid var(--gray-200);
+    margin-top: 5px;
+    border-radius: 5px;
+}
+
+.puzzle-description-input {
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid var(--gray-300);
+    border-radius: 5px;
+    padding: 7px;
+    width: 260px;
+    height: 50px;
+    resize: none;
+}
+
+/* Puzzle tag input */
+
+.tags-input-container {
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 4px;
+    width: 300px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.tag-input {
+    background-color: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tag-close {
+    cursor: pointer;
+    color: #666;
+}
+
+.tags-input {
+    border: none;
+    outline: none;
+    flex: 1;
+    min-width: 120px;
+    padding: 5px;
+}
+
+.suggestions {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 150px;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    background: white;
+    width: 300px;
+}
+
+.suggestion-item {
+    padding: 4px 12px;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    text-align: left;
+}
+
+.suggestion-item.selected {
+    background-color: #e9ecef;
+}
+
+.suggestion-item:hover {
+    background-color: #f8f9fa;
+}
+
+#tagsInputWrapper {
+    padding-bottom: 150px;
+}
+
+/* Puzzle info bar */
 
 .puzzle-info-bar {
     width: 100%;
