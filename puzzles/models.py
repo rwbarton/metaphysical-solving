@@ -89,7 +89,7 @@ class Tag(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
 
     def topic(self):
-        return '%s-%3d'%(slugify(self.name),hash(self.name)%1000)
+        return '%s-%d'%(slugify(self.name),self.id)
 
     def __str__(self):
         return self.name
@@ -185,7 +185,7 @@ class Puzzle(OrderedModel):
     round = models.ForeignKey('Round', null=True, blank=True, on_delete=models.SET_NULL, help_text="The round a given puzzle belongs to.")
 
     solvers = models.ManyToManyField(User, blank=True)
-
+    topic_name = models.CharField(max_length=200,blank=True)
     spreadsheet = models.URLField(blank=True)
     answer = models.CharField(max_length=200, blank=True)
     checkAnswerLink = models.URLField(blank=True)
@@ -207,7 +207,10 @@ class Puzzle(OrderedModel):
             return {'status': self.status}
 
     def zulip_topic(self):
-        return 'p%d' % (self.id,)
+        if not self.topic_name:
+            self.topic_name = '%s-%d'%(slugify(self.title),self.id)
+            self.save()
+        return self.topic_name
 
     def jitsi_room_id(self):
         if jitsi_secret is None:
