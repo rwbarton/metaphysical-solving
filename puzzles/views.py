@@ -542,7 +542,7 @@ def who_what(request):
             rdict[room.user]["rooms"].add(room.puzzle)
     people = list(rdict.items())
 #    print(people)
-    return render(request, "puzzles/whowhat.html", context = base_context(request,{
+    return render(request, "puzzles/whowhat.html", context = base_context({
         'people':people}))
 
 # Google profile photo retriever (direct embedding doesn't work because of
