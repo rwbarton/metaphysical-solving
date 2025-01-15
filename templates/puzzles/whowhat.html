@@ -5,19 +5,43 @@
 {% block title %}Who's on What{% endblock %}
 
 {% block content %}
-<h2 class="stat-page-header">Who's on What</h2>
-<table class="stat-page-table">
-  <tr>
-    <th>Person</th>
-    <th>Recently Accessed Puzzles</th>
-    <th>Current Jitsi Rooms</th>
-  </tr>
+<div class="stat-page">
+<h2 class="stat-page-header"><i class="ti ti-clipboard-smile"></i> Who's on What?</h2>
+<div class="refresh-countdown"><i class="ti ti-refresh"></i> <span id="countdown">Next reload in 60 seconds</span></div>
   {% for record in people %}
-  <tr>
-    <td class="person left">{{record.0.first_name}} {{record.0.last_name}}</td>
-    <td class="left">{% for puzzle in record.1.puzzles %}<span class="puzzle-link"><a href="/puzzle/{{puzzle.id}}">{{puzzle.title}}</a></span>{% endfor %}</td>
-    <td>{% for puzzle in record.1.rooms %}<span class="puzzle-link"><a href="/puzzle/jitsi/{{puzzle.id}}"><img src="{% static "img/videochat.svg" %}" class="iconimage" style="opacity:0.5;"> {{puzzle.title}}</a></span>{% endfor %}</td>
-  </tr>
+  <div class="person-stats">
+    <div class="person-info">
+      <div class="profile-pic"><img src="/profile_photo/{{record.0.id}}"/></div>
+      <div class="person-name">{{record.0.first_name}} {{record.0.last_name}}</div>
+    </div>
+    <div class="puzzles stats-section">
+      <div class="stats-section-header"><i class="ti ti-binoculars"></i> Recently open puzzles</div>
+        {% for puzzle in record.1.puzzles %}
+          <div class="puzzle-link"><a href="/puzzle/{{puzzle.id}}"><i class="ti ti-clipboard"></i> {{puzzle.title}}</a></div>
+        {% endfor %}
+    </div>
+    <div class="jitsi-rooms stats-section">
+      <div class="stats-section-header"><i class="ti ti-user-screen"></i> Active Jitsi Rooms</div>
+      {% for puzzle in record.1.rooms %}
+          <div class="puzzle-link"><a href="/puzzle/jitsi/{{puzzle.id}}"><i class="ti ti-video"></i> {{puzzle.title}}</a></div>
+      {% endfor %}
+    </div>
+  </div>
   {% endfor %}
-  </table>
+</div>
+<script>
+  let countdown = 60; // Time in seconds for the next refresh
+
+  const countdownElement = document.getElementById("countdown");
+
+  const intervalId = setInterval(() => {
+    countdown--;
+    countdownElement.textContent = `Next reload in ${countdown} seconds`;
+
+    if (countdown <= 0) {
+      clearInterval(intervalId); // Stop the countdown interval
+      location.reload(); // Refresh the page
+    }
+  }, 1000); // Update every 1 second
+</script>
 {% endblock %}
