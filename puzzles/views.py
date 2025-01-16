@@ -333,12 +333,17 @@ def api_update_puzzle (request, puzzle_id):
                         puzzle.tags.set(tags)
                 if key == "hint":
                    q = QueuedHint(puzzle=puzzle, user=request.user, details=data["hint"]["text"], urgent=data["hint"]["urgent"], resolved=False)
+                   zulip_send("b+status", "puzzles", puzzle.zulip_topic(),
+                              "**%s requested a hint:**\n>%s" % (q.user.get_full_name(),q.details))
                    q.save()
                 if key == "hint_resolution":
                    q = QueuedHint.objects.get(id=data["hint_resolution"]["id"])
                    q.resolved = True
                    q.response = data["hint_resolution"]["response"]
                    q.save()
+                   zulip_send("b+status","puzzles", puzzle.zulip_topic(),
+                               "**Hint request resolved!**\n*We asked:*\n>%s\n\n*...and they replied:*\n>%s"%(q.details, q.response))
+
             puzzle.save()
             return JsonResponse(build_puzzle_dict(request.user, puzzle_id))
         except Exception as e:
