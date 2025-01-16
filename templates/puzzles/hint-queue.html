@@ -5,73 +5,149 @@
 {% block title %}Hint Queue{% endblock %}
 
 {% block content %}
-<div id="overview"> <!-- XXX The css is all wrong here. -->
-  <h1>Unresolved Hints</h1>
+<script>
+  setInterval(() => {
+    // Check if any <textarea> is focused
+    const isTextAreaFocused = document.activeElement.tagName === "TEXTAREA";
+    if (!isTextAreaFocused) {
+      // Reload the page if no <textarea> is focused
+      location.reload();
+    }
+  }, 60000);
+
+
+  async function submitResponse(puzzle_id, hint_id) {
+    resp = document.getElementById(`hint-response-${hint_id}`).value;
+    try {
+        const response = await fetch(`/api_update_puzzle/${puzzle_id}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              "hint_resolution": {
+                "id": hint_id,
+                "response": resp
+              }
+            }),
+        });
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const errorData = await response.json();
+            console.error('Error:', errorData.error);
+        }
+    } catch (error) {
+        console.error('Fetch Error:', error);
+    }
+  }
+</script>
+<div class="hints-page">
+  <div class="hints-page-header"><i class="ti ti-help-octagon" style="margin-right: 5px;""></i> The Hinterlands</div>
+  <div class="hints-page-byline">Welcome, Hint Directrix {{ user.first_name }}. We've been expecting you.</div>
   {% if queued_hints %}
-  <table class="puzzle-list">
-    <tbody>
-      <tr class="puzzle-list-header">
-          <td style="padding-left:10px;padding-right:10px"></td>
-	<th style="padding-left:10px;padding-right:10px">Puzzle</th>
-	<th style="padding-left:10px;padding-right:10px">Requestor</th>
-          <th style="padding-left:10px;padding-right:10px">Created</th>
-          <th style="padding-left:10px;padding-right:10px"></th>
-	<th style="padding-left:10px;padding-right:10px">Details</th>
-      </tr>
-      {% for queued_hint in queued_hints %}
-      <tr class="puzzle-list-regular">
-          <td style="color:red;padding-left:10px;padding-right:10px">{% if queued_hint.urgent %} <b>!</b> {% endif %}</td>
-	<td class="puzzle-list-puzzle">
-	  <a href="{{ queued_hint.puzzle.url }}">{{ queued_hint.puzzle.title }}</a>
-    </td>
-      	<td style="padding-left:10px;padding-right:10px">
-	  {{ queued_hint.user.first_name }} {{ queued_hint.user.last_name }}
-	</td>
-      <td style="padding-left:10px;padding-right:10px">{{ queued_hint.createdTime|date:'H:i D' }}</td>
-          <td style="padding-left:10px;padding-right:10px"><a href="{% url 'puzzles.views.hint_resolve' queued_hint.id %}"> Close </a> </td>
-	<td style="padding-left:10px;padding-right:10px">
-	  {{ queued_hint.details }}
-	</td>
-      </tr>
+  <div class="hints-section-header"><i class="ti ti-progress"></i> Unresolved Hint Requests</div>
+  <div class="hint-requests">
+      {% for hint in queued_hints %}
+      <div class="hint-request">
+        <div class="hint-info">
+          <div class="hint-request-top">
+              <div class="hint-request-top-left">
+                <div class="hint-request-header"><i class="ti ti-progress-help"></i> Hint request for <a href="/puzzle/{{hint.puzzle.id}}">{{ hint.puzzle.title }}</a></div>
+                <div class="hint-request-byline"><img class="profile-pic" src="/profile_photo/{{ hint.user.id }}"/> {{ hint.user.first_name }} {{ hint.user.last_name }}</div>
+              </div>
+              <div class="hint-request-timestamp">{{ hint.submitted_ago }}</div>
+          </div>
+          <div class="triage-stats">
+            <div class="triage-stats-header"><i class="ti ti-graph"></i> Triage stats</div>
+          <div class="triage-badges">
+           <div class="triage-badge" style="width:40%;">
+            <div class="badge-line">Hint urgency: <span class="heavy">{{ hint.urgent|yesno:"high,normal" }}</span></div>
+            <div class="badge-line">Puzzle priority: <span class="heavy">{{ hint.puzzle.priority }}</span></div>
+          <div class="badge-line">Puzzle status: <span class="heavy">{{ hint.puzzle.status }}</span></div>
+          <div class="badge-line">Total Solvers: <span class="heavy">{{ hint.puzzle.effort_spent.solvers }}</span></div>
+          <div class="badge-line">Person-hours spent: <span class="heavy">{{ hint.puzzle.effort_spent.solver_hours }}</span></div>
+           </div>
+          <div class="triage-badge" style="width:60%;">
+            <div class="badge-line"><i class="ti ti-users"></i> Current solvers</div>
+            <div class="triage-solvers">
+              {{ hint.puzzle.recent_solvers|yesno:",None" }}
+              {% for solver in hint.puzzle.recent_solvers %}
+                <span class="triage-solver"><img class="profile-pic" src="/profile_photo/{{ solver.id }}"/>&nbsp;{{solver.first_name}} {{solver.last_name}}</span>
+             {% endfor %}         
+            </div>
+        </div>
+      </div>
+        </div>
+      </div>
+        <div class="hint-details">
+          <div class="hint-details-header">
+            <span class="header-left"><i class="ti ti-file-description"></i> Request</span>
+            <span class="header-right"><button class="copy-details" onClick="navigator.clipboard.writeText(document.getElementById('hint-details-text-{{hint.id}}').textContent)"><i class="ti ti-copy"></i></button></span>
+          </div>
+          <div class="hint-details-text" id="hint-details-text-{{hint.id}}">
+            {{ hint.details }}
+          </div>
+        </div>
+        <div class="hint-details">
+          <div class="hint-details-header">
+            <span class="header-left"><i class="ti ti-message-reply"></i> Resolution</span>
+          </div>
+          <div id="hint-details-text">
+            <textarea class="hint-response" id="hint-response-{{hint.id}}" placeholder="Enter the writing team's response here."></textarea>
+          </div>
+          <div class="resolved-button">
+          <button id="mark-hint-resolved-button" onClick="submitResponse({{hint.puzzle.id}}, {{hint.id}})">Add response and mark as resolved</button>
+          </div>
+        </div>            
+      </div>
       {% endfor %}
-    </tbody>
-  </table>
+  </div>
   {% else %}
-  The queue is empty.
+    <div class="hint-queue-empty">
+          The queue is empty.
+    </div>
   {% endif %}
 
-  <h1>Resolved Hints</h1>
   {% if resolved_hints %}
-      <table class="puzzle-list">
-    <tbody>
-   <tr class="puzzle-list-header">
-       <th style="padding-left:10px;padding-right:10px"></th>
-	<th style="padding-left:10px;padding-right:10px">Puzzle</th>
-	<th style="padding-left:10px;padding-right:10px">Requestor</th>
-          <th style="padding-left:10px;padding-right:10px">Modified</th>
-          <th style="padding-left:10px;padding-right:10px"></th>
-	<th style="padding-left:10px;padding-right:10px">Details</th>
-      </tr>
-      {% for queued_hint in resolved_hints %}
-       <tr class="puzzle-list-regular">
-          <td style="padding-left:10px;padding-right:10px">{% if queued_hint.urgent %} <b>!</b> {% endif %}</td>
-	<td class="puzzle-list-puzzle">
-	  <a href="{{ queued_hint.puzzle.url }}">{{ queued_hint.puzzle.title }}</a>
-    </td>
-      	<td style="padding-left:10px;padding-right:10px">
-	  {{ queued_hint.user.first_name }} {{ queued_hint.user.last_name }}
-	</td>
-      <td style="padding-left:10px;padding-right:10px">{{ queued_hint.modifiedTime|date:'H:i D' }}</td>
-          <td style="padding-left:10px;padding-right:10px"><a href="{% url 'puzzles.views.hint_resolve' queued_hint.id %}"> Reopen </a> </td>
-	<td style="padding-left:10px;padding-right:10px">
-	  {{ queued_hint.details }}
-	</td>
-      </tr>
+  <div class="hints-section-header"><i class="ti ti-progress"></i> Resolved Hints</div>
+  <div class="hint-requests">
+      {% for hint in resolved_hints %}
+      <div class="hint-request green">
+        <div class="hint-info">
+          <div class="hint-request-top">
+              <div class="hint-request-top-left">
+                <div class="hint-request-header"><i class="ti ti-progress-help"></i> Hint request for <a href="/puzzle/{{hint.puzzle.id}}">{{ hint.puzzle.title }}</a></div>
+                <div class="hint-request-byline"><img class="profile-pic" src="/profile_photo/{{ hint.user.id }}"/> {{ hint.user.first_name }} {{ hint.user.last_name }}</div>
+              </div>
+              <div class="hint-request-timestamp">{{ hint.submitted_ago }}</div>
+          </div>
+      </div>
+        <div class="hint-details">
+          <div class="hint-details-header">
+            <span class="header-left"><i class="ti ti-file-description"></i> Request</span>
+            <span class="header-right"><button class="copy-details" onClick="navigator.clipboard.writeText(document.getElementById('hint-details-text-{{ hint.id }}').textContent)"><i class="ti ti-copy"></i></button></span>
+          </div>
+          <div class="hint-details-text" id="hint-details-text-{{ hint.id }}"">
+            {{ hint.details }}
+          </div>
+        </div>
+        <div class="hint-details">
+          <div class="hint-details-header">
+            <span class="header-left"><i class="ti ti-ti-message-reply"></i> Response</span>
+            <span class="header-right"><button class="copy-details" onClick="navigator.clipboard.writeText(document.getElementById('hint-response-text-{{ hint.id }}').textContent)"><i class="ti ti-copy"></i></button></span>
+          </div>
+          <div class="hint-details-text response" id="hint-response-text-{{ hint.id }}"">
+            {{ hint.response }}
+          </div>
+        </div>               
+      </div>
       {% endfor %}
-    </tbody>
-  </table>
+  </div>
   {% else %}
-  No resolved hints.
+    <div class="hint-queue-empty">
+          The queue is empty.
+    </div>
   {% endif %}
-</div>
 {% endblock %}

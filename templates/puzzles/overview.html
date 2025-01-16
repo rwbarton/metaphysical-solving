@@ -92,6 +92,8 @@
     // Initialize view element list
     let view_items = null;
 
+    let collapsed_rounds = [];
+
     function resetFilters () {
       hide_items = {
                     statuses: [],
@@ -108,6 +110,19 @@
     function saveToLocalStorage() {
       localStorage.setItem('filterSelections', JSON.stringify(hide_items));
       localStorage.setItem('viewFilterSelections', JSON.stringify(view_items))
+    }
+
+    function toggleRound(round_id) {
+      if (collapsed_rounds.includes(''+round_id)) {
+        document.getElementById(`round-block-${round_id}`).classList.remove("collapsed");
+        r_index = collapsed_rounds.indexOf(''+round_id);
+        collapsed_rounds.splice(r_index);
+      }
+      else {
+        document.getElementById(`round-block-${round_id}`).classList.add("collapsed");
+        collapsed_rounds.push(''+round_id);
+      }
+      localStorage.setItem('collapsedRounds', JSON.stringify(collapsed_rounds));
     }
 
     function updateCheckboxes () {
@@ -374,7 +389,7 @@
         let puzzle_priority = puzzle.priority ? puzzle.priority.replace(/!/g, '') : "normal";
       
         return `
-            <div class="puzzle ${puzzle.unopened ? 'unopened' : ''}">
+            <div class="puzzle ${puzzle.unopened ? 'unopened' : ''} ${puzzle_priority}-priority-puzzle">
                 <div class="puzzle-top">
                   <div class="puzzle-header">
                     <a href="/puzzle/${puzzle.id}" target="_blank"><span class="puzzle-title">${puzzle.title}</span></a>
@@ -407,13 +422,19 @@
     }
 
     // Template function for a round
-    function renderRound(round, parentRound = null) {
+    function renderRound(round, parentRound = null, collapsed = false) {
         const roundTitle = parentRound ? `${parentRound}<i class="ti ti-chevron-right round-chevron"></i>${round.round}` : round.round;
         return `
-            <div class="round">
+          <div class="roundwrapper">
+            <div class="round ${collapsed ? 'collapsed' : ''}" id="round-block-${round.id}">
                 <div class="round-header">
+                    <div class="round-header-left">
                     <div class="round-title">${roundTitle}</div>
                     ${round.description ? `<div class="round-description">${round.description}</div>` : ''}
+                    </div>
+                    <div class="round-header-right">
+                      <button class="collapse-round-button" onClick="toggleRound('${round.id}')"><i class="ti ti-chevron-down collapse-chevron"></i></button>
+                    </div>
                 </div>
                 ${round.puzzles ? `
                     <div class="puzzle-list">
@@ -421,6 +442,7 @@
                     </div>
                 ` : ''}
             </div>
+          </div>
         `;
     }
 
@@ -438,6 +460,7 @@
                        document.querySelector('.filtered-view-announcement').classList.add("hidden");
 
         // Process parent-child relationships
+        collapsed_rounds = JSON.parse(localStorage.getItem('collapsedRounds')) || collapsed_rounds;
         data.rounds.forEach(round => {
             parent_round = round.parent_round ? round.parent_round : null;
             if (round.puzzles && !hide_items["rounds"].includes(round.round)) {
@@ -450,7 +473,7 @@
                 if (filtered_puzzles.length > 0) {
                   let round_copy = {...round};
                   round_copy.puzzles = filtered_puzzles;
-                  html += renderRound(round_copy, parent_round);
+                  html += renderRound(round_copy, parent_round, collapsed_rounds.includes(''+round_copy.id));
                 }
             }
         });

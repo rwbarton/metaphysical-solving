@@ -87,6 +87,7 @@ def base_context(d = {}):
     d1['hqphone'] = settings.HQPHONE
     d1['hqemail'] = settings.HQEMAIL
     d1['locations'] = Location.objects.all()
+    d1['zulip_url'] = settings.ZULIP_SERVER_URL
     d1['admin_link']=settings.SHOW_ADMIN_LINK
     return(d1)
 
@@ -214,6 +215,7 @@ def api_overview(request):
     for round in rounds:
         round_dict = {}
         round_dict["round"] = round.name
+        round_dict["id"] = round.id
         round_dict["description"] = round.description if round.description else ""
         if round.parent_round:
             round_dict["parent_round"] = round.parent_round.name
@@ -228,6 +230,7 @@ def api_overview(request):
         rounds_output.append(
             {
                 "round": "Unassigned",
+                "id": "unassigned",
                 "puzzles": [quick_puzzle_info(puzzle) for puzzle in puzzles_without_round]
             }
         )
@@ -255,10 +258,7 @@ def build_puzzle_dict(user, puzzle_id):
                    "user_id": hint.user.id,
                    "details": hint.details,
                    "response": hint.response,
-                   "submitted": human(
-                    timedelta(
-                        seconds=round((now() - hint.createdTime).total_seconds() / 60) * 60)
-                    ),
+                   "submitted": hint.submitted_ago(),
                    "urgent": hint.urgent,
                    "resolved": hint.resolved
                   } for hint in puzzle.queuedhint_set.order_by('-id')],
@@ -334,7 +334,11 @@ def api_update_puzzle (request, puzzle_id):
                 if key == "hint":
                    q = QueuedHint(puzzle=puzzle, user=request.user, details=data["hint"]["text"], urgent=data["hint"]["urgent"], resolved=False)
                    q.save()
-
+                if key == "hint_resolution":
+                   q = QueuedHint.objects.get(id=data["hint_resolution"]["id"])
+                   q.resolved = True
+                   q.response = data["hint_resolution"]["response"]
+                   q.save()
             puzzle.save()
             return JsonResponse(build_puzzle_dict(request.user, puzzle_id))
         except Exception as e:
@@ -550,13 +554,19 @@ def who_what(request):
 # Google's restrictions)
 @login_required
 def profile_photo(request, id = None):
+    svg_placeholder = """
+    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" /></svg>
+    """
     if not id:
         user_profile = request.user.userprofile
     else:
         try:
             user_profile = User.objects.get(id=id).userprofile
         except:
-            return HttpResponse(status=404)
+            return HttpResponse(
+                svg_placeholder,
+                content_type="image/svg+xml"
+            )
     if user_profile.picture:
         response = requests.get(user_profile.picture, stream=True)
         if response.status_code == 200:
@@ -564,7 +574,12 @@ def profile_photo(request, id = None):
                 response.content,
                 content_type=response.headers['Content-Type']
             )
-    return HttpResponse(status=404)
+
+
+    return HttpResponse(
+        svg_placeholder,
+        content_type="image/svg+xml"
+    )
 
 @csrf_exempt
 @require_POST
