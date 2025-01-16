@@ -229,15 +229,15 @@ class Puzzle(OrderedModel):
         
     def log_a_view(self,user):
         userLog = AccessLog.objects.get_or_create(puzzle=self,user=user)[0]
-        if (now()-userLog.lastUpdate)>timedelta(seconds=55):
-            userLog.accumulatedMinutes = userLog.accumulatedMinutes+1
+        if (now()-userLog.lastUpdate)>timedelta(seconds=355):
+            userLog.accumulatedMinutes = userLog.accumulatedMinutes+6
             userLog.lastUpdate = now()
             userLog.save()
 
     def all_distinct_logs(self):
         return AccessLog.objects.filter(puzzle__exact=self).distinct()
     def recent_logs(self):
-        return self.all_distinct_logs().filter(lastUpdate__gte = now()-timedelta(seconds=120))
+        return self.all_distinct_logs().filter(lastUpdate__gte = now()-timedelta(seconds=360))
     def recent_count(self):
         return self.recent_logs().order_by("user").values("user").distinct().count()
     
