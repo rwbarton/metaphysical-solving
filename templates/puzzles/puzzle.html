@@ -14,6 +14,13 @@
 <div id="puzzle-info-bar" class="puzzle-info-bar">
   <i class="ti ti-loader-2 loader-icon"></i>
 </div>
+<div class="puzzle-links">
+  <a href="{% url 'puzzles.views.puzzle_spreadsheet' id %}" title="Open sheet in new tab" target="_blank"><i class="ti ti-table"></i> Open puzzle spreadsheet</a>
+  <a href="{% url 'puzzles.views.puzzle_spreadsheet' id %}" title="Open chat in new tab" target="_blank"><i class="ti ti-brand-zulip"></i> Open puzzle chat</a>
+  <a href="/puzzle/jitsi/{{ id }}?start_muted=1" title="Open chat in new tab" target="_blank"><i class="ti ti-video"></i> Open puzzle video room</a>
+
+  
+</div>
 <div id="content" class="split">
   <div id="left" class="frame">
     <iframe id="left-frame" src="{% url 'puzzles.views.puzzle_spreadsheet' id %}"></iframe>
@@ -22,6 +29,7 @@
     <iframe id="right-frame" src="{% url 'puzzles.views.puzzle_chat' id %}"></iframe>
   </div>
 </div>
+<div class="sheet-popout"><a href="{% url 'puzzles.views.puzzle_spreadsheet' id %}" title="Open sheet in new tab" target="_blank"><i class="ti ti-external-link"></i></a></div>
 <div id="video-resize-overlay">
 </div>
 <div id="dialog-window">
@@ -52,6 +60,7 @@
   <div id="video-content">
   </div>
 </div>
+
 <script>
 
   let puzzle_data = {};
@@ -498,7 +507,7 @@
        <span class="puzzle-name">
          <a class="puzzle-name-link infobar-link" href="/puzzle/linkout/${data.puzzle.id}" target="_blank">
            <i class="ti ti-external-link"></i>
-           ${data.puzzle.round ? data.puzzle.round + `<i class="ti ti-chevron-right puzzle-chevron"></i>` : ""}${data.puzzle.title}
+           <span class="hide-1200">${data.puzzle.round ? data.puzzle.round + `<i class="ti ti-chevron-right puzzle-chevron"></i>` : ""}</span>${data.puzzle.title}
          </a>
        </span>
        <span class="video-chat infobar-section">
@@ -511,12 +520,12 @@
           <span class="infobar-section">
           <div class="infobar-badge ${puzzle_priority}-priority editable" onClick = "editPuzzleState()">
             <i class="ti ti-flag"></i>
-            ${data.puzzle.priority}
+            <span class="hide-1200">${data.puzzle.priority}</span>
           </div> 
           </span>` : ''
         }
-      
-       <span class="infobar-section">
+       
+       <span class="infobar-section hide-860">
                          ${data.puzzle.status ? `
                       <div class="infobar-badge infobar-status editable" onClick = "editPuzzleState()"">
                         <i class="ti ti-activity"></i>
@@ -529,7 +538,8 @@
           `<span class="infobar-section">
             <div class="infobar-badge editable viewable" onClick="viewSolvers()">
             <i class="ti ti-users"></i>
-            ${data.puzzle.solvers.length} ${data.puzzle.solvers.length == 1 ? 'solver' : 'solvers'}
+            <span class="hide-650">${data.puzzle.solvers.length} ${data.puzzle.solvers.length == 1 ? '<span class="hide-1200">solver</span>' : '<span class="hide-1200">solvers</span>'}
+            </span>
             </div>
            </span>` : '' 
         }
@@ -537,7 +547,7 @@
         <span class="infobar-section">
             <div class="infobar-badge editable attachable" onClick="editAttachedFiles()">
             <i class="ti ti-paperclip"></i>
-            <span id="att-file-count">
+            <span id="att-file-count" class="hide-860">
               ${data.puzzle.uploaded_files ?
                 `${data.puzzle.uploaded_files.length} ${data.puzzle.uploaded_files.length == 1 ? 'file' : 'files'}` : 
                 "Attach files"
@@ -550,7 +560,8 @@
            `<span class="infobar-section">
             <div class="infobar-badge editable viewable" onClick="viewAnswers()">
               <i class="ti ti-clipboard-text"></i>
-              ${data.puzzle.answer ? "Prior answers:" : "Answers:"}
+              <span class="hide-650">
+              ${data.puzzle.answer ? "<span class='hide-1200'>Prior answers:</span>" : "<span class='hide-1200'>Answers:</span>"}
               ${data.puzzle.prior_answers.wrong ?
                 `${data.puzzle.prior_answers.wrong.length} wrong` : ''
               }${data.puzzle.prior_answers.wrong && data.puzzle.prior_answers.queued ? ', ' : ''}
@@ -559,6 +570,7 @@
                   ${data.puzzle.prior_answers.queued.length} in queue
                 ` : ''
               }
+              </span>
             </div>
             </span>` : ''
         }
@@ -566,16 +578,18 @@
         <span class="infobar-section">
           <div class="infobar-badge editable" onClick="editTags()">
             <i class="ti ti-tags"></i>
-             Tags and description
+             <span class="hide-1200">Tags and description</span>
           </div>
         </span>
 
         <span class="infobar-section">
           <div class="infobar-badge editable viewable" onClick="showHints()">
             <i class="ti ti-progress-help"></i>
+            <span class="hide-650">
             ${data.puzzle.hints.length == 0 ? "Request a hint" : `
             ${data.puzzle.hints.length} ${data.puzzle.hints.length == 1? "hint" : "hints"}
             `}
+            </span>
           </div>
         </span>
       `;
@@ -602,7 +616,7 @@
 
   // Update the puzzle info bar
   async function logAView() {
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === "visible" && !puzzle_data?.puzzle?.answer) {
         try {
             const response = await fetch("{% url 'puzzles.views.api_log_a_view' id %}", {
               method: "POST",

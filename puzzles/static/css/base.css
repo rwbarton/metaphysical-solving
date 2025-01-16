@@ -156,6 +156,31 @@ select {
     }
 }
 
+@media (max-width: 650px) {
+    .hide-650,
+    .puzzle-info-bar .infobar-section.hide-650 {
+        display: none;
+    }
+}
+
+
+@media (max-width: 860px) {
+    .hide-860,
+    .puzzle-info-bar .infobar-section.hide-860 {
+        display: none;
+
+        &:has(.infobar-answer) {
+            display: flex;
+        }
+    }
+}
+
+@media (max-width: 1200px) {
+    .hide-1200 {
+        display: none;
+    }
+}
+
 /* Header User Info */
 
 .user-header {
@@ -455,31 +480,50 @@ select {
     transform: translateX(-50%);
     top: 0px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
-    white-space: nowrap;
-    overflow-x: auto;
-    text-align: center;
-    max-width: 60vw;
-    scrollbar-width: none;
     -ms-overflow-style: none;
+    max-height: 36px;
+
+    &.overflowing::after {
+        content: "\f6fd";
+        font-family: 'tabler-icons';
+        background: white;
+        padding: 1px;
+        border-radius: 10px;
+        font-size: 14px;
+        position: absolute;
+        right: 3px;
+        top: 10px;
+        height: 14px;
+        display: flex;
+        align-items: center;
+    }
 
     .compact-header & {
         font-size: 12px;
         padding: 5px 10px 3px 10px;
+        max-height: 27px;
+
+        &.overflowing::after {
+            top: 5px;
+        }
     }
 
     & .motd-content {
+        overflow-x: auto;
+        scrollbar-width: none;
         display: inline-block;
         white-space: nowrap;
+        max-width: 60vw;
     }
 }
 
-.top-page-announcement::-webkit-scrollbar {
+.motd-content::-webkit-scrollbar {
     height: 8px;
     /* for horizontal scrollbar */
     background: transparent;
 }
 
-.top-page-announcement::-webkit-scrollbar-track {
+.motd-content::-webkit-scrollbar-track {
     background: transparent;
 }
 
@@ -490,28 +534,28 @@ select {
 }
 
 /* Show thumb on hover */
-.top-page-announcement:hover::-webkit-scrollbar-thumb {
+.motd-content:hover::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.2);
 }
 
 /* Thumb hover state */
-.top-page-announcement:hover::-webkit-scrollbar-thumb:hover {
+.motd-content:hover::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.3);
 }
 
 /* For Firefox */
 @supports (scrollbar-width: thin) {
-    .top-page-announcement:hover {
+    .motd-content:hover {
         scrollbar-width: thin;
         scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
     }
 }
 
-.top-page-announcement.hidden {
+.motd-content.hidden {
     display: none;
 }
 
-.top-page-announcement:hover::-webkit-scrollbar {
+.motd-content:hover::-webkit-scrollbar {
     display: block;
     /* Show the scrollbar on hover for Chrome, Safari, and Edge */
     height: 5px;
@@ -904,6 +948,10 @@ select {
     position: relative;
     border-bottom: 1px solid var(--gray-200);
 
+    &:hover .solver-count.show-on-hover {
+        display: flex;
+    }
+
 }
 
 .puzzle.unopened {
@@ -1099,7 +1147,7 @@ select {
     font-size: 0.7rem;
 }
 
-.solver-count, solver-count:visited {
+.solver-count {
     display: flex;
     align-items: center;
     gap: 2px;
@@ -1110,6 +1158,12 @@ select {
     user-select: none;
     -webkit-user-select: none;
     text-decoration: none;
+    border: none;
+    background: none;
+
+    &.show-on-hover {
+        display: none;
+    }
 }
 
 .solver-count:hover {
@@ -1670,7 +1724,6 @@ select {
             }
         }
     }
-
 }
 
 .prior-hints {
@@ -1894,6 +1947,12 @@ select {
         font-weight: 600;
         margin-right: 5px;
         line-height: 15px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
+        &:hover {
+            background: var(--gray-200);
+        }
     }
 
     & .puzzle-chevron {
@@ -1976,13 +2035,47 @@ select {
     }
 }
 
+.sheet-popout {
+    position: fixed;
+    z-index: 100;
+    left: 5px;
+    bottom: 5px;
+
+    & a, & a:visited {
+        color: var(--gray-800);
+    }
+}
+
 /* Split frames */
+
+.puzzle-links {
+    display: none;
+}
 
 .split {
     display: flex;
     height: calc(100vh - 60px);
     overflow: hidden;
     user-select: none;
+}
+
+@media (max-width: 600px) {
+    .split {
+        display: none;
+    }
+
+    .puzzle-links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        justify-content: center;
+        height: calc(100vh - 60px);
+    }
+
+    .sheet-popout {
+        display: none;
+    }
 }
 
 .gutter {

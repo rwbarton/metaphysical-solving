@@ -58,8 +58,7 @@ urlpatterns = [
     # Redirects to the puzzle's associated chat
     re_path(r'^puzzle/chat/(\d+)/$',  views.puzzle_chat, name='puzzles.views.puzzle_chat'),
 
-    re_path(r'^puzzle/request_hint/(\d+)/$',  views.puzzle_request_hint, name='puzzles.views.puzzle_request_hint'),
-    re_path(r'^puzzle/history/(\d+)/$',  views.puzzle_view_history, name='puzzles.views.puzzle_view_history'),
+    # Jitsi redirects
     re_path(r'^puzzle/jitsi/(\d+)/$',  views.puzzle_jitsi_page, name='puzzles.views.puzzle_jitsi_page'),
     re_path(r'^notapuzzle/jitsi/(\w+)/$',  views.jitsi_page, name='puzzles.views.jitsi_page'),
 
@@ -67,6 +66,7 @@ urlpatterns = [
     # for the user.
     re_path(r'^puzzle/linkout/(\d+)/$',  views.puzzle_linkout, name='puzzles.views.puzzle_linkout'),
     
+    # Jitsi webhook, called when a user joins a Jitsi room
     re_path(r'^iworkallnightandiaccept8x8jaaswebhooksallday',views.jaas_webhook),
 
     re_path(r'^answers/$',  views.answer_queue, name='puzzles.views.answer_queue'),
