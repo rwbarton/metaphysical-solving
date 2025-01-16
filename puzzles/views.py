@@ -453,23 +453,6 @@ def handle_puzzle_hint(request, puzzle, user, details, urgent):
     q.save()
 
 @login_required
-def puzzle_request_hint(request, puzzle_id):
-    puzzle = Puzzle.objects.get(id=puzzle_id)
-    if request.method == 'POST':
-        form = HintForm(request.POST, request.FILES)
-        if form.is_valid():
-            handle_puzzle_hint(request,puzzle=puzzle, user=request.user,
-                               details=form.cleaned_data['details'],
-                               urgent = form.cleaned_data['urgent'])
-            return redirect(reverse('puzzles.views.puzzle_info', args=[puzzle_id]))
-    else:
-        form = HintForm(initial={'urgent': False})
-    return render(request, 'puzzles/puzzle-request-hint.html', context=puzzle_context(request, {
-                'form': form,
-                'puzzle': puzzle
-                }))
-
-@login_required
 def hint_queue(request):
     queued_hints = QueuedHint.objects.all()
     return render(request, 'puzzles/hint-queue.html', context=base_context({
@@ -498,19 +481,6 @@ def logout_return(request):
 @login_required
 def welcome(request):
     return redirect(reverse('puzzles.views.overview'))
-
-
-@login_required
-def puzzle_view_history(request, puzzle_id):
-    puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
-    dedupedLogs = puzzle.all_distinct_logs()
-    countTuples = dedupedLogs.values_list("user","accumulatedMinutes")
-    displayTuples = [(User.objects.get(id=c[0]),c[1]/60.) for c in countTuples]
-    return render(request, "puzzles/view_history.html", context=base_context({
-        'puzzle': puzzle,
-        'current_solvers': puzzle.recent_solvers(),
-        'historical_solvers': displayTuples
-                }))
 
 # General Jitsi page
 @login_required

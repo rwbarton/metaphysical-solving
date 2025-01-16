@@ -102,6 +102,7 @@
               if (oldMotd != data["motd"]) {
                 document.getElementById("motd").innerHTML = data["motd"];
                 document.getElementById("top-page-announcement").classList.remove("hidden");
+                checkOverflow();
                 if (Notification.permission === "granted" && nonInitialMotdLoad) {
                     const notification = new Notification("New message from QM", {
                     body: document.getElementById("motd").textContent,
@@ -127,6 +128,22 @@
       // Update MOTD every 60 seconds
       setInterval(fetchMotdAndUpdate, 20000);
     });
+
+    
+
+    function checkOverflow() {
+      let a_div = document.getElementById('top-page-announcement');
+      let m_div = document.getElementById('motd-content');
+      if (m_div.scrollWidth > m_div.clientWidth) {
+        a_div.classList.add('overflowing');
+      } else {
+      a_div.classList.remove('overflowing');
+      }
+    }
+
+  // Run on window resize
+  window.addEventListener('resize', checkOverflow);
+
 </script>
 
 <!-- The page header, containing the menu button, the team logo and name,
@@ -142,7 +159,7 @@
     </a>
     </div>
     <div class="top-page-announcement hidden" id="top-page-announcement">
-      <div class="motd-content">
+      <div class="motd-content" id="motd-content">
          <i class="ti ti-info-circle"></i>
          <span id="motd"></span>
       </div>

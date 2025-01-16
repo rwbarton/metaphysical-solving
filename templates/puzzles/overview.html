@@ -21,6 +21,18 @@
         <i class="ti ti-adjustments-horizontal"></i>
     </button>
 </div>
+<div id="dialog-window">
+  <div id="dialog-window-save-progress">
+    <div class="loading-placeholder"><i class="ti ti-loader-2 dialog-loading"></i></div>
+    Sending, please hold...
+  </div>
+  <div id="dialog-window-close-button" onClick="hideDialog()">
+    <i class="ti ti-x"></i>
+  </div>
+  <div id="dialog-window-content">
+  </div>
+</div>
+<div id="dialog-overlay" onClick="hideDialog()"></div>
 <div id="filter-overlay" class="overlay" onClick="toggleFilterPopup()"></div>
 <div id="filter-popup">
     <div class="filter-popup-header"><i class="ti ti-adjustments-horizontal"></i>View Filters (<span class="reset-filters-link" onClick="resetFilters()">Reset</span>)</span></div>
@@ -93,6 +105,64 @@
     let view_items = null;
 
     let collapsed_rounds = [];
+
+      // Show dialog overlay
+    function showDialogOverlay(html) {
+      document.getElementById("dialog-overlay").style.display = 'block';
+      document.getElementById("dialog-window-content").innerHTML = html ? html : "Dialog window content";
+      document.getElementById("dialog-window").style.display = "block";
+    }
+
+    function hideDialog() {
+      document.getElementById("dialog-overlay").style.display = 'none';
+      document.getElementById("dialog-window").style.display = 'none';
+    }
+
+    async function viewSolvers(puzzle_id) {
+    let html = `<div class="loading-placeholder"><i class="ti ti-loader-2 dialog-loading"></i></div>`;
+    showDialogOverlay(html);
+    try {
+          const response = await fetch(`/api_puzzle_history/${puzzle_id}`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            }});
+          const data = await response.json();
+          html = `
+            ${data.current_viewers.length > 0 ?
+              `<div class="dialog-row">
+                <header class="dialog-section-header">
+                <i class="ti ti-binoculars"></i> Currently viewing
+                </header>
+               ${data.current_viewers.map(viewer => `
+                    <div class="viewer">
+                      <div class="viewer-pic"><img src="/profile_photo/${viewer.id}" class="viewer-pic-image"/></div>
+                      <div class="viewer-info">
+                        <div class="viewer-name">${viewer.first_name} ${viewer.last_name}</div>
+                        <div class="viewer-location">${viewer.location}</div>
+                      </div>
+                    </div>`).join('')}
+              </div>` : ''}
+            ${data.prior_viewers.length > 0 ?
+              `<div class="dialog-row">
+                <header class="dialog-section-header">
+                <i class="ti ti-history"></i> Viewed in the past
+                </header>
+               ${data.prior_viewers.map(viewer => `
+                    <div class="viewer">
+                      <div class="viewer-pic"><img src="/profile_photo/${viewer.id}" class="viewer-pic-image"/></div>
+                      <div class="viewer-info">
+                        <div class="viewer-name">${viewer.first_name} ${viewer.last_name}</div>
+                        <div class="viewer-location">${viewer.hours} ${viewer.hours == 1 ? 'hour' : 'hours'}, ${viewer.location}</div>
+                      </div>
+                    </div>`).join('')}
+              </div>` : ''}
+          `;
+          showDialogOverlay(html);
+      } catch (error) {
+          console.error('Error fetching puzzle data:', error);
+      }
+    }
 
     function resetFilters () {
       hide_items = {
@@ -399,11 +469,15 @@
                   </div>
                   <div class="badges">
                   ${puzzle.solver_count > 0 && puzzle.status ? `
-                        <a class="solver-count" href="/puzzle/history/${puzzle.id}" target="_blank">
+                        <button class="solver-count" title="Show current solvers" onClick="viewSolvers(${puzzle.id})">
                             <i class="ti ti-users"></i>
                             ${puzzle.solver_count}
-                        </a>
-                  ` : ''}
+                        </button>
+                  ` : `
+                        <button class="show-on-hover solver-count" title="Show solver history" onClick="viewSolvers(${puzzle.id})">
+                            <i class="ti ti-history"></i>
+                        </button>
+                  `}
                   ${puzzle.status ? `
                       <div class="status-badge ${puzzle_priority}-priority">${puzzle.status}</div> `
                       : `<div class="answer-badge"><i class="ti ti-circle-check answer-check"></i>${puzzle.answer}</div>`}
