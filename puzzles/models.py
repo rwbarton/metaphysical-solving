@@ -8,6 +8,9 @@ from django.conf import settings
 from django.utils.timezone import now
 from django.utils.text import slugify
 from collections import defaultdict
+from math import ceil
+from ago import human
+
 import re
 import hashlib
 import time
@@ -121,6 +124,9 @@ class QueuedHint(OrderedModel):
     resolved = models.BooleanField(default=False)
     createdTime = models.DateTimeField(auto_now_add=True)
     modifiedTime = models.DateTimeField(auto_now=True)
+
+    def submitted_ago(self):
+        return (human(timedelta(seconds=ceil((now() - self.createdTime).total_seconds() / 60) * 60)))
 
     def __str__(self):
         return '%s on "%s"' % (self.user, self.puzzle.title)
@@ -246,6 +252,15 @@ class Puzzle(OrderedModel):
             return not (a and a.get().accumulatedMinutes>0)
         else:
             return self.all_distinct_logs().filter(accumulatedMinutes__gte=1).count()<=0
+    
+    def effort_spent(self):
+        dedupedLogs = self.all_distinct_logs()
+        countTuples = dedupedLogs.values_list("user","accumulatedMinutes")
+        individualValues = [round(c[1]/60., 2) for c in countTuples]
+        return({
+            "solvers": len(individualValues),
+            "solver_hours": sum(individualValues)
+        })
 
     def recent_solvers(self):
         logs=self.recent_logs()
