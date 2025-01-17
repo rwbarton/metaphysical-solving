@@ -18,7 +18,7 @@ def get_logged_in_browser():
     # br['password'] = password
     # br.submit()
 
-    r = br.open('https://puzzlefactory.place/login')
+    r = br.open('https://www.two-pi-noir.agency/login')
 
     br.select_form(nr=0)
     br['username'] = username
