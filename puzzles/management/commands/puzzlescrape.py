@@ -66,8 +66,10 @@ def create_puzzle(title, url, round_obj, is_meta=False, answer=None, desc=None):
         print('Adding')
 
         try:
-            puzzle = Puzzle.objects.create(title=title, url=url, round= round_obj,checkAnswerLink='',
-                                           description=desc)
+            if desc:
+                puzzle = Puzzle.objects.create(title=title, url=url, round= round_obj,checkAnswerLink='', description=desc)
+            else:
+                puzzle = Puzzle.objects.create(title=title, url=url, round=round_obj, checkAnswerLink='')
             if is_meta:
                 puzzle.tags.add(Tag.objects.get(name='meta'))
             print("Created puzzle (%s, %s)" % (title, url))
@@ -109,6 +111,7 @@ class Command(BaseCommand):
                     for puzzle in round['puzzles']:
                         if puzzle['state']=='unlocked':
                             puzzle_answer = puzzle.get('answer',None)
+                            puzzle_is_meta = puzzle.get('is_meta',None)
                             puzzle_url = "https://www.two-pi-noir.agency/puzzles/"+puzzle['slug']
                             if puzzle_answer:
                                 print(puzzle_answer)
@@ -126,12 +129,15 @@ class Command(BaseCommand):
                         if puzzle['state']=='unlocked':
                             puzzle_answer = puzzle.get('answer',None)
                             puzzle_url = "https://www.two-pi-noir.agency/puzzles/"+puzzle['slug']
+                            puzzle_desc = puzzle.get('desc',None)
+                            puzzle_is_meta = puzzle.get('is_meta', None)
                             if not Puzzle.objects.filter(url=puzzle_url).exists():
-                                print("[%s](%s) in %s" % (puzzle_url, puzzle['title'], round['title']))
+                                print("[%s](%s) in %s, '%s'" % (puzzle_url, puzzle['title'], round['title'], puzzle_desc))
                                 try:
                                     create_puzzle(puzzle['title'], puzzle_url, round_obj=round_obj,
-                                                  desc=puzzle['desc'])
-                                except:
+                                                  desc=puzzle_desc, is_meta=puzzle_is_meta)
+                                except Exception as e:
+                                    print (e)
                                     continue
                             puzzle_obj = Puzzle.objects.get(url=puzzle_url)
                             if puzzle_answer:
