@@ -954,6 +954,10 @@ select {
 
 }
 
+.puzzle.meta {
+    background: rgb(238, 238, 137) !important;
+}
+
 .puzzle.unopened {
     background: var(--unopened-background);
     /* box-shadow: inset 4px 0px 0px -1px var(--gray-300); */
