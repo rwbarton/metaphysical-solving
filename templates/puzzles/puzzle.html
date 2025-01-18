@@ -16,7 +16,7 @@
 </div>
 <div class="puzzle-links">
   <a href="{% url 'puzzles.views.puzzle_spreadsheet' id %}" title="Open sheet in new tab" target="_blank"><i class="ti ti-table"></i> Open puzzle spreadsheet</a>
-  <a href="{% url 'puzzles.views.puzzle_spreadsheet' id %}" title="Open chat in new tab" target="_blank"><i class="ti ti-brand-zulip"></i> Open puzzle chat</a>
+  <a href="{% url 'puzzles.views.puzzle_chat' id %}" title="Open chat in new tab" target="_blank"><i class="ti ti-brand-zulip"></i> Open puzzle chat</a>
   <a href="/puzzle/jitsi/{{ id }}?start_muted=1" title="Open chat in new tab" target="_blank"><i class="ti ti-video"></i> Open puzzle video room</a>
 
   

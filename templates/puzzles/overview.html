@@ -459,7 +459,7 @@
         let puzzle_priority = puzzle.priority ? puzzle.priority.replace(/!/g, '') : "normal";
       
         return `
-            <div class="puzzle ${puzzle.unopened ? 'unopened' : ''} ${puzzle_priority}-priority-puzzle">
+            <div class="puzzle ${puzzle.tags.includes("meta") ? "meta" : ''} ${puzzle.unopened ? 'unopened' : ''} ${puzzle_priority}-priority-puzzle">
                 <div class="puzzle-top">
                   <div class="puzzle-header">
                     <a href="/puzzle/${puzzle.id}" target="_blank"><span class="puzzle-title">${puzzle.title}</span></a>
@@ -498,6 +498,11 @@
     // Template function for a round
     function renderRound(round, parentRound = null, collapsed = false) {
         const roundTitle = parentRound ? `${parentRound}<i class="ti ti-chevron-right round-chevron"></i>${round.round}` : round.round;
+        const sortedPuzzles = [...round.puzzles].sort((a, b) => {
+            const aHasMeta = a.tags.includes("meta");
+            const bHasMeta = b.tags.includes("meta");
+            return bHasMeta - aHasMeta;
+        });
         return `
           <div class="roundwrapper">
             <div class="round ${collapsed ? 'collapsed' : ''}" id="round-block-${round.id}">
@@ -510,9 +515,9 @@
                       <button class="collapse-round-button" onClick="toggleRound('${round.id}')"><i class="ti ti-chevron-down collapse-chevron"></i></button>
                     </div>
                 </div>
-                ${round.puzzles ? `
+                ${sortedPuzzles ? `
                     <div class="puzzle-list">
-                        ${round.puzzles.map(puzzle => renderPuzzle(puzzle)).join('')}
+                        ${sortedPuzzles.map(puzzle => renderPuzzle(puzzle)).join('')}
                     </div>
                 ` : ''}
             </div>
