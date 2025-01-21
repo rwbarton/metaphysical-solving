@@ -1,0 +1,2 @@
+* * * * * cd /home/puzzle/metaphysical-solving/ ; env/bin/python manage.py puzzlescrape >> /home/puzzle/puzzlescrape.log
+
