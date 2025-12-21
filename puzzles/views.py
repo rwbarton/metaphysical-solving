@@ -20,7 +20,7 @@ from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.utils.http import urlencode
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from django.db import IntegrityError, transaction
 from django import forms
@@ -37,7 +37,7 @@ from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Pu
 from puzzles.forms import UploadForm, AnswerForm, HintForm
 
 from puzzles.submit import submit_answer
-from puzzles.zulip import zulip_send
+from puzzles.zulip import zulip_send, zulip_user_account_active
 from puzzles.jaas_jwt import JaaSJwtBuilder
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -361,11 +361,13 @@ def api_log_a_view(request, puzzle_id):
 
 # Main overview page
 @login_required
+@user_passes_test(zulip_user_account_active,login_url='puzzles.views.need_zulip_login')
 def overview(request):
     return render(request, "puzzles/overview.html", context=base_context())
 
 # Single puzzle page
 @login_required
+@user_passes_test(zulip_user_account_active,login_url='puzzles.views.need_zulip_login')
 def puzzle(request, puzzle_id):
     puzzle = Puzzle.objects.get(id=puzzle_id)
     return render(request, "puzzles/puzzle.html", context = base_context({
@@ -509,6 +511,10 @@ def puzzle_jitsi_page(request, puzzle_id):
     puzzle = Puzzle.objects.select_related().get(id=puzzle_id)
     return jitsi_page(request,puzzle.jitsi_room_id(), start_muted)
 
+@login_required
+def need_zulip_login(request):
+  return render(request, "puzzles/zulip_not_logged_in.html",context = base_context({'zulip_url':settings.ZULIP_SERVER_URL}))
+  
 # Who's on What page
 @login_required
 def who_what(request):

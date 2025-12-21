@@ -6,6 +6,7 @@ import binascii
 import zulip
 
 from django.conf import settings
+from datetime import datetime, timedelta
 
 def zulip_send(user, stream, subject, message):
     if not os.path.exists('/etc/puzzle/zulip/b+logger.conf'):
@@ -68,3 +69,18 @@ def zulip_create_user(email, full_name, short_name):
                          (email, full_name, short_name, response))
 
     return success
+
+def zulip_user_account_active(user):
+	recent_enough = timedelta(days=5)
+	client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
+	result = client.get_user_presence(user.email)
+	try:
+		last_update = datetime.fromtimestamp(result["presence"]["aggregated"]["timestamp"])
+		if (datetime.now() - last_update) < recent_enough:
+			return True
+		else:
+			return False
+	except KeyError:
+		return False
+
+	return True
