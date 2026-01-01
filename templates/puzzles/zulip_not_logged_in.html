@@ -1,7 +1,7 @@
 <html>
   <body>
     <h2>
-      Hi, {{user.first_name}}.
+      Hi, {{user.first_name}}. (<a target="_top" href="{% url 'puzzles.views.logout_user' %}">logout</a> if that's not you)
       <p>You don't seem to be logged in to Zulip yet, and our server will not work properly.
       <p>Please go to <a href={{zulip_url}} target="_blank">{{zulip_url}}</a> and log in (using the Google account associated with '{{user.email}}')
 	<p>Once you've done that, <a href={{request.GET.next}}>click to continue</a> to our server
