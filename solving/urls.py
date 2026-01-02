@@ -49,6 +49,9 @@ urlpatterns = [
     # Who is on what puzzle page
     re_path(r'^whowhat/$', views.who_what, name='puzzles.views.who_what'),
 
+    # Who is on what puzzle page
+    re_path(r'^unloved/$', views.unloved, name='puzzles.views.unloved'),
+
     re_path(r'^need_zulip_login/$', views.need_zulip_login, name = 'puzzles.views.need_zulip_login'),
 
     # Single puzzle overview page

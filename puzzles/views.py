@@ -37,7 +37,7 @@ from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Pu
 from puzzles.forms import UploadForm, AnswerForm, HintForm
 
 from puzzles.submit import submit_answer
-from puzzles.zulip import zulip_send, zulip_user_account_active
+from puzzles.zulip import zulip_send, zulip_user_account_active, get_user_zulip_id
 from puzzles.jaas_jwt import JaaSJwtBuilder
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -531,6 +531,17 @@ def who_what(request):
     return render(request, "puzzles/whowhat.html", context = base_context({
         'people':people}))
 
+@login_required
+def unloved(request):
+    last_updates = [(AccessLog.objects.filter(puzzle=p).order_by("lastUpdate").last(), p) for p in Puzzle.objects.exclude(status=Status.objects.filter(text="solved!").first())]
+    last_updates.sort(key=lambda x: x[0].lastUpdate if x[0] else now())
+    puzzles = [{"puzzle": s[1],
+                "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
+                "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
+                "updating_userid":get_user_zulip_id(s[0].user) if s[0] else 0}
+               for s in last_updates]
+    return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
+  
 # Google profile photo retriever (direct embedding doesn't work because of
 # Google's restrictions)
 @login_required

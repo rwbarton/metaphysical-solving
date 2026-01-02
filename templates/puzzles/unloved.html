@@ -1,0 +1,32 @@
+{% extends "puzzles/base_generic.html" %}
+
+{% load static %}
+
+{% block title %}Unloved Puzzles{% endblock %}
+
+{% block content %}
+<div class="stat-page">
+<h2 class="stat-page-header"><i class="ti ti-clipboard-smile"></i> Possibly Unloved Puzzles</h2>
+<div class="refresh-countdown"><i class="ti ti-refresh"></i> <span id="countdown">Next reload in 60 seconds</span></div>
+  {% for puzzle in puzzles %}
+<div>
+  <div style="display:inline-block">
+    <div class="puzzle-link"><a href="/puzzle/{{puzzle.puzzle.id}}"><i class="ti ti-clipboard"></i> {{puzzle.puzzle.title}}</a></div><div class="viewer-name">{{puzzle.puzzle.description}}</div></div> <div style="display:flex; justify-content:flex-end;" class="viewer-name">{{puzzle.human}} {% if puzzle.updating_username %}(by <a target="_blank" href="{{zulip_url}}/#narrow/dm/{{puzzle.updating_userid}}">{{ puzzle.updating_username }}</a>){% endif %}</div>
+  </div>
+        {% endfor %}
+<script>
+  let countdown = 60; // Time in seconds for the next refresh
+
+  const countdownElement = document.getElementById("countdown");
+
+  const intervalId = setInterval(() => {
+    countdown--;
+    countdownElement.textContent = `Next reload in ${countdown} seconds`;
+
+    if (countdown <= 0) {
+      clearInterval(intervalId); // Stop the countdown interval
+      location.reload(); // Refresh the page
+    }
+  }, 1000); // Update every 1 second
+</script>
+{% endblock %}
