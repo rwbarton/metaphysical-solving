@@ -541,7 +541,7 @@ def unloved(request):
   puzzles = [{"puzzle": s[1],
               "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
               "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
-              "updating_userid":get_user_zulip_id(s[0].user) if s[0] else 0,
+              "updating_userid":0,
               "freshness": freshness_translator(s[0])}
              for s in last_updates]
   return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
