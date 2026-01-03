@@ -24,7 +24,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from django.db import IntegrityError, transaction
 from django import forms
-from django.db.models import Prefetch, Max
+from django.db.models import Prefetch
 from django.db.transaction import atomic, non_atomic_requests
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, HttpResponseForbidden
@@ -534,19 +534,22 @@ def who_what(request):
 @login_required
 def unloved(request):
   acceptable_puzzles = Puzzle.objects.exclude(status__in=unloved_exempt_statuses()).exclude(tags__in=unloved_exempt_tags())
-  last_updates = acceptable_puzzles.annotate(lastUpdate=Max("accesslog__lastUpdate")).order_by('lastUpdate')
-  puzzles = [{"puzzle": s,
-              "human":human(s.lastUpdate,1) if s.lastUpdate else "untouched", 
-              "updating_username":"not tracked",
-              "updating_userid":0,
-              "freshness": freshness_translator(s.lastUpdate),}
+  last_updates = [(AccessLog.objects.filter(puzzle=p).order_by("lastUpdate").last(), p)
+                    for p in acceptable_puzzles]
+    
+  last_updates.sort(key=lambda x: x[0].lastUpdate if x[0] else now())
+  puzzles = [{"puzzle": s[1],
+              "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
+              "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
+              "updating_userid":get_user_zulip_id(s[0].user) if s[0] else 0,
+              "freshness": freshness_translator(s[0])}
              for s in last_updates]
   return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
 
-def freshness_translator(lastUpdate):
-  if not lastUpdate:
+def freshness_translator(log):
+  if not log:
     return "untouched"
-  delta = now()-lastUpdate
+  delta = now()-log.lastUpdate
   if delta>timedelta(hours=1):
     return "rancid"
   if delta>timedelta(minutes=10):
