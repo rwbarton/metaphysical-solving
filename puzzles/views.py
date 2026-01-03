@@ -33,7 +33,7 @@ from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 
 from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, PuzzleWrongAnswer, QueuedAnswer, \
-    Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime, QueuedHint
+    Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime, QueuedHint, unloved_exempt_statuses, unloved_exempt_tags
 from puzzles.forms import UploadForm, AnswerForm, HintForm
 
 from puzzles.submit import submit_answer
@@ -533,14 +533,28 @@ def who_what(request):
 
 @login_required
 def unloved(request):
-    last_updates = [(AccessLog.objects.filter(puzzle=p).order_by("lastUpdate").last(), p) for p in Puzzle.objects.exclude(status=Status.objects.filter(text="solved!").first())]
-    last_updates.sort(key=lambda x: x[0].lastUpdate if x[0] else now())
-    puzzles = [{"puzzle": s[1],
-                "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
-                "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
-                "updating_userid":get_user_zulip_id(s[0].user) if s[0] else 0}
-               for s in last_updates]
-    return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
+  acceptable_puzzles = Puzzle.objects.exclude(status__in=unloved_exempt_statuses()).exclude(tags__in=unloved_exempt_tags())
+  last_updates = [(AccessLog.objects.filter(puzzle=p).order_by("lastUpdate").last(), p)
+                    for p in acceptable_puzzles]
+    
+  last_updates.sort(key=lambda x: x[0].lastUpdate if x[0] else now())
+  puzzles = [{"puzzle": s[1],
+              "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
+              "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
+              "updating_userid":get_user_zulip_id(s[0].user) if s[0] else 0,
+              "freshness": freshness_translator(s[0])}
+             for s in last_updates]
+  return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
+
+def freshness_translator(log):
+  if not log:
+    return "untouched"
+  delta = now()-log.lastUpdate
+  if delta>timedelta(hours=1):
+    return "rancid"
+  if delta>timedelta(minutes=10):
+    return "questionable"
+  return "fresh"
   
 # Google profile photo retriever (direct embedding doesn't work because of
 # Google's restrictions)

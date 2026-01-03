@@ -47,6 +47,10 @@ If empty, users will have to enter their own phone number when submitting an ans
     use_adc = models.BooleanField(default=False,help_text="Should puzzle Sheets be owned by a real user instead of a service account")
 
     motd = models.TextField(blank=True)
+    unloved_exempt_status = models.ManyToManyField('Status', blank=True, related_name="exempt_status",
+                                                   help_text='Set of Statuses which should be filtered out of the list of potentially unloved puzzles')
+    unloved_exempt_tags = models.ManyToManyField('Tag', blank=True, related_name="exempt_tags",
+                                                 help_text='Feature to ignore tags not implemented')
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 from puzzles.zulip import zulip_send, zulip_create_user
@@ -176,7 +180,10 @@ def defaultTemplate():
     return Config.objects.get().default_template
 def defaultFolder():
     return Config.objects.get().default_folder
-
+def unloved_exempt_statuses():
+    return Config.objects.get().unloved_exempt_status.all()
+def unloved_exempt_tags():
+    return Config.objects.get().unloved_exempt_tags.all()
 
 class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)

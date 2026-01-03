@@ -1233,6 +1233,21 @@ select {
     }
 }
 
+.unloved-border {
+    border-bottom:1px solid var(--secondary);
+}
+.unloved-padding {
+    padding:4px 8px 4px 4px; 
+}
+.unloved-fresh {
+    background: #a0ffb0;
+}
+.unloved-questionable {
+    background: #ffe0b0;
+}
+.unloved-rancid {
+    background: #ffc0c0
+}
 /* Hints Management Styles */
 
 @keyframes flash {

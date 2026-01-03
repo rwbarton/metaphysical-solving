@@ -6,14 +6,53 @@
 
 {% block content %}
 <div class="stat-page">
-<h2 class="stat-page-header"><i class="ti ti-clipboard-smile"></i> Possibly Unloved Puzzles</h2>
-<div class="refresh-countdown"><i class="ti ti-refresh"></i> <span id="countdown">Next reload in 60 seconds</span></div>
-  {% for puzzle in puzzles %}
-<div>
-  <div style="display:inline-block">
-    <div class="puzzle-link"><a href="/puzzle/{{puzzle.puzzle.id}}"><i class="ti ti-clipboard"></i> {{puzzle.puzzle.title}}</a></div><div class="viewer-name">{{puzzle.puzzle.description}}</div></div> <div style="display:flex; justify-content:flex-end;" class="viewer-name">{{puzzle.human}} {% if puzzle.updating_username %}(by <a target="_blank" href="{{zulip_url}}/#narrow/dm/{{puzzle.updating_userid}}">{{ puzzle.updating_username }}</a>){% endif %}</div>
+  <h2 class="stat-page-header">Puzzles That Haven't Been Looked At Recently</h2>
+<div id="dialog-window">
+  <div id="dialog-window-save-progress">
+    <div class="loading-placeholder"><i class="ti ti-loader-2 dialog-loading"></i></div>
+    Sending, please hold...
   </div>
-        {% endfor %}
+  <div id="dialog-window-close-button" onClick="hideDialog()">
+    <i class="ti ti-x"></i>
+  </div>
+  <div id="dialog-window-content">
+  </div>
+</div>
+<div id="dialog-overlay" onClick="hideDialog()"></div>
+  <div style="display:grid; grid-template-columns: 2fr 7fr 1fr;background:#ffffff; ">
+    <div class="unloved-border"></div>
+    <div class="unloved-border"></div>
+    <div class="unloved-border"></div>
+    
+  {% for puzzle in puzzles %}
+  <div class="unloved-border unloved-padding unloved-{{puzzle.freshness}}">
+    <div class="puzzle-title" style="justify-self:end;">
+      {{puzzle.human}}<button class="solver-count" style="display:inline flex;
+							  gap:0;
+							  margin-right: 0;
+							  margin-left: 5px;" title="Show solver history" onClick="viewSolvers({{puzzle.puzzle.id}})"><i class="ti ti-history"></i></button>
+    </div>
+    {% if puzzle.updating_username %}                                                                                 
+         <div class="viewer-name" style="justify-self:end;">(by <a target="_blank" href="{{zulip_url}}/#narrow/dm/{{puzzle.updating_userid}}">{{ puzzle.updating_username }}</a>)</div>{% endif %}
+  </div>
+    <div class="unloved-border unloved-padding">
+      <div>
+	<a href="/puzzle/{{puzzle.puzzle.id}}"> <span class="puzzle-title">{% if puzzle.puzzle.round %}{{puzzle.puzzle.round}}>{% endif %}{{puzzle.puzzle.title}}</span></a>
+	<a href="/puzzle/linkout/{{puzzle.puzzle.id}}" target="_blank" class="puzzle-link">
+          <i class="ti ti-external-link"></i></a>
+      </div>
+    <div class="puzzle-description">{{puzzle.puzzle.description}}</div>
+  </div>
+    <div class="unloved-border unloved-padding">
+      
+      <div class="viewer-name {{puzzle.puzzle.priority.css_name}}-priority" style="padding:1px;">
+	{{puzzle.puzzle.priority}}</div>
+      <div class="viewer-name" style="padding:1px;">{{puzzle.puzzle.status}}</div>
+    </div>
+  {% endfor %}
+  </div>
+</div>
+
 <script>
   let countdown = 60; // Time in seconds for the next refresh
 
@@ -28,5 +67,62 @@
       location.reload(); // Refresh the page
     }
   }, 1000); // Update every 1 second
+        // Show dialog overlay
+    function showDialogOverlay(html) {
+      document.getElementById("dialog-overlay").style.display = 'block';
+      document.getElementById("dialog-window-content").innerHTML = html ? html : "Dialog window content";
+      document.getElementById("dialog-window").style.display = "block";
+    }
+
+    function hideDialog() {
+      document.getElementById("dialog-overlay").style.display = 'none';
+      document.getElementById("dialog-window").style.display = 'none';
+    }
+
+    async function viewSolvers(puzzle_id) {
+    let html = `<div class="loading-placeholder"><i class="ti ti-loader-2 dialog-loading"></i></div>`;
+    showDialogOverlay(html);
+    try {
+          const response = await fetch(`/api_puzzle_history/${puzzle_id}`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            }});
+          const data = await response.json();
+        html = `
+            ${data.current_viewers.length > 0 ?
+              `<div class="dialog-row">
+                <header class="dialog-section-header">
+                <i class="ti ti-binoculars"></i> Currently viewing
+                </header>
+               ${data.current_viewers.map(viewer => `
+                    <div class="viewer">
+                      <div class="viewer-pic"><img src="/profile_photo/${viewer.id}" class="viewer-pic-image"/></div>
+                      <div class="viewer-info">
+                        <div class="viewer-name">${viewer.first_name} ${viewer.last_name}</div>
+                        <div class="viewer-location">${viewer.location}</div>
+                      </div>
+                    </div>`).join('')}
+              </div>` : ''}
+            ${data.prior_viewers.length > 0 ?
+              `<div class="dialog-row">
+                <header class="dialog-section-header">
+                <i class="ti ti-history"></i> Viewed in the past
+                </header>
+               ${data.prior_viewers.map(viewer => `
+                    <div class="viewer">
+                      <div class="viewer-pic"><img src="/profile_photo/${viewer.id}" class="viewer-pic-image"/></div>
+                      <div class="viewer-info">
+                        <div class="viewer-name">${viewer.first_name} ${viewer.last_name}</div>
+                        <div class="viewer-location">${viewer.hours} ${viewer.hours == 1 ? 'hour' : 'hours'}, ${viewer.location}</div>
+                      </div>
+                    </div>`).join('')}
+              </div>` : ''}
+          `;
+          showDialogOverlay(html);
+      } catch (error) {
+          console.error('Error fetching puzzle data:', error);
+      }
+    }
 </script>
 {% endblock %}
