@@ -541,7 +541,7 @@ def unloved(request):
   puzzles = [{"puzzle": s[1],
               "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
               "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
-              "updating_userid":0,
+              "updating_userid":s[0].user.id if s[0] else 00,
               "freshness": freshness_translator(s[0])}
              for s in last_updates]
   return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
@@ -555,7 +555,12 @@ def freshness_translator(log):
   if delta>timedelta(minutes=10):
     return "questionable"
   return "fresh"
-  
+
+def zulip_dm(request,user_id):
+  zulip_id=get_user_zulip_id(User.objects.get(id=user_id))
+  return redirect("%s/#narrow/dm/%s" % (settings.ZULIP_SERVER_URL,zulip_id))
+
+
 # Google profile photo retriever (direct embedding doesn't work because of
 # Google's restrictions)
 @login_required

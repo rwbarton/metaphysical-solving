@@ -70,7 +70,9 @@ urlpatterns = [
     # Redirects to the puzzle's external page on writing team's site, and logs the view
     # for the user.
     re_path(r'^puzzle/linkout/(\d+)/$',  views.puzzle_linkout, name='puzzles.views.puzzle_linkout'),
-    
+
+
+    re_path(r'^zulip_dm/(\d+)/$',views.zulip_dm,name='puzzles.views.zulip_dm'),
     # Jitsi webhook, called when a user joins a Jitsi room
     re_path(r'^iworkallnightandiaccept8x8jaaswebhooksallday',views.jaas_webhook),
 
