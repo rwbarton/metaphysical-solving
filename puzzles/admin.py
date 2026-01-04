@@ -40,8 +40,9 @@ admin.site.register(AutoTag)
 
 admin.site.register(Config)
 class LogAdmin(OrderedModelAdmin):
-	list_display = ('user','puzzle','accumulatedMinutes','lastUpdate')
-	list_filter = ('user','puzzle')
+    list_display = ('user','puzzle','accumulatedMinutes','lastUpdate')
+    list_filter = ('user','puzzle')
+    readonly_fields = ['lastUpdate']
 admin.site.register(AccessLog, LogAdmin)
 
 class JitsiAdmin(OrderedModelAdmin):

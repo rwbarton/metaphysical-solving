@@ -428,7 +428,7 @@ class AccessLog(models.Model):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     linkedOut = models.BooleanField(default=False)
     accumulatedMinutes = models.IntegerField(default=0)
-    lastUpdate = models.DateTimeField(auto_now_add=True)
+    lastUpdate = models.DateTimeField(auto_now_add=True, editable=True)
     sessionStart = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))
     sessionEnd = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))    
     def __str__(self):
