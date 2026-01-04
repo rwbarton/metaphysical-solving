@@ -543,7 +543,8 @@ def unloved(request):
               "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
               "updating_userid":s[0].user.id if s[0] else 00,
               "freshness": freshness_translator(s[0]),
-              "total_time":human(timedelta(hours=s[1].effort_spent()["solver_hours"]),1,abbreviate=True,past_tense='{}')}
+              "total_time": human(timedelta(hours=spent),1,abbreviate=True,past_tense='{}') if (spent:=(s[1].effort_spent()["solver_hours"]))>0 else '',
+              }
              for s in last_updates]
   return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
 
