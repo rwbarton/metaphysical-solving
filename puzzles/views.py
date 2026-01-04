@@ -170,7 +170,7 @@ def api_puzzle_history(request, puzzle_id):
         "last_name": item[0].last_name,
         "location": item[0].userprofile.location.name,
         "hours": round(item[1], 2)
-        } for item in displayTuples]
+        } for item in displayTuples if item[1]>0]
     current_viewers = puzzle.recent_solvers().order_by('first_name', 'last_name')
     current_viewers = [{
         "id": item.id,
@@ -542,7 +542,8 @@ def unloved(request):
               "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
               "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
               "updating_userid":s[0].user.id if s[0] else 00,
-              "freshness": freshness_translator(s[0])}
+              "freshness": freshness_translator(s[0]),
+              "total_time":human(timedelta(hours=s[1].effort_spent()["solver_hours"]),1,abbreviate=True,past_tense='{}')}
              for s in last_updates]
   return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
 

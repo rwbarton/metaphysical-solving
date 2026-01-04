@@ -1246,8 +1246,19 @@ select {
     background: #ffe0b0;
 }
 .unloved-rancid {
-    background: #ffc0c0
+    background: #ffc0c0;
 }
+
+.unloved-h {
+    background: #a0d0ff;
+}
+.unloved-d {
+    background: #d0a0ff;
+}
+.unloved-m {
+    background: var(--gray-200);
+}
+
 /* Hints Management Styles */
 
 @keyframes flash {

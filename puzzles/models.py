@@ -250,7 +250,7 @@ class Puzzle(OrderedModel):
     def all_distinct_logs(self):
         return AccessLog.objects.filter(puzzle__exact=self).distinct()
     def recent_logs(self):
-        return self.all_distinct_logs().filter(lastUpdate__gte = now()-timedelta(seconds=360))
+        return self.all_distinct_logs().filter(sessionEnd__gte = now()-timedelta(seconds=360))
     def recent_count(self):
         return self.recent_logs().order_by("user").values("user").distinct().count()
     

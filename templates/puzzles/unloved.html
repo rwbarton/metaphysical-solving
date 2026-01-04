@@ -19,29 +19,38 @@
   </div>
 </div>
 <div id="dialog-overlay" onClick="hideDialog()"></div>
-  <div style="display:grid; grid-template-columns: 2fr 7fr 1fr;background:#ffffff; ">
+  <div style="display:grid; grid-template-columns: 2fr 2.5em 7fr 1fr;background:#ffffff; ">
+    <div class="unloved-border"></div>
     <div class="unloved-border"></div>
     <div class="unloved-border"></div>
     <div class="unloved-border"></div>
     
-  {% for puzzle in puzzles %}
-  <div class="unloved-border unloved-padding unloved-{{puzzle.freshness}}">
+    {% for puzzle in puzzles %}
+    <div class="unloved-border unloved-padding unloved-{{puzzle.freshness}}">
     <div class="puzzle-title" style="justify-self:end;">
-      {{puzzle.human}}<button class="solver-count" style="display:inline flex;
-							  gap:0;
-							  margin-right: 0;
-							  margin-left: 5px;" title="Show solver history" onClick="viewSolvers({{puzzle.puzzle.id}})"><i class="ti ti-history"></i></button>
+      {{puzzle.human}}
     </div>
     {% if puzzle.updating_username %}                                                                                 
          <div class="viewer-name" style="justify-self:end;">(by <a target="_blank" href="/zulip_dm/{{puzzle.updating_userid}}/">{{ puzzle.updating_username }}</a>)</div>{% endif %}
-  </div>
+    </div>
+    {% if puzzle.total_time %}
+        <div class="unloved-border unloved-padding unloved-{{puzzle.total_time | slice:"-1:"}}" style="align-content:center;">
+          <button title="Show solver history" onClick="viewSolvers({{puzzle.puzzle.id}})" style="border:none;background:none;gap:0;padding:0;margin:0;">
+	    <div><i class="ti ti-history"></i></div>
+	    <div>{{puzzle.total_time}}</div></button>
+	</div>
+	{% else %}
+	<div class="unloved-border unloved-padding"></div>
+	{% endif %}
+	
+
     <div class="unloved-border unloved-padding">
       <div>
 	<a href="/puzzle/{{puzzle.puzzle.id}}"> <span class="puzzle-title">{% if puzzle.puzzle.round %}{{puzzle.puzzle.round}}>{% endif %}{{puzzle.puzzle.title}}</span></a>
 	<a href="/puzzle/linkout/{{puzzle.puzzle.id}}" target="_blank" class="puzzle-link">
           <i class="ti ti-external-link"></i></a>
       </div>
-    <div class="puzzle-description">{{puzzle.puzzle.description}}</div>
+    <div class="puzzle-description" style:"top:0;">{{puzzle.puzzle.description}}</div>
   </div>
     <div class="unloved-border unloved-padding">
       
@@ -117,7 +126,7 @@
                         <div class="viewer-location">${viewer.hours} ${viewer.hours == 1 ? 'hour' : 'hours'}, ${viewer.location}</div>
                       </div>
                     </div>`).join('')}
-              </div>` : ''}
+              </div>` : 'No significant views.'}
           `;
           showDialogOverlay(html);
       } catch (error) {
