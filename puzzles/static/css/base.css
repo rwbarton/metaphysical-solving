@@ -1237,7 +1237,8 @@ select {
     border-bottom:1px solid var(--secondary);
 }
 .unloved-padding {
-    padding:4px 8px 4px 4px; 
+    padding:4px 8px 4px 8px;
+    align-content: center;
 }
 .unloved-fresh {
     background: #a0ffb0;
@@ -1258,6 +1259,19 @@ select {
 .unloved-m {
     background: var(--gray-200);
 }
+.unloved-history {
+    border:none;
+    background:none;
+    gap:0;
+    padding:0;
+    margin:0;
+}
+
+.unloved-history:hover {
+    color: var(--primary-light);
+    cursor: pointer;
+}
+
 
 /* Hints Management Styles */
 

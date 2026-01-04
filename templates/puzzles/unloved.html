@@ -19,13 +19,23 @@
   </div>
 </div>
 <div id="dialog-overlay" onClick="hideDialog()"></div>
-  <div style="display:grid; grid-template-columns: 2fr 2.5em 7fr 1fr;background:#ffffff; ">
+  <div style="display:grid; grid-template-columns: auto auto 7fr 5.5em;background:#ffffff; ">
     <div class="unloved-border"></div>
     <div class="unloved-border"></div>
     <div class="unloved-border"></div>
     <div class="unloved-border"></div>
     
     {% for puzzle in puzzles %}
+    {% if puzzle.total_time %}
+        <div class="unloved-border unloved-padding unloved-{{puzzle.total_time | slice:"-1:"}}" style="justify-content:center;">
+          <button class="unloved-history" title="Show solver history" onClick="viewSolvers({{puzzle.puzzle.id}})">
+	    <div><i class="ti ti-history"></i></div>
+	    <div style="justify-self:center;">{{puzzle.total_time}}</div></button>
+	</div>
+	{% else %}
+	<div class="unloved-border unloved-padding"></div>
+	{% endif %}
+
     <div class="unloved-border unloved-padding unloved-{{puzzle.freshness}}">
     <div class="puzzle-title" style="justify-self:end;">
       {{puzzle.human}}
@@ -33,15 +43,6 @@
     {% if puzzle.updating_username %}                                                                                 
          <div class="viewer-name" style="justify-self:end;">(by <a target="_blank" href="/zulip_dm/{{puzzle.updating_userid}}/">{{ puzzle.updating_username }}</a>)</div>{% endif %}
     </div>
-    {% if puzzle.total_time %}
-        <div class="unloved-border unloved-padding unloved-{{puzzle.total_time | slice:"-1:"}}" style="align-content:center;">
-          <button title="Show solver history" onClick="viewSolvers({{puzzle.puzzle.id}})" style="border:none;background:none;gap:0;padding:0;margin:0;">
-	    <div><i class="ti ti-history"></i></div>
-	    <div>{{puzzle.total_time}}</div></button>
-	</div>
-	{% else %}
-	<div class="unloved-border unloved-padding"></div>
-	{% endif %}
 	
 
     <div class="unloved-border unloved-padding">
@@ -50,13 +51,13 @@
 	<a href="/puzzle/linkout/{{puzzle.puzzle.id}}" target="_blank" class="puzzle-link">
           <i class="ti ti-external-link"></i></a>
       </div>
-    <div class="puzzle-description" style:"top:0;">{{puzzle.puzzle.description}}</div>
+    <div class="puzzle-description" style="margin-top:-5px;top:0;">{{puzzle.puzzle.description}}</div>
   </div>
     <div class="unloved-border unloved-padding">
       
       <div class="viewer-name {{puzzle.puzzle.priority.css_name}}-priority" style="padding:1px;">
 	{{puzzle.puzzle.priority}}</div>
-      <div class="viewer-name" style="padding:1px;">{{puzzle.puzzle.status}}</div>
+      <div class="viewer-name" style="padding:1px;">{{puzzle.puzzle.status|truncatechars:12}}</div>
     </div>
   {% endfor %}
   </div>
@@ -105,13 +106,13 @@
                 <i class="ti ti-binoculars"></i> Currently viewing
                 </header>
                ${data.current_viewers.map(viewer => `
-                    <div class="viewer">
+                    <a href="/zulip_dm/${viewer.id}/" target="_blank"><div class="viewer">
                       <div class="viewer-pic"><img src="/profile_photo/${viewer.id}" class="viewer-pic-image"/></div>
                       <div class="viewer-info">
                         <div class="viewer-name">${viewer.first_name} ${viewer.last_name}</div>
                         <div class="viewer-location">${viewer.location}</div>
                       </div>
-                    </div>`).join('')}
+                    </div></a>`).join('')}
               </div>` : ''}
             ${data.prior_viewers.length > 0 ?
               `<div class="dialog-row">
@@ -119,14 +120,18 @@
                 <i class="ti ti-history"></i> Viewed in the past
                 </header>
                ${data.prior_viewers.map(viewer => `
-                    <div class="viewer">
+                    <a href="/zulip_dm/${viewer.id}/" target="_blank"><div class="viewer">
                       <div class="viewer-pic"><img src="/profile_photo/${viewer.id}" class="viewer-pic-image"/></div>
                       <div class="viewer-info">
                         <div class="viewer-name">${viewer.first_name} ${viewer.last_name}</div>
                         <div class="viewer-location">${viewer.hours} ${viewer.hours == 1 ? 'hour' : 'hours'}, ${viewer.location}</div>
                       </div>
-                    </div>`).join('')}
-              </div>` : 'No significant views.'}
+                    </div></a>`).join('')}
+        </div>` :
+              `<div class="dialog-row">
+                <header class="dialog-section-header">
+                <i class="ti ti-history"></i> Viewed in the past
+                </header></div>`}
           `;
           showDialogOverlay(html);
       } catch (error) {

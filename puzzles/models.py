@@ -237,10 +237,10 @@ class Puzzle(OrderedModel):
     def log_a_view(self,user):
         current = now()
         userLog = AccessLog.objects.get_or_create(puzzle=self,user=user)[0]
-        if (current-userLog.sessionEnd)>timedelta(seconds=355):
+        if (current-userLog.sessionEnd)>settings.MAX_GAP_LENGTH:
             userLog.sessionStart=current
-        elif (current-userLog.sessionStart)>timedelta(seconds=355):
-            accounted_for_already = int((userLog.sessionEnd-userLog.sessionStart).seconds/60) if (userLog.sessionEnd-userLog.sessionStart)>timedelta(seconds=355) else 0
+        elif (current-userLog.sessionStart)>settings.MIN_SESSION_LENGTH:
+            accounted_for_already = int((userLog.sessionEnd-userLog.sessionStart).seconds/60) if (userLog.sessionEnd-userLog.sessionStart)>settings.MIN_SESSION_LENGTH else 0
             timeAdjustment = int((current-userLog.sessionStart).seconds/60)-accounted_for_already
             userLog.accumulatedMinutes = userLog.accumulatedMinutes+timeAdjustment
             userLog.lastUpdate = current

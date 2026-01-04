@@ -551,9 +551,9 @@ def freshness_translator(log):
   if not log:
     return "untouched"
   delta = now()-log.lastUpdate
-  if delta>timedelta(hours=1):
+  if delta>(10*settings.MAX_GAP_LENGTH):
     return "rancid"
-  if delta>timedelta(minutes=10):
+  if delta>(2*settings.MAX_GAP_LENGTH):
     return "questionable"
   return "fresh"
 
