@@ -14,7 +14,7 @@ from ago import human
 import re
 import hashlib
 import time
-from datetime import timedelta
+from datetime import timedelta, datetime,timezone
 
 
 
@@ -235,11 +235,17 @@ class Puzzle(OrderedModel):
         return reverse("puzzles.views.puzzle_jitsi_page",args=[self.id])
         
     def log_a_view(self,user):
+        current = now()
         userLog = AccessLog.objects.get_or_create(puzzle=self,user=user)[0]
-        if (now()-userLog.lastUpdate)>timedelta(seconds=355):
-            userLog.accumulatedMinutes = userLog.accumulatedMinutes+6
-            userLog.lastUpdate = now()
-            userLog.save()
+        if (current-userLog.sessionEnd)>timedelta(seconds=355):
+            userLog.sessionStart=current
+        elif (current-userLog.sessionStart)>timedelta(seconds=355):
+            accounted_for_already = int((userLog.sessionEnd-userLog.sessionStart).seconds/60) if (userLog.sessionEnd-userLog.sessionStart)>timedelta(seconds=355) else 0
+            timeAdjustment = int((current-userLog.sessionStart).seconds/60)-accounted_for_already
+            userLog.accumulatedMinutes = userLog.accumulatedMinutes+timeAdjustment
+            userLog.lastUpdate = current
+        userLog.sessionEnd=current
+        userLog.save()
 
     def all_distinct_logs(self):
         return AccessLog.objects.filter(puzzle__exact=self).distinct()
@@ -422,7 +428,9 @@ class AccessLog(models.Model):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     linkedOut = models.BooleanField(default=False)
     accumulatedMinutes = models.IntegerField(default=0)
-    lastUpdate = models.DateTimeField(default=now)
+    lastUpdate = models.DateTimeField(auto_now_add=True)
+    sessionStart = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))
+    sessionEnd = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))    
     def __str__(self):
         return self.puzzle.title + " / " + self.user.email
 
