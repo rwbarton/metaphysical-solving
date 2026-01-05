@@ -35,6 +35,7 @@ from django.utils.timezone import now
 from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, PuzzleWrongAnswer, QueuedAnswer, \
     Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime, QueuedHint, unloved_exempt_statuses, unloved_exempt_tags
 from puzzles.forms import UploadForm, AnswerForm, HintForm
+from puzzles.googlespreadsheet import get_last_revs
 
 from puzzles.submit import submit_answer
 from puzzles.zulip import zulip_send, zulip_user_account_active, get_user_zulip_id
@@ -548,10 +549,32 @@ def unloved(request):
              for s in last_updates]
   return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
 
+@login_required
+def unloved_by_spreadsheet(request):
+  acceptable_puzzles = Puzzle.objects.exclude(status__in=unloved_exempt_statuses()).exclude(tags__in=unloved_exempt_tags())
+
+  last_updates = get_last_revs(acceptable_puzzles)
+    
+
+  puzzles = [{"puzzle": s['puzzle'],
+              "human":human(s['rev'][0],1) if s['rev'] else "untouched",
+              "updating_username": "",
+              "updating_userid":0,
+              "freshness": freshness_translator(s['rev']),
+              "total_time": 'rev %s'%s['rev'][1] if s['rev'] else '',
+              }
+             for s in last_updates]
+  return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
+
+
 def freshness_translator(log):
   if not log:
     return "untouched"
-  delta = now()-log.lastUpdate
+  try:
+    delta = now()-log.lastUpdate
+  except AttributeError:
+    delta = now()-log[0]
+    
   if delta>(10*settings.MAX_GAP_LENGTH):
     return "rancid"
   if delta>(2*settings.MAX_GAP_LENGTH):
