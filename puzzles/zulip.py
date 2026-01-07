@@ -84,3 +84,9 @@ def zulip_user_account_active(user):
 		return False
 
 	return True
+
+def get_user_zulip_id(user):
+    client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
+    result = client.call_endpoint(url=f"/users/"+user.email,method="GET",)
+    return result["user"]["user_id"]
+

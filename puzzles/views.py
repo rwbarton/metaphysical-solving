@@ -33,11 +33,12 @@ from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 
 from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, PuzzleWrongAnswer, QueuedAnswer, \
-    Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime, QueuedHint
+    Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime, QueuedHint, unloved_exempt_statuses, unloved_exempt_tags
 from puzzles.forms import UploadForm, AnswerForm, HintForm
+from puzzles.googlespreadsheet import get_last_revs
 
 from puzzles.submit import submit_answer
-from puzzles.zulip import zulip_send, zulip_user_account_active
+from puzzles.zulip import zulip_send, zulip_user_account_active, get_user_zulip_id
 from puzzles.jaas_jwt import JaaSJwtBuilder
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -170,7 +171,7 @@ def api_puzzle_history(request, puzzle_id):
         "last_name": item[0].last_name,
         "location": item[0].userprofile.location.name,
         "hours": round(item[1], 2)
-        } for item in displayTuples]
+        } for item in displayTuples if item[1]>0]
     current_viewers = puzzle.recent_solvers().order_by('first_name', 'last_name')
     current_viewers = [{
         "id": item.id,
@@ -530,6 +531,60 @@ def who_what(request):
 #    print(people)
     return render(request, "puzzles/whowhat.html", context = base_context({
         'people':people}))
+
+@login_required
+def unloved(request):
+  acceptable_puzzles = Puzzle.objects.exclude(status__in=unloved_exempt_statuses()).exclude(tags__in=unloved_exempt_tags())
+  last_updates = [(AccessLog.objects.filter(puzzle=p).order_by("lastUpdate").last(), p)
+                    for p in acceptable_puzzles]
+    
+  last_updates.sort(key=lambda x: x[0].lastUpdate if x[0] else now())
+  puzzles = [{"puzzle": s[1],
+              "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
+              "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
+              "updating_userid":s[0].user.id if s[0] else 00,
+              "freshness": freshness_translator(s[0]),
+              "total_time": human(timedelta(hours=spent),1,abbreviate=True,past_tense='{}') if (spent:=(s[1].effort_spent()["solver_hours"]))>0 else '',
+              }
+             for s in last_updates]
+  return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
+
+@login_required
+def unloved_by_spreadsheet(request):
+  acceptable_puzzles = Puzzle.objects.exclude(status__in=unloved_exempt_statuses()).exclude(tags__in=unloved_exempt_tags())
+
+  last_updates = get_last_revs(acceptable_puzzles)
+    
+
+  puzzles = [{"puzzle": s['puzzle'],
+              "human":human(s['rev'][0],1) if s['rev'] else "untouched",
+              "updating_username": "",
+              "updating_userid":0,
+              "freshness": freshness_translator(s['rev']),
+              "total_time": 'rev %s'%s['rev'][1] if s['rev'] else '',
+              }
+             for s in last_updates]
+  return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
+
+
+def freshness_translator(log):
+  if not log:
+    return "untouched"
+  try:
+    delta = now()-log.lastUpdate
+  except AttributeError:
+    delta = now()-log[0]
+    
+  if delta>(10*settings.MAX_GAP_LENGTH):
+    return "rancid"
+  if delta>(2*settings.MAX_GAP_LENGTH):
+    return "questionable"
+  return "fresh"
+
+def zulip_dm(request,user_id):
+  zulip_id=get_user_zulip_id(User.objects.get(id=user_id))
+  return redirect("%s/#narrow/dm/%s" % (settings.ZULIP_SERVER_URL,zulip_id))
+
 
 # Google profile photo retriever (direct embedding doesn't work because of
 # Google's restrictions)

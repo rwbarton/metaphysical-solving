@@ -49,6 +49,10 @@ urlpatterns = [
     # Who is on what puzzle page
     re_path(r'^whowhat/$', views.who_what, name='puzzles.views.who_what'),
 
+    # Unloved puzzle page
+    re_path(r'^unloved/$', views.unloved, name='puzzles.views.unloved'),
+    re_path(r'^unloved_by_spreadsheet/$', views.unloved_by_spreadsheet, name='puzzles.views.unloved_by_spreadsheet'),
+
     re_path(r'^need_zulip_login/$', views.need_zulip_login, name = 'puzzles.views.need_zulip_login'),
 
     # Single puzzle overview page
@@ -67,7 +71,9 @@ urlpatterns = [
     # Redirects to the puzzle's external page on writing team's site, and logs the view
     # for the user.
     re_path(r'^puzzle/linkout/(\d+)/$',  views.puzzle_linkout, name='puzzles.views.puzzle_linkout'),
-    
+
+
+    re_path(r'^zulip_dm/(\d+)/$',views.zulip_dm,name='puzzles.views.zulip_dm'),
     # Jitsi webhook, called when a user joins a Jitsi room
     re_path(r'^iworkallnightandiaccept8x8jaaswebhooksallday',views.jaas_webhook),
 

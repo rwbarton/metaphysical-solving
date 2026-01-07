@@ -14,7 +14,7 @@ from ago import human
 import re
 import hashlib
 import time
-from datetime import timedelta
+from datetime import timedelta, datetime,timezone
 
 
 
@@ -47,6 +47,10 @@ If empty, users will have to enter their own phone number when submitting an ans
     use_adc = models.BooleanField(default=False,help_text="Should puzzle Sheets be owned by a real user instead of a service account")
 
     motd = models.TextField(blank=True)
+    unloved_exempt_status = models.ManyToManyField('Status', blank=True, related_name="exempt_status",
+                                                   help_text='Set of Statuses which should be filtered out of the list of potentially unloved puzzles')
+    unloved_exempt_tags = models.ManyToManyField('Tag', blank=True, related_name="exempt_tags",
+                                                 help_text='Feature to ignore tags not implemented')
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 from puzzles.zulip import zulip_send, zulip_create_user
@@ -176,7 +180,10 @@ def defaultTemplate():
     return Config.objects.get().default_template
 def defaultFolder():
     return Config.objects.get().default_folder
-
+def unloved_exempt_statuses():
+    return Config.objects.get().unloved_exempt_status.all()
+def unloved_exempt_tags():
+    return Config.objects.get().unloved_exempt_tags.all()
 
 class Puzzle(OrderedModel):
     title = models.CharField(max_length=200)
@@ -228,16 +235,22 @@ class Puzzle(OrderedModel):
         return reverse("puzzles.views.puzzle_jitsi_page",args=[self.id])
         
     def log_a_view(self,user):
+        current = now()
         userLog = AccessLog.objects.get_or_create(puzzle=self,user=user)[0]
-        if (now()-userLog.lastUpdate)>timedelta(seconds=355):
-            userLog.accumulatedMinutes = userLog.accumulatedMinutes+6
-            userLog.lastUpdate = now()
-            userLog.save()
+        if (current-userLog.sessionEnd)>settings.MAX_GAP_LENGTH:
+            userLog.sessionStart=current
+        elif (current-userLog.sessionStart)>settings.MIN_SESSION_LENGTH:
+            accounted_for_already = int((userLog.sessionEnd-userLog.sessionStart).seconds/60) if (userLog.sessionEnd-userLog.sessionStart)>settings.MIN_SESSION_LENGTH else 0
+            timeAdjustment = int((current-userLog.sessionStart).seconds/60)-accounted_for_already
+            userLog.accumulatedMinutes = userLog.accumulatedMinutes+timeAdjustment
+            userLog.lastUpdate = current
+        userLog.sessionEnd=current
+        userLog.save()
 
     def all_distinct_logs(self):
         return AccessLog.objects.filter(puzzle__exact=self).distinct()
     def recent_logs(self):
-        return self.all_distinct_logs().filter(lastUpdate__gte = now()-timedelta(seconds=360))
+        return self.all_distinct_logs().filter(sessionEnd__gte = now()-timedelta(seconds=360))
     def recent_count(self):
         return self.recent_logs().order_by("user").values("user").distinct().count()
     
@@ -415,7 +428,9 @@ class AccessLog(models.Model):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     linkedOut = models.BooleanField(default=False)
     accumulatedMinutes = models.IntegerField(default=0)
-    lastUpdate = models.DateTimeField(default=now)
+    lastUpdate = models.DateTimeField(auto_now_add=True, editable=True)
+    sessionStart = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))
+    sessionEnd = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))    
     def __str__(self):
         return self.puzzle.title + " / " + self.user.email
 

@@ -3,6 +3,7 @@ from googleapiclient import discovery
 import google.auth
 from google.auth import exceptions
 from puzzles.models import Config
+from datetime import datetime
 
 _google_config = None
 _adc_config = None
@@ -115,5 +116,25 @@ def create_google_folder(name):
     folder = driveService.files().create(body=metadata,fields="id").execute()
     fid = folder.get("id")
     return fid
-    
+
+def get_last_revs(acceptable_puzzles):
+  id_list = [{'id':val[0],'fileId':val[1].split('/')[-2]} for val in acceptable_puzzles.values_list('id','spreadsheet')]
+
+  responses = []
+  def callback(id,response,exception):
+    if exception:
+      responses.append((id,None))
+    else:
+      responses.append((id,max([(datetime.fromisoformat(x['modifiedTime']),x['id']) for x in response["revisions"]])))
+
+  driveService = discovery.build('drive','v3',credentials=get_google_credentials())
+  #TODO: handle more than 100 puzzles (batch size limit)
+  batch = driveService.new_batch_http_request(callback=callback)
+  
+  for p in id_list:
+    batch.add(driveService.revisions().list(fileId=p['fileId']))
+  batch.execute()
+
+  last_updates=[{'puzzle':acceptable_puzzles[int(resp[0])-1],'rev':resp[1]} for resp in responses]
+  return sorted(last_updates,key=lambda x: x['rev'][0] if x['rev'] else datetime.now())
     

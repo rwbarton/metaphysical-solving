@@ -135,13 +135,13 @@
                 <i class="ti ti-binoculars"></i> Currently viewing
                 </header>
                ${data.current_viewers.map(viewer => `
-                    <div class="viewer">
+                    <a href="/zulip_dm/${viewer.id}/" target="_blank"><div class="viewer">
                       <div class="viewer-pic"><img src="/profile_photo/${viewer.id}" class="viewer-pic-image"/></div>
                       <div class="viewer-info">
                         <div class="viewer-name">${viewer.first_name} ${viewer.last_name}</div>
                         <div class="viewer-location">${viewer.location}</div>
                       </div>
-                    </div>`).join('')}
+                    </div></a>`).join('')}
               </div>` : ''}
             ${data.prior_viewers.length > 0 ?
               `<div class="dialog-row">
@@ -149,14 +149,20 @@
                 <i class="ti ti-history"></i> Viewed in the past
                 </header>
                ${data.prior_viewers.map(viewer => `
-                    <div class="viewer">
+                    <a href="/zulip_dm/${viewer.id}/" target="_blank"><div class="viewer">
                       <div class="viewer-pic"><img src="/profile_photo/${viewer.id}" class="viewer-pic-image"/></div>
                       <div class="viewer-info">
                         <div class="viewer-name">${viewer.first_name} ${viewer.last_name}</div>
                         <div class="viewer-location">${viewer.hours} ${viewer.hours == 1 ? 'hour' : 'hours'}, ${viewer.location}</div>
                       </div>
-                    </div>`).join('')}
-              </div>` : ''}
+                    </div></a>`).join('')}
+        </div>` :
+              `<div class="dialog-row">
+                <header class="dialog-section-header">
+                <i class="ti ti-history"></i> No Past Views!
+                </header></div>`
+ 
+}
           `;
           showDialogOverlay(html);
       } catch (error) {

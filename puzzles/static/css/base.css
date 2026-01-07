@@ -1233,6 +1233,46 @@ select {
     }
 }
 
+.unloved-border {
+    border-bottom:1px solid var(--secondary);
+}
+.unloved-padding {
+    padding:4px 8px 4px 8px;
+    align-content: center;
+}
+.unloved-fresh {
+    background: #a0ffb0;
+}
+.unloved-questionable {
+    background: #ffe0b0;
+}
+.unloved-rancid {
+    background: #ffc0c0;
+}
+
+.unloved-h {
+    background: #a0d0ff;
+}
+.unloved-d {
+    background: #d0a0ff;
+}
+.unloved-m {
+    background: var(--gray-200);
+}
+.unloved-history {
+    border:none;
+    background:none;
+    gap:0;
+    padding:0;
+    margin:0;
+}
+
+.unloved-history:hover {
+    color: var(--primary-light);
+    cursor: pointer;
+}
+
+
 /* Hints Management Styles */
 
 @keyframes flash {
