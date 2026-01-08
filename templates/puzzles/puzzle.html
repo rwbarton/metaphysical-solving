@@ -23,6 +23,18 @@
 </div>
 <div id="content" class="split">
   <div id="left" class="frame">
+    <div id="motp-container" class="motp-container hidden">
+      <div id="motp-banner" class="motp-banner">
+        <i class="ti ti-info-circle"></i>
+        <span id="motp-text" class="motp-text"></span>
+        <button id="motp-collapse-btn" class="motp-collapse-btn" title="Collapse" onclick="collapseMOTP()">
+          <i class="ti ti-chevron-up"></i>
+        </button>
+      </div>
+    </div>
+    <div id="motp-dogear" class="motp-dogear hidden" onclick="expandMOTP()" title="Show message">
+      <i class="ti ti-info-circle"></i>
+    </div>
     <iframe id="left-frame" src="{% url 'puzzles.views.puzzle_spreadsheet' id %}"></iframe>
   </div>
   <div id="right" class="frame">
@@ -66,6 +78,40 @@
   let puzzle_data = {};
   let edited_tags = [];
   let fileUploader = null;
+  let motpCollapsed = false;
+
+  // MOTP (Message of the Puzzle) functions
+  function renderMOTP(motp) {
+    const container = document.getElementById('motp-container');
+    const dogear = document.getElementById('motp-dogear');
+    const textEl = document.getElementById('motp-text');
+
+    if (motp) {
+      textEl.textContent = motp;
+      if (motpCollapsed) {
+        container.classList.add('hidden');
+        dogear.classList.remove('hidden');
+      } else {
+        container.classList.remove('hidden');
+        dogear.classList.add('hidden');
+      }
+    } else {
+      container.classList.add('hidden');
+      dogear.classList.add('hidden');
+    }
+  }
+
+  function collapseMOTP() {
+    motpCollapsed = true;
+    document.getElementById('motp-container').classList.add('hidden');
+    document.getElementById('motp-dogear').classList.remove('hidden');
+  }
+
+  function expandMOTP() {
+    motpCollapsed = false;
+    document.getElementById('motp-container').classList.remove('hidden');
+    document.getElementById('motp-dogear').classList.add('hidden');
+  }
 
   // Show dialog overlay
   function showDialogOverlay(html) {
@@ -595,6 +641,7 @@
       `;
 
     document.getElementById("puzzle-info-bar").innerHTML = html;
+    renderMOTP(data.puzzle.motp);
   }
 
   // Update the puzzle info bar

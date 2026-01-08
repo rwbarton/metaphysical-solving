@@ -562,6 +562,93 @@ select {
     /* Optional: control the scrollbar size */
 }
 
+/* MOTP - Message of the Puzzle */
+.motp-container {
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    pointer-events: none;
+    max-width: 400px;
+}
+
+.motp-container.hidden {
+    display: none;
+}
+
+.motp-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    background: #02ad48;
+    color: white;
+    /*
+    background: linear-gradient(90deg, #9893f6 -8.21%, #edcbe2 44.23%, #fbd4c4 108.88%);
+    background-size: 200% 200%;
+    animation: undulateGradient 8s ease-in-out infinite;
+    color: var(--gray-800);
+    */
+    font-size: 14px;
+    font-weight: 400;
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    pointer-events: auto;
+}
+
+.motp-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.motp-collapse-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.motp-collapse-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.motp-dogear {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+    background: #02ad48;
+    /* background: linear-gradient(135deg, #9893f6 0%, #edcbe2 100%); */
+    border-radius: 0 0 6px 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease;
+}
+
+.motp-dogear:hover {
+    /* transform: scale(1.05); */
+    background: #087535;
+}
+
+.motp-dogear.hidden {
+    display: none;
+}
+
 @media (max-width: 900px) {
     .user-info {
         display: none;
@@ -2135,6 +2222,7 @@ select {
 .frame {
     overflow: hidden;
     background: white;
+    position: relative;
 }
 
 .frame iframe {

@@ -202,6 +202,7 @@ class Puzzle(OrderedModel):
     spreadsheet = models.URLField(blank=True)
     answer = models.CharField(max_length=200, blank=True)
     checkAnswerLink = models.URLField(blank=True)
+    motp = models.TextField(blank=True, help_text="Message of the puzzle - displayed at top of puzzle page")
     template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,default=defaultTemplate, on_delete=models.SET_NULL,
                                  help_text="Template to copy when first making this puzzle.  Leave null to create from scratch.")
     folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,default=defaultFolder, on_delete=models.SET_NULL,

@@ -298,7 +298,10 @@ def build_puzzle_dict(user, puzzle_id):
         p_info["answer"] = puzzle.answer
     else:
         p_info["status"] = str(puzzle.status)
-    
+
+    if puzzle.motp:
+        p_info["motp"] = puzzle.motp
+
     puzzle_dict["puzzle"] = p_info
 
     return(puzzle_dict)
