@@ -8,6 +8,13 @@
 <div class="unloved-page">
   <h2 class="unloved-page-header">Stalled Puzzles</h2>
 
+  <div class="unloved-filters">
+    <label class="filter-checkbox">
+      <input type="checkbox" id="show-solved" onchange="handleFilterChange()">
+      <span class="checkbox-label">Show solved puzzles</span>
+    </label>
+  </div>
+
   <div id="dialog-window">
     <div id="dialog-window-save-progress">
       <div class="loading-placeholder"><i class="ti ti-loader-2 dialog-loading"></i></div>
@@ -36,8 +43,8 @@
               Last Viewed <i class="ti ti-arrows-sort sort-icon"></i>
             </th>
             <th class="col-puzzle">Puzzle</th>
-            <th class="col-status sortable" data-sort="status">
-              Status <i class="ti ti-arrows-sort sort-icon"></i>
+            <th class="col-priority sortable" data-sort="priority">
+              Priority <i class="ti ti-arrows-sort sort-icon"></i>
             </th>
           </tr>
         </thead>
@@ -62,8 +69,8 @@
               Last Updated <i class="ti ti-arrows-sort sort-icon"></i>
             </th>
             <th class="col-puzzle">Puzzle</th>
-            <th class="col-status sortable" data-sort="status">
-              Status <i class="ti ti-arrows-sort sort-icon"></i>
+            <th class="col-priority sortable" data-sort="priority">
+              Priority <i class="ti ti-arrows-sort sort-icon"></i>
             </th>
           </tr>
         </thead>
@@ -183,10 +190,10 @@
           </div>
           ${puzzle.puzzle.description ? `<div class="puzzle-description">${puzzle.puzzle.description}</div>` : ''}
         </td>
-        <td class="col-status" data-sort-value="${puzzle.puzzle.status}">
-          <div class="status-info">
-            <div class="status-badge ${priorityCss}-priority">${puzzle.puzzle.status}</div>
+        <td class="col-priority" data-sort-value="${puzzle.puzzle.priority}">
+          <div class="priority-info">
             <div class="priority-badge ${priorityCss}-priority">${puzzle.puzzle.priority}</div>
+            <div class="status-text">${puzzle.puzzle.status}</div>
           </div>
         </td>
       </tr>
@@ -200,9 +207,11 @@
       if (column === 'last_viewed') {
         aVal = a.last_update || '';
         bVal = b.last_update || '';
-      } else if (column === 'status') {
-        aVal = a.puzzle.status;
-        bVal = b.puzzle.status;
+      } else if (column === 'priority') {
+        // Define priority order: asap! > high > normal > low
+        const priorityOrder = { 'asap!': 4, 'high': 3, 'normal': 2, 'low': 1 };
+        aVal = priorityOrder[a.puzzle.priority.toLowerCase()] || 0;
+        bVal = priorityOrder[b.puzzle.priority.toLowerCase()] || 0;
       }
 
       if (direction === 'asc') {
@@ -217,7 +226,15 @@
 
   function renderTable(tableId, data, sortColumn, sortDirection) {
     const tbody = document.getElementById(`${tableId}-body`);
-    const sortedData = sortColumn ? sortTable(tableId, data, sortColumn, sortDirection) : data;
+    const showSolved = document.getElementById('show-solved').checked;
+
+    // Filter out solved puzzles if checkbox is unchecked
+    let filteredData = data;
+    if (!showSolved) {
+      filteredData = data.filter(puzzle => puzzle.puzzle.status.toLowerCase() !== 'solved!');
+    }
+
+    const sortedData = sortColumn ? sortTable(tableId, filteredData, sortColumn, sortDirection) : filteredData;
 
     tbody.innerHTML = sortedData.map(puzzle => renderPuzzleRow(puzzle)).join('');
 
@@ -233,6 +250,11 @@
         icon.className = 'ti ti-arrows-sort sort-icon';
       }
     });
+  }
+
+  function handleFilterChange() {
+    renderTable('table1', table1Data, table1SortColumn, table1SortDirection);
+    renderTable('table2', table2Data, table2SortColumn, table2SortDirection);
   }
 
   async function fetchTable1() {

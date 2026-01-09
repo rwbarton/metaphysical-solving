@@ -1331,10 +1331,35 @@ select {
     & .unloved-page-header {
         font-size: 28px;
         font-weight: 600;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    & .unloved-filters {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    & .filter-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        user-select: none;
+
+        & input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        & .checkbox-label {
+            color: var(--gray-700);
+        }
     }
 
     & .unloved-section {
@@ -1358,20 +1383,22 @@ select {
 
     & .loading-indicator {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 10px;
+        right: 10px;
         display: none;
         align-items: center;
         justify-content: center;
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         z-index: 10;
-        min-height: 200px;
 
         & .loader-icon {
-            font-size: 32px;
+            font-size: 20px;
             animation: spin 1s linear infinite;
+            color: var(--primary);
         }
     }
 
@@ -1448,7 +1475,7 @@ select {
         min-width: 300px;
     }
 
-    & .col-status {
+    & .col-priority {
         width: 180px;
     }
 }
@@ -1557,11 +1584,11 @@ select {
     line-height: 1.4;
 }
 
-/* Status column */
-.status-info {
+/* Priority column */
+.priority-info {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 .priority-badge {
@@ -1573,6 +1600,12 @@ select {
     background: var(--gray-200);
     color: var(--gray-700);
     width: fit-content;
+}
+
+.status-text {
+    font-size: 11px;
+    color: var(--gray-600);
+    font-style: italic;
 }
 
 /* Priority colors for badges */
