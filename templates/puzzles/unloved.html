@@ -8,13 +8,6 @@
 <div class="unloved-page">
   <h2 class="unloved-page-header">Stalled Puzzles</h2>
 
-  <div class="unloved-filters">
-    <label class="filter-checkbox">
-      <input type="checkbox" id="show-solved" onchange="handleFilterChange()">
-      <span class="checkbox-label">Show solved puzzles</span>
-    </label>
-  </div>
-
   <div id="dialog-window">
     <div id="dialog-window-save-progress">
       <div class="loading-placeholder"><i class="ti ti-loader-2 dialog-loading"></i></div>
@@ -226,15 +219,8 @@
 
   function renderTable(tableId, data, sortColumn, sortDirection) {
     const tbody = document.getElementById(`${tableId}-body`);
-    const showSolved = document.getElementById('show-solved').checked;
 
-    // Filter out solved puzzles if checkbox is unchecked
-    let filteredData = data;
-    if (!showSolved) {
-      filteredData = data.filter(puzzle => puzzle.puzzle.status.toLowerCase() !== 'solved!');
-    }
-
-    const sortedData = sortColumn ? sortTable(tableId, filteredData, sortColumn, sortDirection) : filteredData;
+    const sortedData = sortColumn ? sortTable(tableId, data, sortColumn, sortDirection) : data;
 
     tbody.innerHTML = sortedData.map(puzzle => renderPuzzleRow(puzzle)).join('');
 
@@ -250,11 +236,6 @@
         icon.className = 'ti ti-arrows-sort sort-icon';
       }
     });
-  }
-
-  function handleFilterChange() {
-    renderTable('table1', table1Data, table1SortColumn, table1SortDirection);
-    renderTable('table2', table2Data, table2SortColumn, table2SortDirection);
   }
 
   async function fetchTable1() {
