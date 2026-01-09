@@ -1320,43 +1320,304 @@ select {
     }
 }
 
-.unloved-border {
-    border-bottom:1px solid var(--secondary);
+/* Unloved Puzzles Page Styles */
+
+.unloved-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-size: 13px;
+
+    & .unloved-page-header {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    & .unloved-section {
+        margin-bottom: 40px;
+    }
+
+    & .unloved-section-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--gray-700);
+    }
+
+    & .unloved-table-container {
+        position: relative;
+        overflow-x: auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    & .loading-indicator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.9);
+        z-index: 10;
+        min-height: 200px;
+
+        & .loader-icon {
+            font-size: 32px;
+            animation: spin 1s linear infinite;
+        }
+    }
+
+    & #last-updated {
+        text-align: center;
+        color: var(--gray-500);
+        font-size: 12px;
+        margin-top: 20px;
+    }
 }
-.unloved-padding {
-    padding:4px 8px 4px 8px;
-    align-content: center;
+
+.unloved-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    & thead {
+        background: var(--gray-100);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+    }
+
+    & th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--gray-700);
+        border-bottom: 2px solid var(--gray-300);
+        white-space: nowrap;
+
+        &.sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+
+            &:hover {
+                background: var(--gray-200);
+            }
+        }
+
+        & .sort-icon {
+            margin-left: 4px;
+            font-size: 14px;
+            vertical-align: middle;
+            opacity: 0.5;
+
+            &.active {
+                opacity: 1;
+            }
+        }
+    }
+
+    & td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--gray-200);
+        vertical-align: middle;
+    }
+
+    & tr:hover {
+        background: var(--gray-50);
+    }
+
+    & .col-history {
+        width: 80px;
+        text-align: center;
+    }
+
+    & .col-last-viewed {
+        width: 200px;
+    }
+
+    & .col-puzzle {
+        min-width: 300px;
+    }
+
+    & .col-status {
+        width: 180px;
+    }
 }
+
+/* Freshness indicators */
 .unloved-fresh {
-    background: #a0ffb0;
+    background: #e8f5e9 !important;
 }
+
 .unloved-questionable {
-    background: #ffe0b0;
+    background: #fff3e0 !important;
 }
+
 .unloved-rancid {
-    background: #ffc0c0;
+    background: #ffebee !important;
 }
 
+/* Time spent indicators */
 .unloved-h {
-    background: #a0d0ff;
-}
-.unloved-d {
-    background: #d0a0ff;
-}
-.unloved-m {
-    background: var(--gray-200);
-}
-.unloved-history {
-    border:none;
-    background:none;
-    gap:0;
-    padding:0;
-    margin:0;
+    background: #e3f2fd !important;
 }
 
-.unloved-history:hover {
-    color: var(--primary-light);
+.unloved-d {
+    background: #f3e5f5 !important;
+}
+
+.unloved-m {
+    background: var(--gray-100) !important;
+}
+
+/* History button */
+.unloved-history {
+    border: none;
+    background: none;
+    gap: 4px;
+    padding: 6px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 11px;
+    color: var(--gray-600);
+    transition: color 0.2s;
     cursor: pointer;
+
+    &:hover {
+        color: var(--primary);
+    }
+
+    & i {
+        font-size: 18px;
+    }
+}
+
+/* Last viewed column */
+.last-viewed-time {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.viewer-name {
+    font-size: 12px;
+    color: var(--gray-600);
+
+    & a {
+        color: var(--gray-600);
+        text-decoration: none;
+
+        &:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+    }
+}
+
+/* Puzzle column */
+.puzzle-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.puzzle-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--gray-800);
+}
+
+.puzzle-link {
+    color: var(--gray-500);
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+        color: var(--primary);
+    }
+}
+
+.puzzle-description {
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* Status column */
+.status-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.priority-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    background: var(--gray-200);
+    color: var(--gray-700);
+    width: fit-content;
+}
+
+/* Priority colors for badges */
+.low-priority {
+    background: var(--low-priority) !important;
+}
+
+.normal-priority {
+    background: var(--normal-priority) !important;
+}
+
+.high-priority {
+    background: var(--high-priority) !important;
+}
+
+.asap-priority {
+    background: var(--asap-priority) !important;
+    animation: pulsate 1.5s infinite;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .unloved-table {
+        font-size: 12px;
+
+        & th, & td {
+            padding: 8px 12px;
+        }
+
+        & .col-last-viewed {
+            width: 150px;
+        }
+
+        & .col-status {
+            width: 140px;
+        }
+    }
+
+    .puzzle-title {
+        font-size: 13px;
+    }
+
+    .unloved-section-title {
+        font-size: 18px;
+    }
 }
 
 

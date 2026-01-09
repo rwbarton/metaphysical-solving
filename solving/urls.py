@@ -40,6 +40,12 @@ urlpatterns = [
     # Retrieves updated user location, JSON
     re_path(r'^api_user_location/$',  views.api_user_location, name='puzzles.views.user_location'),
 
+    # Unloved puzzles data (by status), JSON format
+    re_path(r'^api_unloved/$', views.api_unloved, name='puzzles.views.api_unloved'),
+
+    # Unloved puzzles data (by spreadsheet), JSON format
+    re_path(r'^api_unloved_by_spreadsheet/$', views.api_unloved_by_spreadsheet, name='puzzles.views.api_unloved_by_spreadsheet'),
+
 
     # Pages
 

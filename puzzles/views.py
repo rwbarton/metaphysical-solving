@@ -363,6 +363,58 @@ def api_log_a_view(request, puzzle_id):
     else:
         return HttpResponse(status=418)
 
+# API endpoint for unloved puzzles (by status)
+@login_required
+def api_unloved(request):
+    acceptable_puzzles = Puzzle.objects.exclude(status__in=unloved_exempt_statuses()).exclude(tags__in=unloved_exempt_tags())
+    last_updates = [(AccessLog.objects.filter(puzzle=p).order_by("lastUpdate").last(), p)
+                      for p in acceptable_puzzles]
+
+    last_updates.sort(key=lambda x: x[0].lastUpdate if x[0] else now())
+    puzzles = [{"puzzle": {
+                    "id": s[1].id,
+                    "title": s[1].title,
+                    "round": str(s[1].round) if s[1].round else "",
+                    "description": s[1].description,
+                    "priority": str(s[1].priority),
+                    "priority_css": s[1].priority.css_name,
+                    "status": str(s[1].status),
+                },
+                "human": human(s[0].lastUpdate,1) if s[0] else "untouched",
+                "last_update": s[0].lastUpdate.isoformat() if s[0] else None,
+                "updating_username": s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
+                "updating_userid": s[0].user.id if s[0] else 0,
+                "freshness": freshness_translator(s[0]),
+                "total_time": human(timedelta(hours=spent),1,abbreviate=True,past_tense='{}') if (spent:=(s[1].effort_spent()["solver_hours"]))>0 else '',
+                }
+               for s in last_updates]
+    return JsonResponse({"puzzles": puzzles})
+
+# API endpoint for unloved puzzles (by spreadsheet)
+@login_required
+def api_unloved_by_spreadsheet(request):
+    acceptable_puzzles = Puzzle.objects.exclude(status__in=unloved_exempt_statuses()).exclude(tags__in=unloved_exempt_tags())
+    last_updates = get_last_revs(acceptable_puzzles)
+
+    puzzles = [{"puzzle": {
+                    "id": s['puzzle'].id,
+                    "title": s['puzzle'].title,
+                    "round": str(s['puzzle'].round) if s['puzzle'].round else "",
+                    "description": s['puzzle'].description,
+                    "priority": str(s['puzzle'].priority),
+                    "priority_css": s['puzzle'].priority.css_name,
+                    "status": str(s['puzzle'].status),
+                },
+                "human": human(s['rev'][0],1) if s['rev'] else "untouched",
+                "last_update": s['rev'][0].isoformat() if s['rev'] else None,
+                "updating_username": "",
+                "updating_userid": 0,
+                "freshness": freshness_translator(s['rev']),
+                "total_time": 'rev %s'%s['rev'][1] if s['rev'] else '',
+                }
+               for s in last_updates]
+    return JsonResponse({"puzzles": puzzles})
+
 # Main overview page
 @login_required
 @user_passes_test(zulip_user_account_active,login_url='puzzles.views.need_zulip_login')
@@ -536,21 +588,9 @@ def who_what(request):
         'people':people}))
 
 @login_required
+@user_passes_test(zulip_user_account_active,login_url='puzzles.views.need_zulip_login')
 def unloved(request):
-  acceptable_puzzles = Puzzle.objects.exclude(status__in=unloved_exempt_statuses()).exclude(tags__in=unloved_exempt_tags())
-  last_updates = [(AccessLog.objects.filter(puzzle=p).order_by("lastUpdate").last(), p)
-                    for p in acceptable_puzzles]
-    
-  last_updates.sort(key=lambda x: x[0].lastUpdate if x[0] else now())
-  puzzles = [{"puzzle": s[1],
-              "human":human(s[0].lastUpdate,1) if s[0] else "untouched",
-              "updating_username":s[0].user.first_name+" "+s[0].user.last_name if s[0] else "",
-              "updating_userid":s[0].user.id if s[0] else 00,
-              "freshness": freshness_translator(s[0]),
-              "total_time": human(timedelta(hours=spent),1,abbreviate=True,past_tense='{}') if (spent:=(s[1].effort_spent()["solver_hours"]))>0 else '',
-              }
-             for s in last_updates]
-  return render(request, "puzzles/unloved.html", context = base_context({"puzzles":puzzles}))
+  return render(request, "puzzles/unloved.html", context = base_context())
 
 @login_required
 def unloved_by_spreadsheet(request):
