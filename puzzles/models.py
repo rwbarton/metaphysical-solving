@@ -51,6 +51,7 @@ If empty, users will have to enter their own phone number when submitting an ans
                                                    help_text='Set of Statuses which should be filtered out of the list of potentially unloved puzzles')
     unloved_exempt_tags = models.ManyToManyField('Tag', blank=True, related_name="exempt_tags",
                                                  help_text='Feature to ignore tags not implemented')
+    log_user = models.ForeignKey(settings.AUTH_USER_MODEL,null=True,blank=True,on_delete=models.CASCADE)
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 from puzzles.zulip import zulip_send, zulip_create_user
@@ -357,9 +358,21 @@ def notify_tag_on_add(**kwargs):
                                     settings.BASE_URL + reverse('puzzles.views.puzzle', args=[puzzle.id]),
                                     tag))
 
+
+def log_on_creation(**kwargs):
+    if kwargs['created']:
+        user=Config.objects.get().log_user
+        entry = AccessLog(
+            user=user if user is not None else User.objects.all()[0],
+            puzzle=kwargs['instance'],
+            lastUpdate=datetime.now())
+        entry.save()
+        
+                
 post_save.connect(send_puzzle_zulip, sender=Puzzle)
 post_save.connect(notify_of_new_tag, sender=Tag)
 m2m_changed.connect(notify_tag_on_add, sender = Puzzle.tags.through)
+post_save.connect(log_on_creation,sender=Puzzle)
 
 class TagList(OrderedModel):
     name = models.CharField(max_length=200, unique=True)
@@ -429,7 +442,7 @@ class AccessLog(models.Model):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)
     linkedOut = models.BooleanField(default=False)
     accumulatedMinutes = models.IntegerField(default=0)
-    lastUpdate = models.DateTimeField(auto_now_add=True, editable=True)
+    lastUpdate = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))
     sessionStart = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))
     sessionEnd = models.DateTimeField(default=datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc))    
     def __str__(self):
