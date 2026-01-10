@@ -71,19 +71,21 @@ def zulip_create_user(email, full_name, short_name):
     return success
 
 def zulip_user_account_active(user):
-	recent_enough = timedelta(days=5)
-	client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
-	result = client.get_user_presence(user.email)
-	try:
-		last_update = datetime.fromtimestamp(result["presence"]["aggregated"]["timestamp"])
-		if (datetime.now() - last_update) < recent_enough:
-			return True
-		else:
-			return False
-	except KeyError:
-		return False
-
-	return True
+    try:
+        return settings.LIMBO_DISABLED
+    except AttributeError:
+        print("assuming limbo is on!")
+        pass
+    
+    recent_enough = timedelta(days=5)
+    client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
+    result = client.get_user_presence(user.email)
+    try:
+        last_update = datetime.fromtimestamp(result["presence"]["aggregated"]["timestamp"])
+        return (datetime.now()-last_update) < recent_enough
+    except KeyError:
+        return False
+    return True
 
 def get_user_zulip_id(user):
     client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
