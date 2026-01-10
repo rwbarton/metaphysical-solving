@@ -72,7 +72,8 @@ def zulip_create_user(email, full_name, short_name):
 
 def zulip_user_account_active(user):
     try:
-        return settings.LIMBO_DISABLED
+        if (settings.LIMBO_DISABLED):
+            return True
     except AttributeError:
         print("assuming limbo is on!")
         pass
