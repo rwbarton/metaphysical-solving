@@ -21,9 +21,8 @@
   </div>
   <div id="dialog-overlay" onClick="hideDialog()"></div>
 
-  <!-- Table 1: Stalled Puzzles (by Status) -->
+  <!-- Stalled Puzzles Table -->
   <div class="unloved-section">
-    <h3 class="unloved-section-title">Stalled Puzzles (by Status)</h3>
     <div class="unloved-table-container">
       <div id="table1-loading" class="loading-indicator">
         <i class="ti ti-loader-2 loader-icon"></i>
@@ -34,6 +33,9 @@
             <th class="col-history"></th>
             <th class="col-last-viewed sortable" data-sort="last_viewed">
               Last Viewed <i class="ti ti-arrows-sort sort-icon"></i>
+            </th>
+            <th class="col-spreadsheet sortable" data-sort="spreadsheet_update">
+              Last Update to Spreadsheet <i class="ti ti-arrows-sort sort-icon"></i>
             </th>
             <th class="col-puzzle">Puzzle</th>
             <th class="col-priority sortable" data-sort="priority">
@@ -47,42 +49,14 @@
     </div>
   </div>
 
-  <!-- Table 2: Stalled Puzzles (by Google Sheets Status) -->
-  <div class="unloved-section">
-    <h3 class="unloved-section-title">Stalled Puzzles (by Google Sheets Status)</h3>
-    <div class="unloved-table-container">
-      <div id="table2-loading" class="loading-indicator">
-        <i class="ti ti-loader-2 loader-icon"></i>
-      </div>
-      <table class="unloved-table" id="table2">
-        <thead>
-          <tr>
-            <th class="col-history"></th>
-            <th class="col-last-viewed sortable" data-sort="last_viewed">
-              Last Updated <i class="ti ti-arrows-sort sort-icon"></i>
-            </th>
-            <th class="col-puzzle">Puzzle</th>
-            <th class="col-priority sortable" data-sort="priority">
-              Priority <i class="ti ti-arrows-sort sort-icon"></i>
-            </th>
-          </tr>
-        </thead>
-        <tbody id="table2-body">
-        </tbody>
-      </table>
-    </div>
-  </div>
-
   <div id="last-updated"></div>
 </div>
 
 <script>
   let table1Data = [];
-  let table2Data = [];
+  let spreadsheetData = {};  // Map puzzle ID to spreadsheet info
   let table1SortColumn = null;
   let table1SortDirection = 'asc';
-  let table2SortColumn = null;
-  let table2SortDirection = 'asc';
 
   // Show dialog overlay
   function showDialogOverlay(html) {
@@ -151,16 +125,17 @@
     const priorityCss = puzzle.puzzle.priority_css || 'normal';
     const freshnessClass = `unloved-${puzzle.freshness}`;
     const timeClass = puzzle.total_time ? `unloved-${puzzle.total_time.slice(-1)}` : '';
+    const ssInfo = spreadsheetData[puzzle.puzzle.id];
+    const ssFreshnessClass = ssInfo ? `unloved-${ssInfo.freshness}` : '';
 
     return `
       <tr>
         <td class="col-history ${timeClass}">
-          ${puzzle.total_time ? `
-            <button class="unloved-history" title="Show solver history" onClick="viewSolvers(${puzzle.puzzle.id})">
-              <div><i class="ti ti-history"></i></div>
-              <div>${puzzle.total_time}</div>
-            </button>
-          ` : ''}
+          <button class="unloved-history" title="Show solver history" onClick="viewSolvers(${puzzle.puzzle.id})">
+            <div><i class="ti ti-history"></i></div>
+            ${puzzle.total_time ? `<div>${puzzle.total_time}</div>` : ''}
+            ${ssInfo && ssInfo.rev ? `<div class="rev-number">rev ${ssInfo.rev}</div>` : ''}
+          </button>
         </td>
         <td class="col-last-viewed ${freshnessClass}" data-sort-value="${puzzle.last_update || ''}">
           <div class="last-viewed-time">${puzzle.human}</div>
@@ -169,6 +144,9 @@
               <a target="_blank" href="/zulip_dm/${puzzle.updating_userid}/">${puzzle.updating_username}</a>
             </div>
           ` : ''}
+        </td>
+        <td class="col-spreadsheet ${ssFreshnessClass}" data-sort-value="${ssInfo ? ssInfo.last_update || '' : ''}">
+          ${ssInfo ? `<div class="last-viewed-time">${ssInfo.human}</div>` : '<div class="loading-placeholder"><i class="ti ti-loader-2 cell-loading"></i></div>'}
         </td>
         <td class="col-puzzle">
           <div class="puzzle-header">
@@ -200,6 +178,11 @@
       if (column === 'last_viewed') {
         aVal = a.last_update || '';
         bVal = b.last_update || '';
+      } else if (column === 'spreadsheet_update') {
+        const aInfo = spreadsheetData[a.puzzle.id];
+        const bInfo = spreadsheetData[b.puzzle.id];
+        aVal = aInfo ? aInfo.last_update || '' : '';
+        bVal = bInfo ? bInfo.last_update || '' : '';
       } else if (column === 'priority') {
         // Define priority order: asap! > high > normal > low
         const priorityOrder = { 'asap!': 4, 'high': 3, 'normal': 2, 'low': 1 };
@@ -257,9 +240,8 @@
     }
   }
 
-  async function fetchTable2() {
+  async function fetchSpreadsheetData() {
     try {
-      document.getElementById('table2-loading').style.display = 'flex';
       const response = await fetch("{% url 'puzzles.views.api_unloved_by_spreadsheet' %}", {
         method: "POST",
         headers: {
@@ -267,17 +249,27 @@
         }
       });
       const data = await response.json();
-      table2Data = data.puzzles;
-      renderTable('table2', table2Data, table2SortColumn, table2SortDirection);
-      document.getElementById('table2-loading').style.display = 'none';
+      // Build a map of puzzle ID to spreadsheet info
+      spreadsheetData = {};
+      for (const puzzle of data.puzzles) {
+        spreadsheetData[puzzle.puzzle.id] = {
+          human: puzzle.human,
+          last_update: puzzle.last_update,
+          freshness: puzzle.freshness,
+          rev: puzzle.total_time ? puzzle.total_time.replace('rev ', '') : null
+        };
+      }
+      // Re-render table1 with spreadsheet data now available
+      renderTable('table1', table1Data, table1SortColumn, table1SortDirection);
     } catch (error) {
-      console.error('Error fetching table 2 data:', error);
-      document.getElementById('table2-loading').style.display = 'none';
+      console.error('Error fetching spreadsheet data:', error);
     }
   }
 
   async function fetchAndUpdate() {
-    await Promise.all([fetchTable1(), fetchTable2()]);
+    // Fetch table1 first (faster), then spreadsheet data
+    await fetchTable1();
+    fetchSpreadsheetData();  // Don't await - let it load in background
     document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
   }
 
@@ -293,19 +285,6 @@
           table1SortDirection = 'asc';
         }
         renderTable('table1', table1Data, table1SortColumn, table1SortDirection);
-      });
-    });
-
-    document.querySelectorAll('#table2 .sortable').forEach(th => {
-      th.addEventListener('click', () => {
-        const column = th.dataset.sort;
-        if (table2SortColumn === column) {
-          table2SortDirection = table2SortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-          table2SortColumn = column;
-          table2SortDirection = 'asc';
-        }
-        renderTable('table2', table2Data, table2SortColumn, table2SortDirection);
       });
     });
   }

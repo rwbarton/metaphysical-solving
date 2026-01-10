@@ -1423,7 +1423,7 @@ select {
     }
 
     & th {
-        padding: 12px 16px;
+        padding: 6px 10px;
         text-align: left;
         font-weight: 600;
         color: var(--gray-700);
@@ -1453,7 +1453,7 @@ select {
     }
 
     & td {
-        padding: 12px 16px;
+        padding: 6px 10px;
         border-bottom: 1px solid var(--gray-200);
         vertical-align: middle;
     }
@@ -1463,20 +1463,25 @@ select {
     }
 
     & .col-history {
-        width: 80px;
+        width: 60px;
         text-align: center;
+        padding: 4px;
     }
 
     & .col-last-viewed {
-        width: 200px;
+        width: 160px;
+    }
+
+    & .col-spreadsheet {
+        width: 140px;
     }
 
     & .col-puzzle {
-        min-width: 300px;
+        min-width: 250px;
     }
 
     & .col-priority {
-        width: 180px;
+        width: 120px;
     }
 }
 
@@ -1510,13 +1515,13 @@ select {
 .unloved-history {
     border: none;
     background: none;
-    gap: 4px;
-    padding: 6px;
-    margin: 0;
+    gap: 2px;
+    padding: 4px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--gray-600);
     transition: color 0.2s;
     cursor: pointer;
@@ -1526,8 +1531,20 @@ select {
     }
 
     & i {
-        font-size: 18px;
+        font-size: 16px;
     }
+
+    & .rev-number {
+        font-size: 9px;
+        color: var(--gray-500);
+    }
+}
+
+/* Cell loading spinner */
+.cell-loading {
+    animation: spin 1s linear infinite;
+    font-size: 14px;
+    color: var(--gray-400);
 }
 
 /* Last viewed column */
@@ -1592,7 +1609,7 @@ select {
 }
 
 .priority-badge {
-    padding: 2px 8px;
+    padding: 1px 6px;
     border-radius: 4px;
     font-size: 14px;
     font-weight: 500;
@@ -1632,7 +1649,7 @@ select {
         font-size: 12px;
 
         & th, & td {
-            padding: 8px 12px;
+            padding: 4px 6px;
         }
 
         & .col-last-viewed {
