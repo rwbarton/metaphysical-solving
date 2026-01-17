@@ -1045,6 +1045,10 @@ select {
     background: rgb(238, 238, 137) !important;
 }
 
+.puzzle.capstone {
+    background: #50efff !important;
+}
+
 .puzzle.unopened {
     background: var(--unopened-background);
     /* box-shadow: inset 4px 0px 0px -1px var(--gray-300); */
@@ -1210,7 +1214,6 @@ select {
     border-radius: 4px;
     font-size: 0.75rem;
     background: var(--status-not-started);
-    white-space: nowrap;
     background: var(--success);
     text-transform: uppercase;
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
@@ -1236,6 +1239,12 @@ select {
     padding: 1px 8px;
     border-radius: 10px;
     font-size: 0.7rem;
+}
+
+.special-tag {
+    font-weight: bold;
+    color: rgba(0,0,0,0.7);;
+    background: rgba(255,255,255,0.4);
 }
 
 .solver-count {
