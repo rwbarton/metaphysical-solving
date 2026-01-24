@@ -36,13 +36,11 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'puzzle',
-        'OPTIONS': {
-            'read_default_file': '/etc/my.cnf',
-	    'charset': 'utf8mb4',
-            },
-        'HOST': '',
+        'USER': 'puzzle',
+        'PASSWORD': 'plantsandbirdsandrocksandthings',
+        'HOST': 'localhost',
         'PORT': '',
     }
 }

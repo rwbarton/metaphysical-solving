@@ -1,0 +1,66 @@
+from datetime import timedelta
+
+# In DEBUG mode, error tracebacks will be served to the browser,
+# rather than emailed to the site administrator. Intended for development.
+#DEBUG = False
+DEBUG = True
+
+# In non-DEBUG mode, you must specify the server names that Django
+# is allowed to serve requests for.
+ALLOWED_HOSTS = ['metaphysicalplant.com','localhost']
+
+# The URL at which your solving server is located. Used to construct
+# Zulip messages and uploaded file URLs.
+BASE_URL = 'https://metaphysicalplant.com'
+
+# Who gets email when the site breaks.
+ADMINS = (
+    ('Plant Server', 'vegetarian.waitstaff@gmail.com'),
+)
+
+
+# Absolute path to the directory static files should be collected to.
+# Don't put anything in this directory yourself; store your static files
+# in apps' "static/" subdirectories and in STATICFILES_DIRS.
+# Example: "/home/media/media.lawrence.com/static/"
+STATIC_ROOT = '/home/puzzle/static/'
+
+TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    'templates','/home/acoth/metaphysical-solving/templates'
+)
+
+# Your team name and contact information. Displayed at the top of every page.
+# Make sure these are valid HTML!
+TEAMNAME = 'Metaphysical plant.'
+HQPHONE = '408-827-5268'
+HQEMAIL = 'metaphungus@gmail.com'
+HQCONTACT = '408-827-5268 &nbsp;|&nbsp; metaphungus@gmail.com'
+
+# Zulip server hostname and URL.
+ZULIP_SERVER_HOSTNAME = 'zulip.metaphysicalplant.com'
+ZULIP_SERVER_URL = 'https://' + ZULIP_SERVER_HOSTNAME
+
+JITSI_SERVER_URL = 'https://jitsi.metaphysicalplant.com'
+# Endpoint on Jitsi server which provides JSON of in-use rooms
+JITSI_ROOMS_URL = '/mpcensus'
+
+
+# Enable answer call-in button?
+ANSWER_CALLIN_ENABLED = False
+
+# Put the admin page link in the menu
+SHOW_ADMIN_LINK = False
+
+ENABLE_ACCESS_LOG = True
+MIN_SESSION_LENGTH = timedelta(minutes=6)
+MAX_GAP_LENGTH = timedelta(minutes=6)
+
+PRIVACY_URL = 'https://docs.google.com/document/d/1lQOjmYkk4liVxGThT9LMlSirsAZKn0OXq2PD7aCjn9k/edit?usp=sharing'
+HELP_URL = 'https://docs.google.com/document/d/1tGpGn5kTsVdv5lO5M29zS1qKjdKFz62gdZIuZ5RcqUU/edit?usp=drive_link'
+GENERALHELP_URL = 'https://docs.google.com/document/d/1Q9Omy80N0vxvoidX3H4S5Fofg5yDWBmWX9V2jVfMu_c/edit?usp=drive_link'
+
+LIMBO_DISABLED = True
+

@@ -34,9 +34,6 @@ class Config(models.Model):
     default_status = models.ForeignKey('Status', on_delete=models.CASCADE)
     default_priority = models.ForeignKey('Priority', on_delete=models.CASCADE)
     default_tag = models.ForeignKey('Tag', on_delete=models.SET_NULL,blank=True, null=True)
-    default_taglist = models.ForeignKey('TagList', on_delete=models.CASCADE,
-                                        help_text="This isn't actually used for anything (at the moment)")
-
     default_template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,on_delete=models.SET_NULL,
                                          help_text="Default spreadsheet to use to create new puzzles.  Leave null to create completely blank ones")
     default_folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,on_delete=models.SET_NULL,
@@ -52,6 +49,7 @@ If empty, users will have to enter their own phone number when submitting an ans
     unloved_exempt_tags = models.ManyToManyField('Tag', blank=True, related_name="exempt_tags",
                                                  help_text='Feature to ignore tags not implemented')
     log_user = models.ForeignKey(settings.AUTH_USER_MODEL,null=True,blank=True,on_delete=models.CASCADE)
+    silly_field = models.CharField(max_length=16,blank=True)
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 from puzzles.zulip import zulip_send, zulip_create_user
@@ -373,13 +371,6 @@ post_save.connect(send_puzzle_zulip, sender=Puzzle)
 post_save.connect(notify_of_new_tag, sender=Tag)
 m2m_changed.connect(notify_tag_on_add, sender = Puzzle.tags.through)
 post_save.connect(log_on_creation,sender=Puzzle)
-
-class TagList(OrderedModel):
-    name = models.CharField(max_length=200, unique=True)
-    tags = models.ManyToManyField('Tag')
-
-    def __str__(self):
-        return self.name
 
 class UploadedFile(models.Model):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)

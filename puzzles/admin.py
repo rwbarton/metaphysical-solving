@@ -1,6 +1,6 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
-from puzzles.models import Round, Status, Priority, Tag, AutoTag, TagList, UploadedFile, Location, Puzzle, SubmittedAnswer, \
+from puzzles.models import Round, Status, Priority, Tag, AutoTag, UploadedFile, Location, Puzzle, SubmittedAnswer, \
     PuzzleWrongAnswer, Config, AccessLog, JitsiRooms, PuzzleFolder, PuzzleTemplate, QueuedAnswer, QueuedHint
 
 
@@ -14,7 +14,6 @@ class ItemAdmin(OrderedModelAdmin):
     list_display = ('name', 'move_up_down_links')
 admin.site.register(Round, ItemAdmin)
 admin.site.register(Tag, ItemAdmin)
-admin.site.register(TagList, ItemAdmin)
 admin.site.register(Location, ItemAdmin)
 class PuzzleAdmin(OrderedModelAdmin):
     list_display = ('title', 'status', 'priority', 'answer', 'move_up_down_links')

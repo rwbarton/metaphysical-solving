@@ -33,7 +33,7 @@ from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 
 from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, PuzzleWrongAnswer, QueuedAnswer, \
-    Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime, QueuedHint, unloved_exempt_statuses, unloved_exempt_tags
+    Round, Status, SubmittedAnswer, Tag, UploadedFile, User, UserProfile, quantizedTime, QueuedHint, unloved_exempt_statuses, unloved_exempt_tags
 from puzzles.forms import UploadForm, AnswerForm, HintForm
 from puzzles.googlespreadsheet import get_last_revs
 
