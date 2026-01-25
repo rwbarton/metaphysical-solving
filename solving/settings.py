@@ -37,7 +37,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'puzzle',
+        'NAME': 'puzzle_db',
         'USER': 'puzzle',
         'PASSWORD': 'plantsandbirdsandrocksandthings',
         'HOST': 'localhost',
@@ -125,7 +125,8 @@ LOGIN_URL = '/login/google-oauth2/'
 LOGIN_REDIRECT_URL = '/'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY    = open('/etc/puzzle/google-oauth2-client-id').read().strip()
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = open('/etc/puzzle/google-oauth2-client-secret').read().strip()
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = open(
+    '/etc/puzzle/google-oauth2-client-secret').read().strip()
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 'https://www.googleapis.com/auth/userinfo.email',

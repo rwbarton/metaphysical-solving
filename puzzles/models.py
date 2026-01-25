@@ -1,4 +1,5 @@
-from django.db import models, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models, ProgrammingError
 from ordered_model.models import OrderedModel
 
 from django.contrib.auth.models import User
@@ -7,7 +8,6 @@ from django.urls import reverse
 from django.conf import settings
 from django.utils.timezone import now
 from django.utils.text import slugify
-from collections import defaultdict
 from math import ceil
 from ago import human
 
@@ -49,7 +49,6 @@ If empty, users will have to enter their own phone number when submitting an ans
     unloved_exempt_tags = models.ManyToManyField('Tag', blank=True, related_name="exempt_tags",
                                                  help_text='Feature to ignore tags not implemented')
     log_user = models.ForeignKey(settings.AUTH_USER_MODEL,null=True,blank=True,on_delete=models.CASCADE)
-    silly_field = models.CharField(max_length=16,blank=True)
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 from puzzles.zulip import zulip_send, zulip_create_user
@@ -100,12 +99,6 @@ class Tag(OrderedModel):
     def __str__(self):
         return self.name
 
-class AutoTag(models.Model):
-    html_name = models.CharField(max_length=200)
-    tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.html_name
 
 class QueuedAnswer(models.Model):
     # An answer that's not wrong yet!
@@ -176,9 +169,15 @@ def defaultPriority():
 def defaultTags():
     return [Config.objects.get().default_tag]
 def defaultTemplate():
-    return Config.objects.get().default_template
+    try:
+        return Config.objects.get().default_template
+    except ProgrammingError:
+        return None
 def defaultFolder():
-    return Config.objects.get().default_folder
+    try:
+        return Config.objects.get().default_folder
+    except ProgrammingError:
+        return None
 def unloved_exempt_statuses():
     return Config.objects.get().unloved_exempt_status.all()
 def unloved_exempt_tags():
@@ -241,8 +240,8 @@ class Puzzle(OrderedModel):
             userLog.sessionStart=current
         elif (current-userLog.sessionStart)>settings.MIN_SESSION_LENGTH:
             accounted_for_already = int((userLog.sessionEnd-userLog.sessionStart).seconds/60) if (userLog.sessionEnd-userLog.sessionStart)>settings.MIN_SESSION_LENGTH else 0
-            timeAdjustment = int((current-userLog.sessionStart).seconds/60)-accounted_for_already
-            userLog.accumulatedMinutes = userLog.accumulatedMinutes+timeAdjustment
+            time_adjustment = int((current-userLog.sessionStart).seconds/60)-accounted_for_already
+            userLog.accumulatedMinutes = userLog.accumulatedMinutes+time_adjustment
             userLog.lastUpdate = current
         userLog.sessionEnd=current
         userLog.save()

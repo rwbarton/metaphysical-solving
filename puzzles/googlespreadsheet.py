@@ -1,7 +1,6 @@
 import json
 from googleapiclient import discovery
 import google.auth
-from google.auth import exceptions
 from puzzles.models import Config
 from datetime import datetime
 
@@ -28,19 +27,19 @@ def get_google_credentials():
     return credentials
 
 def create_google_spreadsheet(title,folder=None,puzzle_template=None):
-    discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
+    discovery_url = 'https://sheets.googleapis.com/$discovery/rest?version=v4'
     service = discovery.build('sheets', 'v4', credentials=get_google_credentials(),
-                              discoveryServiceUrl=discoveryUrl)
-    driveService = discovery.build('drive','v3',credentials=get_google_credentials())
+                              discoveryServiceUrl=discovery_url)
+    drive_service = discovery.build('drive','v3',credentials=get_google_credentials())
 
-    if (puzzle_template):
-        if (folder):
-            spreadsheet_file = driveService.files().copy( fileId = puzzle_template.fid,
+    if puzzle_template:
+        if folder:
+            spreadsheet_file = drive_service.files().copy( fileId = puzzle_template.fid,
                                                          body = {"name": title,
                                                                  "parents": [folder.fid],}
                                                          ).execute()
         else:
-            spreadsheet_file = driveService.files().copy( fileId = puzzle_template.fid,
+            spreadsheet_file = drive_service.files().copy( fileId = puzzle_template.fid,
                                                          body = {"name": title,}
                                                          ).execute()
         new_spreadsheet = service.spreadsheets().get(
@@ -50,29 +49,29 @@ def create_google_spreadsheet(title,folder=None,puzzle_template=None):
             body={"properties": {"title": title,}}
                   ).execute()
         file_id = new_spreadsheet['spreadsheetId']
-        if (folder):
-            spreadsheet_file = driveService.files().get(fileId=file_id, fields="parents").execute()
+        if folder:
+            spreadsheet_file = drive_service.files().get(fileId=file_id, fields="parents").execute()
             previous_parents = ",".join(spreadsheet_file.get("parents"))
-            driveService.files().update(
+            drive_service.files().update(
                 fileId=file_id,
                 addParents=folder.fid,
                 removeParents=previous_parents,
                 fields="id, parents",
             ).execute()
-    if (not folder):
+    if not folder:
         acl_entry = {
             'type': 'anyone',
             'role': 'writer',
             'allowFileDiscovery': False
         }
-        driveService.permissions().create(fileId=new_spreadsheet['spreadsheetId'],
+        drive_service.permissions().create(fileId=new_spreadsheet['spreadsheetId'],
                                           body=acl_entry).execute()
 
     return new_spreadsheet
 
 
 def grant_access(fid_list,user_list):
-    if (not fid_list or not user_list):
+    if not fid_list or not user_list:
         return
 
     ids = []
@@ -89,11 +88,6 @@ def grant_access(fid_list,user_list):
 
     # pylint: disable=maybe-no-member
     batch = service.new_batch_http_request(callback=callback)
-    acl_entry = {
-        'type': 'user',
-        'emailAddress': '',
-        'role': 'writer',
-    }
 
     for user in user_list:
         for fid in fid_list:
@@ -108,12 +102,12 @@ def grant_access(fid_list,user_list):
     
     
 def create_google_folder(name):
-    driveService = discovery.build("drive", "v3", credentials=get_google_credentials())
+    drive_service = discovery.build("drive", "v3", credentials=get_google_credentials())
     metadata = {
         "name": name,
         "mimeType": "application/vnd.google-apps.folder",
         }
-    folder = driveService.files().create(body=metadata,fields="id").execute()
+    folder = drive_service.files().create(body=metadata,fields="id").execute()
     fid = folder.get("id")
     return fid
 
@@ -121,18 +115,18 @@ def get_last_revs(acceptable_puzzles):
   id_list = [{'id':val[0],'fileId':val[1].split('/')[-2]} for val in acceptable_puzzles.values_list('id','spreadsheet')]
 
   responses = []
-  def callback(id,response,exception):
+  def callback(cb_id, response, exception):
     if exception:
-      responses.append((id,None))
+      responses.append((cb_id, None))
     else:
-      responses.append((id,max([(datetime.fromisoformat(x['modifiedTime']),x['id']) for x in response["revisions"]])))
+      responses.append((cb_id, max([(datetime.fromisoformat(x['modifiedTime']), x['id']) for x in response["revisions"]])))
 
-  driveService = discovery.build('drive','v3',credentials=get_google_credentials())
+  drive_service = discovery.build('drive','v3',credentials=get_google_credentials())
   #TODO: handle more than 100 puzzles (batch size limit)
-  batch = driveService.new_batch_http_request(callback=callback)
+  batch = drive_service.new_batch_http_request(callback=callback)
   
   for p in id_list:
-    batch.add(driveService.revisions().list(fileId=p['fileId']))
+    batch.add(drive_service.revisions().list(fileId=p['fileId']))
   batch.execute()
 
   last_updates=[{'puzzle':acceptable_puzzles[int(resp[0])-1],'rev':resp[1]} for resp in responses]
