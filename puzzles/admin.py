@@ -1,6 +1,6 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
-from puzzles.models import Round, Status, Priority, Tag, AutoTag, TagList, UploadedFile, Location, Puzzle, SubmittedAnswer, \
+from puzzles.models import Round, Status, Priority, Tag, UploadedFile, Location, Puzzle, SubmittedAnswer, \
     PuzzleWrongAnswer, Config, AccessLog, JitsiRooms, PuzzleFolder, PuzzleTemplate, QueuedAnswer, QueuedHint, UserZulipStatus
 
 
