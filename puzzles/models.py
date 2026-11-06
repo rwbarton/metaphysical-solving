@@ -51,6 +51,21 @@ If empty, users will have to enter their own phone number when submitting an ans
     log_user = models.ForeignKey(settings.AUTH_USER_MODEL,null=True,blank=True,on_delete=models.CASCADE)
 
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
+
+class UserZulipStatus(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    NONE = 'none'
+    SUCCESS = 'success'
+    FAILURE = 'failure'
+    STATUS_CHOICES = (
+        (NONE, 'Not created yet'),
+        (SUCCESS, 'Zulip user successfully created'),
+        (FAILURE, 'Zulip user could not be created'),
+        )
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=NONE)
+    zulip_id = models.IntegerField(default=0)
+
 from puzzles.zulip import zulip_send, zulip_create_user
 
 class Status(OrderedModel):
@@ -388,18 +403,6 @@ class UserProfile(models.Model):
     location = models.ForeignKey('Location', on_delete=models.CASCADE)
     picture = models.TextField(null=True, blank=True)
 
-class UserZulipStatus(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    NONE = 'none'
-    SUCCESS = 'success'
-    FAILURE = 'failure'
-    STATUS_CHOICES = (
-        (NONE, 'Not created yet'),
-        (SUCCESS, 'Zulip user successfully created'),
-        (FAILURE, 'Zulip user could not be created'),
-        )
-    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=NONE)
 
 def make_user_profile(**kwargs):
     user = kwargs['instance']
@@ -411,11 +414,15 @@ def make_user_profile(**kwargs):
     user_zulip_status, _ = UserZulipStatus.objects.get_or_create(user=user)
     if user_zulip_status.status == UserZulipStatus.NONE \
             and user.first_name:
-        success = zulip_create_user(user.email, '%s %s' % (user.first_name, user.last_name), user.first_name)
-        if success:
+        result = zulip_create_user(user.email,
+                                   '%s %s' % (user.first_name, user.last_name),
+                                   user.first_name)
+        if result['result']=='success':
             user_zulip_status.status = UserZulipStatus.SUCCESS
+            user_zulip_status.zulip_id = result['user_id']
         else:
             user_zulip_status.status = UserZulipStatus.FAILURE
+            user_zulip_status.zulip_id = 0
         user_zulip_status.save()
 
 post_save.connect(make_user_profile, sender=User)
