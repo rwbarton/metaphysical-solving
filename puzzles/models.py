@@ -424,7 +424,9 @@ def make_user_profile(**kwargs):
     user_zulip_status, _ = UserZulipStatus.objects.get_or_create(user=user)
     if user_zulip_status.status == UserZulipStatus.NONE \
             and user.first_name:
-        result = zulip_create_user(user.email, '%s %s' % (user.first_name, user.last_name), user.first_name)
+        result = zulip_create_user(user.email,
+                                   '%s %s' % (user.first_name, user.last_name),
+                                   user.first_name)
         if result['result']=='success':
             user_zulip_status.status = UserZulipStatus.SUCCESS
             user_zulip_status.zulip_id = result['user_id']

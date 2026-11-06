@@ -46,9 +46,9 @@ def zulip_create_user(email, full_name, short_name):
     if zulip_create_settings is None:
         return
     client = zulip.Client(
-        email=zulip_create_settings["email"],
-        api_key=zulip_create_settings["api_key"],
-        site=settings.ZULIP_SERVER_URL)
+        email = zulip_create_settings["email"],
+        api_key = zulip_create_settings["api_key"],
+        site = settings.ZULIP_SERVER_URL)
     random_password = ''.join(secrets.choice(string.ascii_letters) for _ in range(32))
     result = client.create_user(
         {"email":email,
@@ -67,12 +67,14 @@ def zulip_user_account_active(user):
     
     recent_enough = timedelta(days=5)
     client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
-    result = client.get_user_presence(get_user_zulip_id(user))
-    try:
-        last_update = datetime.fromtimestamp(result["presence"]["aggregated"]["timestamp"])
-        return (datetime.now()-last_update) < recent_enough
-    except KeyError:
-        return False
+    zid = get_user_zulip_id(user)
+    if zid>0:
+        result = client.get_user_presence(zid)
+        try:
+            last_update = datetime.fromtimestamp(result["presence"]["aggregated"]["timestamp"])
+            return (datetime.now()-last_update) < recent_enough
+        except KeyError:
+            return False
     return True
 
 from puzzles.models import UserZulipStatus
