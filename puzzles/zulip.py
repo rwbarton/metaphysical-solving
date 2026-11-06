@@ -4,6 +4,9 @@ import subprocess
 import json
 import binascii
 import zulip
+import string
+import secrets
+
 
 from django.conf import settings
 from datetime import datetime, timedelta
@@ -42,33 +45,17 @@ except IOError:
 def zulip_create_user(email, full_name, short_name):
     if zulip_create_settings is None:
         return
-
-    try:
-        response = subprocess.check_output(
-            ['/usr/bin/curl',
-             '--insecure',
-             '--silent',
-             '-X', 'POST',
-             '-u', '%s:%s' % (zulip_create_settings['email'], zulip_create_settings['api_key']),
-             settings.ZULIP_SERVER_URL + '/api/v1/users',
-             '-d', 'email=' + email,
-             '-d', 'password=' + binascii.b2a_hex(os.urandom(15)).decode(encoding='ASCII'),
-             '-d', b'full_name=' + full_name.encode('utf-8'),
-             '-d', b'short_name=' + short_name.encode('utf-8')],
-            timeout=5)
-        success = (json.loads(response.decode('utf-8')))['result'] == 'success'
-    except subprocess.TimeoutExpired:
-        response = 'Timed out!\n'
-        success = False
-    except subprocess.CalledProcessError as err:
-        response = '%s returned exit code %d\n'%(err.cmd,err.returncode)
-        success = False
+    client = zulip.Client(
+        email = zulip_create_settings["email"],
+        api_key = zulip_create_settings["api_key"],
+        site = settings.ZULIP_SERVER_URL)
+    random_password = ''.join(secrets.choice(string.ascii_letters) for _ in range(32))
+    result = client.create_user(
+        {"email":email,
+         "full_name":full_name,
+         "password": random_password})
         
-    if not success:
-        sys.stderr.write('Failed to create user (%s, %s, %s): %s' %
-                         (email, full_name, short_name, response))
-
-    return success
+    return result
 
 def zulip_user_account_active(user):
     try:
@@ -80,16 +67,21 @@ def zulip_user_account_active(user):
     
     recent_enough = timedelta(days=5)
     client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
-    result = client.get_user_presence(user.email)
-    try:
-        last_update = datetime.fromtimestamp(result["presence"]["aggregated"]["timestamp"])
-        return (datetime.now()-last_update) < recent_enough
-    except KeyError:
-        return False
+    zid = get_user_zulip_id(user)
+    if zid>0:
+        result = client.get_user_presence(zid)
+        try:
+            last_update = datetime.fromtimestamp(result["presence"]["aggregated"]["timestamp"])
+            return (datetime.now()-last_update) < recent_enough
+        except KeyError:
+            return False
     return True
 
+from puzzles.models import UserZulipStatus
+
 def get_user_zulip_id(user):
-    client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
-    result = client.call_endpoint(url=f"/users/"+user.email,method="GET",)
-    return result["user"]["user_id"]
+    #client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
+    #result = client.call_endpoint(url=f"/users/"+user.email,method="GET",)
+    #return result["user"]["user_id"]
+    return UserZulipStatus.objects.get(user=user).zulip_id
 
