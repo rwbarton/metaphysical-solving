@@ -1,4 +1,5 @@
-from django.db import models, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models, ProgrammingError
 from ordered_model.models import OrderedModel
 
 from django.contrib.auth.models import User
@@ -7,7 +8,6 @@ from django.urls import reverse
 from django.conf import settings
 from django.utils.timezone import now
 from django.utils.text import slugify
-from collections import defaultdict
 from math import ceil
 from ago import human
 
@@ -34,9 +34,6 @@ class Config(models.Model):
     default_status = models.ForeignKey('Status', on_delete=models.CASCADE)
     default_priority = models.ForeignKey('Priority', on_delete=models.CASCADE)
     default_tag = models.ForeignKey('Tag', on_delete=models.SET_NULL,blank=True, null=True)
-    default_taglist = models.ForeignKey('TagList', on_delete=models.CASCADE,
-                                        help_text="This isn't actually used for anything (at the moment)")
-
     default_template = models.ForeignKey('PuzzleTemplate',null=True,blank=True,on_delete=models.SET_NULL,
                                          help_text="Default spreadsheet to use to create new puzzles.  Leave null to create completely blank ones")
     default_folder = models.ForeignKey('PuzzleFolder',null=True,blank=True,on_delete=models.SET_NULL,
@@ -117,12 +114,6 @@ class Tag(OrderedModel):
     def __str__(self):
         return self.name
 
-class AutoTag(models.Model):
-    html_name = models.CharField(max_length=200)
-    tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.html_name
 
 class QueuedAnswer(models.Model):
     # An answer that's not wrong yet!
@@ -193,9 +184,15 @@ def defaultPriority():
 def defaultTags():
     return [Config.objects.get().default_tag]
 def defaultTemplate():
-    return Config.objects.get().default_template
+    try:
+        return Config.objects.get().default_template
+    except ProgrammingError:
+        return None
 def defaultFolder():
-    return Config.objects.get().default_folder
+    try:
+        return Config.objects.get().default_folder
+    except ProgrammingError:
+        return None
 def unloved_exempt_statuses():
     return Config.objects.get().unloved_exempt_status.all()
 def unloved_exempt_tags():
@@ -258,8 +255,8 @@ class Puzzle(OrderedModel):
             userLog.sessionStart=current
         elif (current-userLog.sessionStart)>settings.MIN_SESSION_LENGTH:
             accounted_for_already = int((userLog.sessionEnd-userLog.sessionStart).seconds/60) if (userLog.sessionEnd-userLog.sessionStart)>settings.MIN_SESSION_LENGTH else 0
-            timeAdjustment = int((current-userLog.sessionStart).seconds/60)-accounted_for_already
-            userLog.accumulatedMinutes = userLog.accumulatedMinutes+timeAdjustment
+            time_adjustment = int((current-userLog.sessionStart).seconds/60)-accounted_for_already
+            userLog.accumulatedMinutes = userLog.accumulatedMinutes+time_adjustment
             userLog.lastUpdate = current
         userLog.sessionEnd=current
         userLog.save()
@@ -388,13 +385,6 @@ post_save.connect(send_puzzle_zulip, sender=Puzzle)
 post_save.connect(notify_of_new_tag, sender=Tag)
 m2m_changed.connect(notify_tag_on_add, sender = Puzzle.tags.through)
 post_save.connect(log_on_creation,sender=Puzzle)
-
-class TagList(OrderedModel):
-    name = models.CharField(max_length=200, unique=True)
-    tags = models.ManyToManyField('Tag')
-
-    def __str__(self):
-        return self.name
 
 class UploadedFile(models.Model):
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE)

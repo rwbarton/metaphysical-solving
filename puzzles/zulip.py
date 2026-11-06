@@ -26,16 +26,6 @@ def zulip_send(user, stream, subject, message):
                                   "topic": subject,
                                   "content": message,
                                  } ) )
-    #    try:
-        # Need to wait for this one to finish so that we know the stream exists (blargh).
-#        subprocess.check_call([os.path.join(settings.PROJECT_ROOT,"zulip/api/examples/subscribe"),
-#                               "--config-file", "/etc/puzzle/zulip/b+logger.conf",
-#                               "--streams", stream])
-#        subprocess.Popen([os.path.join(settings.PROJECT_ROOT,"zulip/api/bin/zulip-send"),
-#                          "--config-file", "/etc/puzzle/zulip/%s.conf" % (user,),
-#                          "--stream", stream, "--subject", subject, "--message", message.encode('utf-8')])
-#    except FileNotFoundError:
-#        sys.stderr.write('Failed find Zulip API\n')
 
 try:
     zulip_create_settings = json.load(open('/etc/puzzle/zulip/create.json'))
@@ -59,7 +49,7 @@ def zulip_create_user(email, full_name, short_name):
 
 def zulip_user_account_active(user):
     try:
-        if (settings.LIMBO_DISABLED):
+        if settings.LIMBO_DISABLED:
             return True
     except AttributeError:
         print("assuming limbo is on!")

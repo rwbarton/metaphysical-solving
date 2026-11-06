@@ -1,10 +1,8 @@
-import random
+
 import os
 import os.path
-import urllib
 import json
 import re
-import time
 import hmac
 import base64
 import requests
@@ -13,28 +11,23 @@ from ago import human
 
 from datetime import timedelta
 
-from collections import defaultdict, Counter
+from collections import defaultdict
 
-from django.http import HttpResponse, JsonResponse
+from django.http import  JsonResponse
 from django.shortcuts import render, redirect
-from django.template import RequestContext
-from django.utils.http import urlencode
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from django.db import IntegrityError, transaction
-from django import forms
 from django.db.models import Prefetch
-from django.db.transaction import atomic, non_atomic_requests
-from django.forms.models import model_to_dict
-from django.http import HttpResponse, HttpResponseForbidden
+from django.db.transaction import  non_atomic_requests
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.timezone import now
 
 from puzzles.models import AccessLog, Config, JitsiRooms, Location, Priority, Puzzle, PuzzleWrongAnswer, QueuedAnswer, \
-    Round, Status, SubmittedAnswer, Tag, TagList, UploadedFile, User, UserProfile, quantizedTime, QueuedHint, unloved_exempt_statuses, unloved_exempt_tags
-from puzzles.forms import UploadForm, AnswerForm, HintForm
+    Round, Status, SubmittedAnswer, Tag, UploadedFile, UserProfile, QueuedHint, unloved_exempt_statuses, unloved_exempt_tags
 from puzzles.googlespreadsheet import get_last_revs
 
 from puzzles.submit import submit_answer
@@ -47,7 +40,7 @@ jaas_api_key = open('/etc/puzzle/jaas_api_key').read()
 jaas_app_id = open('/etc/puzzle/jaas_app_id').read()
 jaas_private_key = open('/etc/puzzle/id_rsa_jaas').read()
 jaas_webhook_secret = open('/etc/puzzle/jaas_webhook_secret').read().strip()
-#webhooklog = open("/home/puzzle/webhooklog","a")
+
 
 # This function is called as part of the auth flow (defined in settings.py), and updates the URL
 # for the user's Google profile photo
@@ -72,11 +65,11 @@ def get_motd():
 def get_jitsi_data():
     try:
         table = JitsiRooms.objects.all()
-        byUserDict = defaultdict(set)
+        by_user_dict = defaultdict(set)
         for row in table:
-            byUserDict[row.user].add(row.puzzle)
+            by_user_dict[row.user].add(row.puzzle)
 
-        user_list = sorted(byUserDict.items())
+        user_list = sorted(by_user_dict.items())
     except:
         user_list = None
     return user_list
@@ -90,7 +83,7 @@ def base_context(d = {}):
     d1['locations'] = Location.objects.all()
     d1['zulip_url'] = settings.ZULIP_SERVER_URL
     d1['admin_link']=settings.SHOW_ADMIN_LINK
-    return(d1)
+    return d1
 
 # An API endpoint for updating user location
 @login_required

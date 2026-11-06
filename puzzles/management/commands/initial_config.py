@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from puzzles.models import Config, Status, Priority, Tag, TagList, Location
+from puzzles.models import Config, Status, Priority, Tag, Location
 
 class Command(BaseCommand):
     help = 'Create reasonable default config, locations, priorities etc.'
@@ -34,16 +34,7 @@ class Command(BaseCommand):
         for tag_name in default_tags:
             Tag(name=tag_name).save()
 
-        default_taglists = ['rounds', 'testing']
-        TagList.objects.all().delete()
-        for taglist_name in default_taglists:
-            TagList(name=taglist_name).save()
 
-        # Leave the rounds taglist empty, since 'testing' is not actually a round
-
-        testing_taglist = TagList.objects.get(name='testing')
-        testing_taglist.tags.set([Tag.objects.get(name='testing')])
-        testing_taglist.save()
 
         default_locations = ['Cambridge', 'remote', 'unknown']
         Location.objects.all().delete()
@@ -53,6 +44,5 @@ class Command(BaseCommand):
         Config(default_status=Status.objects.get(text='not started'),
                default_priority=Priority.objects.get(text='normal'),
                default_tag=Tag.objects.get(name='testing'),
-               default_taglist=TagList.objects.get(name='rounds'),
                motd='Welcome to the Mystery Hunt!'
                ).save()

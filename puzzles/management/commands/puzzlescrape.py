@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand
 import django.db.utils
-from puzzles.models import Puzzle, Tag, AutoTag, TagList, Status, Round
+from puzzles.models import Puzzle, Tag, Status, Round
 import re
 import json
 from bs4 import BeautifulSoup
@@ -81,11 +81,6 @@ def create_puzzle(title, url, round_obj, is_meta=False, answer=None, desc=None):
         puzzle.answer = answer
         puzzle.status = solved_status
         puzzle.save()
-
-def add_tag_to_taglist(tag, taglist_name):
-    taglist = TagList.objects.get(name=taglist_name)
-    taglist.tags.add(tag)
-    taglist.save()
 
 def html_to_tag(html):
     return html
