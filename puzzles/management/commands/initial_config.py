@@ -11,8 +11,9 @@ class Command(BaseCommand):
         default_statuses = [('not a puzzle', 'not-puzzle'),
                             ('not started', 'not-started'),
                             ('being worked on', 'being-worked'),
+                            ('we got this!', 'we-got-this'),
                             ('needs insight', 'needs-insight'),
-                            ('needs manpower', 'needs-manpower'),
+                            ('needs bodies', 'needs-bodies'),
                             ('needs extraction', 'needs-extraction'),
                             ('currently impuzzlable', 'currently-impuzzlable'),
                             ('solved!', 'solved'),
@@ -29,14 +30,19 @@ class Command(BaseCommand):
         for priority_text, priority_css_name in default_priorities:
             Priority(text=priority_text, css_name=priority_css_name).save()
 
-        default_tags = ['testing']
+        default_tags = ['testing', 'meta', 'crossword', 'list of clues', 'cryptogram',
+                        'cryptic', 'duck konundrum', 'music', 'nikoli', 'logic', 'chess',
+                        'physical', 'runaround', 'scavenger hunt', 'video game', 'math',
+                        'programming', 'science', 'literature', 'pop culture', 'sports',
+                        'MIT', 'geography', 'trivia', 'board games', 'word puzzle', 'event',
+                        'interaction', 'anagram', 'hintable', 'art', 'history', 'on campus', 'make something']
         Tag.objects.all().delete()
         for tag_name in default_tags:
             Tag(name=tag_name).save()
 
 
 
-        default_locations = ['Cambridge', 'remote', 'unknown']
+        default_locations = ['MIT/Cambridge', 'remote', 'unknown']
         Location.objects.all().delete()
         for location_name in default_locations:
             Location(name=location_name).save()
