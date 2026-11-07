@@ -53,7 +53,7 @@ If empty, users will have to enter their own phone number when submitting an ans
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 
 class UserZulipStatus(models.Model):
-    class Meta:
+    class Meta(OrderedModel.Meta):
         verbose_name_plural = 'UserZulipStatuses'
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -448,7 +448,7 @@ class AccessLog(models.Model):
         return self.puzzle.title + " / " + self.user.email
 
 class JitsiRooms(OrderedModel):
-    class Meta:
+    class Meta(OrderedModel.Meta):
         verbose_name_plural = "JitsiRooms"
     name = models.CharField(max_length=200,unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
