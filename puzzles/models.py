@@ -53,7 +53,7 @@ If empty, users will have to enter their own phone number when submitting an ans
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 
 class UserZulipStatus(models.Model):
-    class Meta(OrderedModel.Meta):
+    class Meta:
         verbose_name_plural = 'UserZulipStatuses'
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
