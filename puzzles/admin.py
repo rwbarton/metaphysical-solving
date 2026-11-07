@@ -57,4 +57,7 @@ admin.site.register(PuzzleTemplate,DriveAdmin)
 admin.site.register(UploadedFile,admin.ModelAdmin)
 admin.site.register(QueuedAnswer,OrderedModelAdmin)
 admin.site.register(QueuedHint,OrderedModelAdmin)
-admin.site.register(UserZulipStatus)
+
+class UserZulipStatusAdmin(admin.ModelAdmin):
+	list_display = ('user','status','zulip_id')
+admin.site.register(UserZulipStatus,UserZulipStatusAdmin)
