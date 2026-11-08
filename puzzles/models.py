@@ -450,7 +450,7 @@ class AccessLog(models.Model):
 class JitsiRooms(OrderedModel):
     class Meta(OrderedModel.Meta):
         verbose_name_plural = "JitsiRooms"
-    name = models.CharField(max_length=200,unique=True)
+    name = models.CharField(max_length=200,unique=True,default='<unnamed>')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE, null=True)
     string_id = models.CharField(max_length=200,default='')
