@@ -18,7 +18,7 @@ class Command(BaseCommand):
             return
 
 
-        client = zulip.Client(config_file="/etc/puzzle/zulip/zuliprc-admin")
+        client = zulip.Client(config_file="configuration/zulip/zuliprc-admin")
 
 
         all_streams = client.get_streams()['streams']

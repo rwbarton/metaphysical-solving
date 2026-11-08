@@ -21,7 +21,7 @@ from datetime import timedelta, datetime,timezone
 
 try:
     # Secret used to generate Jitsi room names.
-    jitsi_secret = open('/etc/puzzle/jitsi-secret').read()
+    jitsi_secret = open('configuration/jitsi-secret').read()
     if jitsi_secret == '':
         jitsi_secret = None
 except IOError:

@@ -1,8 +1,8 @@
 import mechanize
 
 
-username = open('/etc/puzzle/site-username', 'r').read().rstrip()
-password = open('/etc/puzzle/site-password', 'r').read().rstrip()
+username = open('configuration/site-username', 'r').read().rstrip()
+password = open('configuration/site-password', 'r').read().rstrip()
 
 _br = None
 
