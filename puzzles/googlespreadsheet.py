@@ -10,13 +10,13 @@ _adc_config = None
 def get_google_config():
     global _google_config
     if _google_config is None:
-        _google_config = json.loads(open('/etc/puzzle/google.json').read())
+        _google_config = json.loads(open('configuration/google.json').read())
     return _google_config
 
 def get_adc_config():
     global _adc_config
     if _adc_config is None:
-        _adc_config = json.loads(open('/etc/puzzle/adc.json').read())
+        _adc_config = json.loads(open('configuration/adc.json').read())
     return _adc_config
 
 def get_google_credentials():

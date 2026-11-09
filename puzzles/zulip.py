@@ -12,15 +12,15 @@ from django.conf import settings
 from datetime import datetime, timedelta
 
 def zulip_send(user, stream, subject, message):
-    if not os.path.exists('/etc/puzzle/zulip/b+logger.conf'):
+    if not os.path.exists('configuration/zulip/b+logger.conf'):
         return
 
     print (user, stream, subject, message)
 
-    client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
+    client = zulip.Client(config_file="configuration/zulip/b+logger.conf")
     print (client.add_subscriptions(streams=[{"name":stream,},],) )
 
-    client = zulip.Client(config_file="/etc/puzzle/zulip/%s.conf" % (user,))
+    client = zulip.Client(config_file="configuration/zulip/%s.conf" % (user,))
     print (client.send_message( { "type": "stream",
                                   "to": stream,
                                   "topic": subject,
@@ -28,7 +28,7 @@ def zulip_send(user, stream, subject, message):
                                  } ) )
 
 try:
-    zulip_create_settings = json.load(open('/etc/puzzle/zulip/create.json'))
+    zulip_create_settings = json.load(open('configuration/zulip/create.json'))
 except IOError:
     zulip_create_settings = None
 
@@ -56,7 +56,7 @@ def zulip_user_account_active(user):
         pass
     
     recent_enough = timedelta(days=5)
-    client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
+    client = zulip.Client(config_file="configuration/zulip/b+logger.conf")
     zid = get_user_zulip_id(user)
     if zid>0:
         result = client.get_user_presence(zid)
@@ -70,7 +70,7 @@ def zulip_user_account_active(user):
 from puzzles.models import UserZulipStatus
 
 def get_user_zulip_id(user):
-    #client = zulip.Client(config_file="/etc/puzzle/zulip/b+logger.conf")
+    #client = zulip.Client(config_file="configuration/zulip/b+logger.conf")
     #result = client.call_endpoint(url=f"/users/"+user.email,method="GET",)
     #return result["user"]["user_id"]
     return UserZulipStatus.objects.get(user=user).zulip_id

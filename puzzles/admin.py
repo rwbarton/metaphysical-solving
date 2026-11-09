@@ -1,6 +1,6 @@
 from django.contrib import admin
 from ordered_model.admin import OrderedModelAdmin
-from puzzles.models import Round, Status, Priority, Tag, AutoTag, TagList, UploadedFile, Location, Puzzle, SubmittedAnswer, \
+from puzzles.models import Round, Status, Priority, Tag, UploadedFile, Location, Puzzle, SubmittedAnswer, \
     PuzzleWrongAnswer, Config, AccessLog, JitsiRooms, PuzzleFolder, PuzzleTemplate, QueuedAnswer, QueuedHint, UserZulipStatus
 
 
@@ -57,4 +57,7 @@ admin.site.register(PuzzleTemplate,DriveAdmin)
 admin.site.register(UploadedFile,admin.ModelAdmin)
 admin.site.register(QueuedAnswer,OrderedModelAdmin)
 admin.site.register(QueuedHint,OrderedModelAdmin)
-admin.site.register(UserZulipStatus)
+
+class UserZulipStatusAdmin(admin.ModelAdmin):
+	list_display = ('user','status','zulip_id')
+admin.site.register(UserZulipStatus,UserZulipStatusAdmin)

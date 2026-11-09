@@ -21,7 +21,7 @@ from datetime import timedelta, datetime,timezone
 
 try:
     # Secret used to generate Jitsi room names.
-    jitsi_secret = open('/etc/puzzle/jitsi-secret').read()
+    jitsi_secret = open('configuration/jitsi-secret').read()
     if jitsi_secret == '':
         jitsi_secret = None
 except IOError:
@@ -53,6 +53,8 @@ If empty, users will have to enter their own phone number when submitting an ans
 from puzzles.googlespreadsheet import create_google_spreadsheet, create_google_folder, grant_access
 
 class UserZulipStatus(models.Model):
+    class Meta:
+        verbose_name_plural = 'UserZulipStatuses'
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     NONE = 'none'
@@ -446,6 +448,9 @@ class AccessLog(models.Model):
         return self.puzzle.title + " / " + self.user.email
 
 class JitsiRooms(OrderedModel):
+    class Meta(OrderedModel.Meta):
+        verbose_name_plural = "JitsiRooms"
+    name = models.CharField(max_length=200,unique=True,default='<unnamed>')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     puzzle = models.ForeignKey('Puzzle', on_delete=models.CASCADE, null=True)
     string_id = models.CharField(max_length=200,default='')

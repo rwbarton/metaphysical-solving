@@ -36,10 +36,10 @@ from puzzles.jaas_jwt import JaaSJwtBuilder
 from django.contrib.auth.models import User
 from django.conf import settings
 
-jaas_api_key = open('/etc/puzzle/jaas_api_key').read()
-jaas_app_id = open('/etc/puzzle/jaas_app_id').read()
-jaas_private_key = open('/etc/puzzle/id_rsa_jaas').read()
-jaas_webhook_secret = open('/etc/puzzle/jaas_webhook_secret').read().strip()
+jaas_api_key = open('configuration/jaas_api_key').read()
+jaas_app_id = open('configuration/jaas_app_id').read()
+jaas_private_key = open('configuration/id_rsa_jaas').read()
+jaas_webhook_secret = open('configuration/jaas_webhook_secret').read().strip()
 
 
 # This function is called as part of the auth flow (defined in settings.py), and updates the URL
